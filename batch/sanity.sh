@@ -9,6 +9,9 @@
 #SBATCH --error=/home/weziv5/work/logs/%x-%j.err
 #SBATCH --output=/home/weziv5/work/logs/%x-%j.out
 
+hostname
+pwd
+
 ## Modules
 
 module load "anaconda3/5.3.0"
