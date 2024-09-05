@@ -7,7 +7,7 @@ from dataset import ImagenetSource
 from benchmark import *
 from cpe import *
 
-def create_sals(images, model_name='resnet18')
+def create_sals(images, model_name='resnet18'):
     me = ModelEnv(model_name)
     algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=64, batch_size=128)    
     create_saliency_data(me, algo, all_images, run_idx=0, exist_name="pg", with_scores=True)
