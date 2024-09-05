@@ -1,12 +1,12 @@
 #!/bin/bash
 
 ##resource allocation
-#SBATCH --ntasks=4
+#SBATCH --ntasks=2
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8g
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=TEST_RUN
-#SBATCH --error=/home/weziv5/work/logs/%x-%j-%t.err
+#SBATCH --error=/home/weziv5/work/logs/%x-%j-%t-%a-%J.err
 #SBATCH --output=/home/weziv5/work/logs/%x-%j-%t.out
 
 hostname
