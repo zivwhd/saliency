@@ -24,6 +24,6 @@ echo "Current Env:" $CONDA_DEFAULT_ENV
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-python src/dispatch.py  --action list_images
+srun python src/dispatch.py  --action list_images
 
 echo "DONE"
