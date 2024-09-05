@@ -20,7 +20,10 @@ module load "CUDA/11.8.0"
 conda init bash
 source activate salsc
 
+echo "Current Env:" $CONDA_DEFAULT_ENV
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
 python -c src/dispatch.py
+
+echo "DONE"
