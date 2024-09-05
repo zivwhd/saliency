@@ -35,7 +35,8 @@ if __name__ == '__main__':
     all_images = sorted(list(isrc.get_all_images().values()), key=lambda x:x.name)
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
 
-
+    logging.info(f"images: {len(task_images)}/{len(all_images)}")
+    
     if args.action == "list_images":
         for img in task_images:
             print(f"{img.name}")
