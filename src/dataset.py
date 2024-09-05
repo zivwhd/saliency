@@ -46,7 +46,7 @@ class ImagenetSource:
             for line in tf:
                 file_name, target = line.split()
                 target = int(target)
-                image_name = self.get_image_name()
+                image_name = self.get_image_name(file_name)
                 rv[image_name] = target
         return rv
 
