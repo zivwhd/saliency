@@ -42,7 +42,7 @@ class ImagenetSource:
     @lru_cache(maxsize=None)
     def get_image_targets(self):
         rv = {}
-        with open(self.targets_path, "rt") in tf:
+        with open(self.targets_path, "rt") as tf:
             for line in tf:
                 file_name, target = line.split()
                 target = int(target)
