@@ -23,6 +23,13 @@ def get_selected_images(selection):
         selected_images[x] = glob.glob(f"imagenet100/*/{x}.JPEG")[0]
     return selected_images
 
+def image_name_to_class(info):    
+    all_images = get_all_images()
+    rv = {}
+    for ipath in all_images:
+        os.path.basename(x) : os.path.basename(os.path.dirname(x))
+
+
 
 def show_image(path):
     img=Image.open(path)
@@ -254,7 +261,7 @@ def show_sal_scores(img, scores_dict, sals_dict):
     plt.subplots_adjust(hspace=0.5)   
     plt.show()
 
-def showsal(sal, img, caption=""):
+def showsal(sal, img, caption="", quantile=0.9):
     stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     stdsal = (stdsal > 0.7)
     
@@ -270,7 +277,11 @@ def showsal(sal, img, caption=""):
     plt.yticks([])
     
     plt.subplot(1, 3, 3)
-    plt.imshow((stdsal*img).astype(int))  # Set alpha for transparency
+    bar = torch.quantile(sal, quantile)
+    masked_img = ((sal > bar).unsqueeze(-1)).numpy() *img
+    #img = img * 
+    #plt.imshow((stdsal*img).astype(int))  # Set alpha for transparency
+    plt.imshow(masked_img)
     plt.xticks([])  
     plt.yticks([])
 

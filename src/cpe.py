@@ -145,7 +145,7 @@ class SqMaskGen:
 
 
 class SimpGen:
-    def __init__(self, segsize=68, ishape = (224,224)):
+    def __init__(self, segsize=68, ishape = (224,224), force_mask=None):
         self.treatment = None
         self.ctrl = None
         self.treatment2 = None
@@ -160,6 +160,7 @@ class SimpGen:
         self.weights = torch.zeros(ishape)
         self.sals = torch.zeros(ishape)
         self.sals2 = torch.zeros(ishape)
+        self.force_mask = force_mask
 
     def gen_(self, model, inp, itr=125, batch_size=32):
         
@@ -167,13 +168,19 @@ class SimpGen:
         w = self.ishape[1]
         pad = self.pad
 
+        force_mask = self.force_mask
+        if force_mask is not None:
+            force_mask = force_mask.unsqueeze(0).to(inp.device)
+
         for idx in tqdm(range(itr)):
-            masks = self.mgen.gen_masks(batch_size)            
+            masks = self.mgen.gen_masks(batch_size)
             self.total_masks += masks.shape[0]
             #if type(exp_masks) == np.ndarray:
             #    exp_masks = torch.tensor(exp_masks)
             #masks = masks.unsqueeze(1)            
             dmasks = masks.to(inp.device)    
+            if force_mask is not None:
+                dmasks = dmasks | force_mask
 
             out = masked_output(model, inp, dmasks)
             mout = out.unsqueeze(-1).unsqueeze(-1)
