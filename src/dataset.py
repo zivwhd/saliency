@@ -15,7 +15,7 @@ class ImageInfo:
 class ImagenetSource:
 
     def __init__(self, selection_name=None):
-        self.base_path = "/home/weziv5/work/data/imagenet"
+        self.base_path = "/home/weziv5/work/data/imagenet"        
         self.targets_path = os.path.join(self.base_path, "imagenet_validation_ground_truth.txt")
         self.selection_name = selection_name
 
@@ -27,7 +27,8 @@ class ImagenetSource:
 
     @lru_cache(maxsize=None)     
     def get_all_images(self):
-        ptrn = os.path.join(self.base_path, "validation", "/*.JPEG")
+        logging.debug(f"imagenet base path: {self.base_path}")
+        ptrn = os.path.join(self.base_path, "validation", "*.JPEG")
         all_images = glob.glob(ptrn)
         logging.debug(f"found {len(all_images)} images at {ptrn}")
         image_targets = self.get_image_targets()
