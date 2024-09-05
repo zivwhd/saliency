@@ -453,19 +453,23 @@ class IpwGenHex(IpwGen):
 
 class IpwSalCreator:
 
-    def __init__(self, ipwf, desc, nmasks, batch_size=32, clip=[0.1]):
-        self.ipwf = ipwf
+    def __init__(self, desc, nmasks, batch_size=32, clip=[0.1], ipwg = IpwGen, **kwargs):        
         self.nmasks = nmasks
         self.desc = desc
         self.clip = clip
         self.batch_size = batch_size
+        self.ipwg = IpwGen
+        self.kwargs = kwargs
         
 
     def __call__(self, me, inp, catidx):
-        ipwg = self.ipwf()
-        ipwg.gen(me.narrow_model(catidx), inp, nmasks=self.nmasks, batch_size=self.batch_size)
+        ipwg = self.ipwg(**self.kwargs)
+        total = 0
         res = {}
-        res[f"{self.desc}_{self.nmasks}_ate"] = ipwg.get_ate_sal()
-        for clip in self.clip:
-            res[f"{self.desc}_{self.nmasks}_ipw_{clip}"] = ipwg.get_ips_sal(clip)
+        for nmasks in self.nmasks:
+            ipwg.gen(me.narrow_model(catidx), inp, nmasks=nmasks - total, batch_size=self.batch_size)
+            total += nmasks
+            res[f"{self.desc}_{nmasks}_ate"] = ipwg.get_ate_sal()
+            for clip in self.clip:
+                res[f"{self.desc}_{nmasks}_ipw_{clip}"] = ipwg.get_ips_sal(clip)
         return res 

@@ -1,19 +1,23 @@
 #!/bin/python
-print("########### python ############")
+
 
 import argparse, logging, os
 from dataset import ImagenetSource
 
+from benchmark import *
+from cpe import *
+
+def create_sals(images, model_name='resnet18')
+    me = ModelEnv(model_name)
+    algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=64, batch_size=128)    
+    create_saliency_data(me, algo, all_images, run_idx=0, exist_name="pg", with_scores=True)
 
 def get_args(): 
-    
-    
-
+        
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "sals"], help="TBD")
     parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
-    #parser.add_argument("--env", type=str, help="TBD")
-
+    
     args = parser.parse_args()    
     return args
 
@@ -36,9 +40,11 @@ if __name__ == '__main__':
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
-    
+
     if args.action == "list_images":
         for img in task_images:
             print(f"{img.name}")
+    elif args.action == "sals":
+        create_sals(task_images)
         
     

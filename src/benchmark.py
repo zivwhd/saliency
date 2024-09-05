@@ -153,38 +153,36 @@ class SelectKthLogit(nn.Module):
         self.loss  = nn.CrossEntropyLoss()
 
     def forward(self, x):
-        # Select the k-th logit
-        ## torch.log(self.sigmoid(x)),
-        #print("ooo", x.shape)
-        #values = torch.stack([x], dim=-1)
-        
-        values = torch.stack((x, self.sigmoid(x), self.softmax(x), torch.logit(self.softmax(x))), dim=-1)
-        #print("ppp", values.shape)
-        #print(">>>>", x.shape, values.shape)
+        values = torch.stack([x], dim=-1)        
+        #values = torch.stack((x, self.sigmoid(x), self.softmax(x), torch.logit(self.softmax(x))), dim=-1)
         result = values[...,self.k,:]
         return result
     
 
-def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_scores=True):
+def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_scores=False):
 
     info = ImageNetInfo()
 
-    for itr, image_path in enumerate(all_images):    
+    for itr, img in enumerate(all_images):    
             
         
-        image_name = os.path.basename(image_path)
+        image_name = img.name
+        image_path = img.path 
+
         pidx = image_name.find(".")
         if pidx > 0:
             image_name = image_name[0:pidx]
 
-        if exist_name and os.path.exists(os.path.join("results", "scores", f"{exist_name}_{run_idx}", image_name)):
-            print("##", itr, image_path, image_name, " - Found skipping")
-            continue
+        if exist_name:
+            progress_path = os.path.join("results", "progress", exist_name, image_name)
+            if os.path.exists(progress_path):
+                print("##", itr, image_path, image_name, " - Found skipping")
+                continue
 
         inp = me.get_image(image_path)
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))
-        print("##", itr, image_path, image_name, topidx, info.idx2label[topidx])
+        print("##", itr, image_path, image_name, topidx, img.desc)
 
         #mdl = nn.Sequential(me.model, SelectKthLogit(topidx))
         sal_dict = algo(me, inp, topidx)
@@ -195,6 +193,10 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
                 continue
             save_saliency(sal, variant, image_name, run=run_idx)
 
+        os.makedirs(os.path.dirname(progress_path), exist_ok=True)
+        with open(progress_path, "wt") as pf:
+            pf.write(".")
+        
         if not with_scores:
             continue
 
