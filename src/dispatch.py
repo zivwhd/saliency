@@ -18,12 +18,13 @@ def get_args():
     return args
 
 if __name__ == '__main__':
-
         
     logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.DEBUG)
-    
+    logging.info("start")    
     args = get_args()
 
+    logging.debug(args)
+    
     isrc = ImagenetSource(args.selection)
     images = isrc.get_all_images()
 
