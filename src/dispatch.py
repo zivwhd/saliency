@@ -38,6 +38,6 @@ if __name__ == '__main__':
 
     if args.action == "list_img":
         for img in task_images:
-            print f"{img.name}"
+            print(f"{img.name}")
         
     
