@@ -37,7 +37,8 @@ class ImagenetSource:
                 path=path, 
                 name=image_name,
                 target=image_targets[image_name])
-        
+
+        return images
 
     @lru_cache(maxsize=None)
     def get_image_targets(self):

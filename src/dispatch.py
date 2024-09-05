@@ -32,7 +32,7 @@ if __name__ == '__main__':
     logging.debug(f"task: {task_id}/{ntasks}")
     isrc = ImagenetSource(selection_name=args.selection)
     
-    all_images = list(isrc.get_all_images().values())
+    all_images = sorted(list(isrc.get_all_images().values()), key=lambda x:x.name)
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
 
 
