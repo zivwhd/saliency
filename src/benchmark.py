@@ -26,8 +26,8 @@ def get_selected_images(selection):
 def image_name_to_class(info):    
     all_images = get_all_images()
     rv = {}
-    for ipath in all_images:
-        os.path.basename(x) : os.path.basename(os.path.dirname(x))
+    #for ipath in all_images:
+    #os.path.basename(x) : os.path.basename(os.path.dirname(x))
 
 
 
