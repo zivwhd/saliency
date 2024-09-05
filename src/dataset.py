@@ -27,7 +27,9 @@ class ImagenetSource:
 
     @lru_cache(maxsize=None)     
     def get_all_images(self):
-        all_images = glob.glob(os.path.join(self.base_path, "validation", "/*.JPEG"))
+        ptrn = os.path.join(self.base_path, "validation", "/*.JPEG")
+        all_images = glob.glob(ptrn)
+        logging.debug(f"found {len(all_images)} images at {ptrn}")
         image_targets = self.get_image_targets()
 
         images = {}
