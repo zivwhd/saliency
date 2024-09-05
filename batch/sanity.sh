@@ -17,6 +17,7 @@ pwd
 module load "anaconda3/5.3.0"
 module load "CUDA/11.8.0"
 
+conda init bash
 conda activate salsc
 
 python -c "import torch; print('PyTorch version:', torch.__version__)"
