@@ -6,8 +6,8 @@
 #SBATCH --mem=8g
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=TEST_RUN
-#SBATCH --error=/home/weziv5/work/logs/%x-%j-%t-%a-%J.err
-#SBATCH --output=/home/weziv5/work/logs/%x-%j-%t.out
+#SBATCH --error=/home/weziv5/work/logs/%x-%j-%4t.err
+#SBATCH --output=/home/weziv5/work/logs/%x-%j-%4t.out
 
 hostname
 pwd
