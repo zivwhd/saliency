@@ -1,9 +1,13 @@
 from torch import nn
-from tqdm import tqdm
-from scipy.ndimage.filters import gaussian_filter
 
+from scipy.ndimage.filters import gaussian_filter
 from evalutils import *
 
+try:
+    from tqdm import tqdm
+except:
+    tqdm = lambda *args: args
+    
 HW = 224 * 224 # image area
 n_classes = 1000
 

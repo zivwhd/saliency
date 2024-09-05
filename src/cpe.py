@@ -3,7 +3,11 @@ from skimage.segmentation import slic,mark_boundaries
 import torch
 import cv2
 from scipy.spatial import Voronoi
-from tqdm import tqdm
+
+try:
+    from tqdm import tqdm
+except:
+    tqdm = lambda *args: args
 
 import pdb
 
