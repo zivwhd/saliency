@@ -193,7 +193,7 @@ class IpwGen(IpwGenBase):
             else:
                 self.saliency += saliency
                 self.weights += weights
-        logging.debug(f"IpwGen.gen_ weights={self.weights.mean()}")
+        logging.debug(f"IpwGen.gen_ weights={(self.weights * 1.0).mean()}")
 
 
     def gen_masks(self, batch_size):
