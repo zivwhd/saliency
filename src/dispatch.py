@@ -23,7 +23,7 @@ def create_cam_sals(me, images):
 def get_args(): 
         
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals", "scores"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
     parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")       
     parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")    
@@ -54,7 +54,13 @@ if __name__ == '__main__':
     if args.action == "list_images":
         for img in task_images:
             print(f"{img.name}")
+    elif args.action == "summary":
+        df = load_scores_df()
+        df.to_csv('results/results.csv', index=False)
         
+        smry = summarize_scores_df(df)
+        smry.to_csv('results/summary.csv', index=False)
+
     else:
         me = ModelEnv(args.model)
         if args.action == "create_sals":

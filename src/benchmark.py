@@ -2,6 +2,7 @@ import torch
 import torchvision
 
 import torch.nn as nn
+import pandas as pd
 
 import os, glob, json, pickle
 import random, logging
@@ -10,6 +11,7 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import numpy as np
 import pdb
+from collections import defaultdict
 
 from saleval import *
 
@@ -228,6 +230,38 @@ def create_scores(me, images, result_paths, update=True):
         sal_dict = {variant : torch.load(path)}
         scores_dict = get_sal_scores(me, inp, sal_dict)
         save_scores(scores_dict, image_name, update=update)
+
+
+
+def load_scores_df(variant_names=None, base_path="results/scores"):
+
+    if variant_names is None:
+        variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]
+
+    def append_row(res, **kwargs):
+        for key, value in kwargs.items():
+            res[key].append(value)
+        
+    res = defaultdict(list)
+    for variant in variant_names:
+        score_files = glob.glob(os.path.join(base_path, variant, "*"))
+        for scores_path in score_files:
+            image_name = os.path.basename(scores_path)
+            with open(scores_path, "rb") as sf:
+                scores = pickle.load(sf)
+            
+            append_row(
+                res, 
+                image=image_name, variant=variant, del_auc=scores["del_auc"], ins_auc=scores["ins_auc"])
+    return pd.DataFrame(res)
+
+def summarize_scores_df(df):
+    smry =df.groupby('variant').agg(
+        mean_del_auc=('del_auc', 'mean'),
+        mean_ins_auc=('ins_auc', 'mean'),
+        row_count=('variant', 'size')
+    ).reset_index()
+    return smry    
 
 
 class CombSaliencyCreator:
