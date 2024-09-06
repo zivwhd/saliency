@@ -67,19 +67,17 @@ class ModelEnv:
 
 ### general utils
 
-class ImageNetInfo:
-    def __init__(self, path='dataset/imagenet_class_index.json'):
-        with open(os.path.abspath(path), 'r') as read_file:
-            class_idx = json.load(read_file)
-            self.class_idx = class_idx
-            self.idx2label = [class_idx[str(k)][1] for k in range(len(class_idx))]
-            self.cls2label = {class_idx[str(k)][0]: class_idx[str(k)][1] for k in range(len(class_idx))}
-            self.cls2idx = {class_idx[str(k)][0]: k for k in range(len(class_idx))} 
-
 
 
 def get_result_path(variant, image_name, run=0, result_type="saliency"):
     return os.path.join("results", result_type, f"{variant}_{run}", image_name)
+
+def get_all_results(subset=None):
+    all_sals = glob.glob(os.path.join("results", "saliency", "*", "*"))
+    if subset:
+        all_sals = [x for x in all_sals if os.path.basename(x) in subset]
+    return all_sals
+
 
 def get_saliency_path(variant, image_name, run=0):
     return get_result_path(variant=variant, image_name=image_name, run=run, result_type="saliency")
@@ -89,11 +87,19 @@ def save_saliency(obj, variant, image_name, run=0):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(obj, path)
 
-def save_scores(scores_dict, image_name, run=0):
+def save_scores(scores_dict, image_name, run=0, update=False):
     for variant, scores in scores_dict.items():
         path = get_result_path(variant, image_name, run, result_type="scores")
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as sf:
+        if update and os.path.exists(path):
+            with open(path, "wb") as sof:
+                orig_scores = pickle.load(sof)
+                uscores = {}
+                uscores.update(orig_scores)
+                uscores.update(scores)
+                scores = uscores
+
+        with open(path, "wb") as sf:            
             pickle.dump(scores, sf)
 
 
@@ -168,10 +174,10 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
         if not with_scores:
             continue
 
-        scores_dict = get_sal_scores(me, inp, sal_dict)
-        save_scores(scores_dict, image_name, run=run_idx)
+        scores_dict = get_sal_scores(me, inp, sal_dict, with_breakdown=False)
+        save_scores(scores_dict, image_name, run=run_idx, update=True)
 
-def get_sal_scores(me, inp, sal_dict):
+def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
     smodel = nn.Sequential(me.model, nn.Softmax(dim=1)) 
     scores_dict = {}
     flat_sal_dict = {}
@@ -197,14 +203,30 @@ def get_sal_scores(me, inp, sal_dict):
 
             scores_dict[sal_name] = scores = {}
 
-            scores["del"] = del_scores
-            scores["del_auc"] = auc(del_scores)
-            scores["ins"] = ins_scores
+            if with_breakdown:
+                scores["del"] = del_scores
+                scores["ins"] = ins_scores
             scores["ins_auc"] = auc(ins_scores)
+            scores["del_auc"] = auc(del_scores)
 
-            print("###", idx, sal_name, auc(del_scores), auc(ins_scores))
+            logging.debug("scores  {idx}, {sal_name}, {scores['del_auc']}, {scores['ins_auc']}")
     return scores_dict
 
+def create_scores(me, images, result_paths, update=True):
+    for path in result_paths:
+        
+        image_name = os.path.basename(path)
+        variant = os.path.basename(os.path.dirname(path))
+        if image_name not in images:
+            continue
+        
+        logging.debug(f"handling {path}")
+        info = images[image_name]
+
+        inp = me.get_image(info.path)
+        sal_dict = {variant : torch.load(path)}
+        scores_dict = get_sal_scores(me, inp, sal_dict)
+        save_scores(scores_dict, image_name, update=update)
 
 
 class CombSaliencyCreator:

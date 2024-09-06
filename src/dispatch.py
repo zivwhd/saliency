@@ -22,10 +22,10 @@ def create_cam_sals(me, images):
 def get_args(): 
         
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores"], help="TBD")
     parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")       
     parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
-    parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")       
+    parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
     return args
@@ -59,6 +59,9 @@ if __name__ == '__main__':
                 create_cpe_sals(me, task_images)
             elif args.sal == "cam":
                 create_cam_sals(me, task_images)
+        if args.action == "scores":
+            result_paths = get_all_results()
+            create_scores(me, task_images, result_paths, update=True)
             
 
 
