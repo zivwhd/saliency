@@ -43,8 +43,10 @@ if __name__ == '__main__':
     logging.debug(f"pid: {os.getpid()}; task: {task_id}/{ntasks}")
     isrc = ImagenetSource(selection_name=args.selection)
     
+    
     all_images = sorted(list(isrc.get_all_images().values()), key=lambda x:x.name)
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
+    task_image_dict = {info.name : info for info in task_images }
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
 
@@ -62,7 +64,7 @@ if __name__ == '__main__':
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")
-            create_scores(me, task_images, result_paths, update=True)
+            create_scores(me, task_image_dict, result_paths, update=True)
             
 
 
