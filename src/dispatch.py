@@ -1,5 +1,6 @@
 #!/bin/python
 
+print("## dispatch.py ")
 
 import argparse, logging, os
 from dataset import ImagenetSource
