@@ -152,7 +152,7 @@ class IpwGen(IpwGenBase):
                 self.gen_(model=model, inp=inp, itr=1, batch_size=nmasks % batch_size, **kwargs)
         
     def gen_(self, model, inp, itr=125, batch_size=32):
-        logging.debug("IpwGen.gen_ itr={itr} itr={batch_size}")
+        logging.debug(f"IpwGen.gen_ itr={itr} itr={batch_size}")
         h = self.ishape[0]
         w = self.ishape[1]
         pad = self.pad
@@ -193,6 +193,8 @@ class IpwGen(IpwGenBase):
             else:
                 self.saliency += saliency
                 self.weights += weights
+        logging.debug(f"IpwGen.gen_ weights={self.weights.mean()}")
+
 
     def gen_masks(self, batch_size):
         return self.mgen.gen_masks(batch_size)

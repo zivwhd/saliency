@@ -6,8 +6,8 @@ from evalutils import *
 try:
     from tqdm import tqdm
 except:
-    tqdm = lambda *args: args
-    
+    tqdm = lambda x: x
+
 HW = 224 * 224 # image area
 n_classes = 1000
 
