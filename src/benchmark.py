@@ -167,7 +167,7 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
             image_name = image_name[0:pidx]
 
         if exist_name:
-            progress_path = os.path.join("results", "progress", exist_name, image_name)
+            progress_path = os.path.join("results", "progress", f"{exist_name}_{image_name}")
             if os.path.exists(progress_path):
                 logging.info(f"## {itr} {image_path} {image_name} - Found skipping")
                 continue
