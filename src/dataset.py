@@ -83,6 +83,7 @@ class Coord:
         self.iter_last_wip = None
         self.iter_items = [] + self.items
         random.shuffle(self.iter_items)
+        return self
 
     def mark_done(self):
         if self.iter_last_wip:
