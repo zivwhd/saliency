@@ -2,6 +2,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import torch
 
+
+
+def show_image(path):
+    img=Image.open(path)
+    img=img.resize((224,224))    
+    plt.title('input image', fontsize=18)
+    plt.imshow(img)
+
+
 def show_sal_scores(img, scores_dict, sals_dict):
     plt.figure(figsize=(10, 3 * len(scores_dict)))
 

@@ -9,11 +9,13 @@ from benchmark import *
 from cpe import *
 
 def create_cpe_sals(me, images, segsize=64):
+    logging.info("create_cpe_sals")
     algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32)
     logging.info("creating saliency maps")    
     create_saliency_data(me, algo, images, run_idx=0, exist_name="cpe", with_scores=False)
 
 def create_cam_sals(me, images):
+    logging.info("create_cam_sals")
     algo = CamSaliencyCreator(list(METHOD_CONV.key()))
     create_saliency_data(me, algo, images, run_idx=0, exist_name="camsal", with_scores=False)
 
