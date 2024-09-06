@@ -25,7 +25,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
     parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")       
-    parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
+    parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     elif args.action == "summary":
         df = load_scores_df()
         df.to_csv('results/results.csv', index=False)
-        
+
         smry = summarize_scores_df(df)
         smry.to_csv('results/summary.csv', index=False)
 

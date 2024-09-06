@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##resource allocation
-#SBATCH --ntasks=1
+#SBATCH --ntasks=10
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8g
 #SBATCH --gres=gpu:1
@@ -24,6 +24,6 @@ echo "Current Env:" $CONDA_DEFAULT_ENV
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-srun python src/dispatch.py  --action summary --sal cam --selection dbl
+srun python src/dispatch.py  --action create_sals --sal cpe --selection rsample100
 
 echo "DONE"
