@@ -174,14 +174,13 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
 
         inp = me.get_image(image_path)
         logits = me.model(inp).cpu()
-        topidx = int(torch.argmax(logits))
-        print("##", itr, image_path, image_name, topidx, img.desc)
-        logging.info("creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
+        topidx = int(torch.argmax(logits))        
+        logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
 
         #mdl = nn.Sequential(me.model, SelectKthLogit(topidx))
         sal_dict = algo(me, inp, topidx)
 
-        print("done, saving")
+        logging.info("done, saving")
         for variant, sal  in sal_dict.items():
             if variant.startswith("_"):
                 continue

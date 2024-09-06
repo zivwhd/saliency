@@ -21,7 +21,8 @@ class ImagenetSource:
 
     @lru_cache(maxsize=None)     
     def read_selection(self):
-        selection_path = os.path.join(self.base_path, f"{selection}.txt")
+        logging.debug("loading selection")
+        selection_path = os.path.join(self.base_path, f"{self.selection_name}.txt")
         with open(selection_path, "rt") as sf:
             return [self.get_image_name(x.strip()) for x in sf]
 
@@ -40,6 +41,10 @@ class ImagenetSource:
                 path=path, 
                 name=image_name,
                 target=image_targets[image_name])
+
+        if self.selection_name:
+            selection = self.read_selection()
+            images = {name : img for name, img in images.items() if name in selection}
 
         return images
 
