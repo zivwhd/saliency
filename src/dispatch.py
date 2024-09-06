@@ -15,7 +15,7 @@ def create_sals(images, model_name='resnet18'):
 def get_args(): 
         
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "sals"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals"], help="TBD")
     parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
     
     args = parser.parse_args()    
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     if args.action == "list_images":
         for img in task_images:
             print(f"{img.name}")
-    elif args.action == "sals":
+    elif args.action == "create_sals":
         create_sals(task_images)
         
     
