@@ -10,7 +10,7 @@ from cpe import *
 def create_sals(images, model_name='resnet18'):
     me = ModelEnv(model_name)
     segsize=64
-    algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=128)
+    algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32)
     logging.info("creating saliency maps")    
     create_saliency_data(me, algo, all_images, run_idx=0, exist_name="pg", with_scores=False)
 
