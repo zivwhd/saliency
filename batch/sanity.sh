@@ -24,6 +24,6 @@ echo "Current Env:" $CONDA_DEFAULT_ENV
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-srun python src/dispatch.py  --action create_sals --sal cpe --selection dbl
+srun python src/dispatch.py  --action create_sals --sal cam --selection dbl
 
 echo "DONE"
