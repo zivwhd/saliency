@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.segmentation import slic,mark_boundaries
 import torch
-import cv2
+import cv2, logging
 from scipy.spatial import Voronoi
 
 try:
@@ -471,9 +471,12 @@ class IpwSalCreator:
         total = 0
         res = {}
         for nmasks in self.nmasks:
-            ipwg.gen(me.narrow_model(catidx), inp, nmasks=nmasks - total, batch_size=self.batch_size)
-            total += nmasks
+            added_nmasks = nmasks - total
+            total = nmasks
+            logging.debug(f"IpSalCreator: nmasks={nmasks}; added = {added_nmasks}")
+            ipwg.gen(me.narrow_model(catidx), inp, nmasks=added_nmasks, batch_size=self.batch_size)            
             res[f"{self.desc}_{nmasks}_ate"] = ipwg.get_ate_sal()
             for clip in self.clip:
                 res[f"{self.desc}_{nmasks}_ipw_{clip}"] = ipwg.get_ips_sal(clip)
+        logging.debug(f"IpSalCreator: total masks={total};")
         return res 
