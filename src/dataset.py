@@ -22,7 +22,7 @@ class ImagenetSource:
     @lru_cache(maxsize=None)     
     def read_selection(self):
         logging.debug("loading selection")
-        selection_path = os.path.join(self.base_path, f"{self.selection_name}.txt")
+        selection_path = os.path.join(self.base_path, f"{self.selection_name}.smp")
         with open(selection_path, "rt") as sf:
             return [self.get_image_name(x.strip()) for x in sf]
 
