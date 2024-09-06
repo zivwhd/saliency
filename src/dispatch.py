@@ -65,9 +65,9 @@ if __name__ == '__main__':
         me = ModelEnv(args.model)
         if args.action == "create_sals":
             if args.sal == "cpe":
-                create_cpe_sals(me, task_images)
+                create_cpe_sals(me, all_images)
             elif args.sal == "cam":
-                create_cam_sals(me, task_images)
+                create_cam_sals(me, all_images)
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")

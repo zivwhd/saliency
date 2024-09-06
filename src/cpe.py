@@ -4,10 +4,11 @@ import torch
 import cv2, logging
 from scipy.spatial import Voronoi
 
-try:
-    from tqdm import tqdm
-except:
-    tqdm = lambda x: x
+#try:
+#    from tqdm import tqdm
+#except:
+#    tqdm = lambda x: x
+tqdm = lambda x: x
 
 import pdb
 
