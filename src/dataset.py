@@ -101,7 +101,7 @@ class Coord:
             
             os.makedirs(self.base_path, exist_ok=True)
 
-            rnd = random.randint(int(1e9))
+            rnd = random.randint(0,int(1e9))
             tmp_path = os.path.join(self.base_path, f"{name}.{rnd:x}.tmp")
             wip_path = os.path.join(self.base_path, f"{name}.wip")
             done_path = os.path.join(self.base_path, f"{name}.done")
