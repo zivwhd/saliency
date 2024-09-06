@@ -217,7 +217,7 @@ def create_scores(me, images, result_paths, update=True):
         
         image_name = os.path.basename(path)
         variant = os.path.basename(os.path.dirname(path))
-        logging.debug("checking: {path} name={image_name} variant={variant}")
+        logging.debug(f"checking: {path} name={image_name} variant={variant}")
         if image_name not in images:
             continue
 
