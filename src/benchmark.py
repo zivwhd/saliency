@@ -92,7 +92,7 @@ def save_scores(scores_dict, image_name, run=0, update=False):
         path = get_result_path(variant, image_name, run, result_type="scores")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if update and os.path.exists(path):
-            with open(path, "wb") as sof:
+            with open(path, "rb") as sof:
                 orig_scores = pickle.load(sof)
                 uscores = {}
                 uscores.update(orig_scores)
@@ -209,7 +209,7 @@ def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
             scores["ins_auc"] = auc(ins_scores)
             scores["del_auc"] = auc(del_scores)
 
-            logging.debug("scores  {idx}, {sal_name}, {scores['del_auc']}, {scores['ins_auc']}")
+            logging.debug(f"scores  {idx}, {sal_name}, {scores['del_auc']}, {scores['ins_auc']}")
     return scores_dict
 
 def create_scores(me, images, result_paths, update=True):
