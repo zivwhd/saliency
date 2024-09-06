@@ -137,10 +137,7 @@ class SelectKthLogit(nn.Module):
 
 def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_scores=False):
 
-    info = ImageNetInfo()
-
     for itr, img in enumerate(all_images):    
-            
         
         image_name = img.name
         image_path = img.path 
