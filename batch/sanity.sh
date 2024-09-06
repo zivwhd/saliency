@@ -3,7 +3,7 @@
 ##resource allocation
 #SBATCH --ntasks=11
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=8g
+#SBATCH --mem=16g
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=TEST_RUN
 #SBATCH --error=/home/weziv5/work/logs/%x-%j-%4t.err
