@@ -3,7 +3,7 @@
 print("## dispatch.py ")
 
 import argparse, logging, os
-from dataset import ImagenetSource
+from dataset import ImagenetSource, Coord
 from adaptors import CamSaliencyCreator, METHOD_CONV
 
 from benchmark import *
@@ -13,18 +13,19 @@ def create_cpe_sals(me, images, segsize=64):
     logging.info("create_cpe_sals")
     algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32)
     logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0, exist_name="cpe", with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0,  with_scores=False)
 
 def create_cam_sals(me, images):
     logging.info("create_cam_sals")
     algo = CamSaliencyCreator(list(METHOD_CONV.keys()))
-    create_saliency_data(me, algo, images, run_idx=0, exist_name="camsal", with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0, with_scores=False)
 
 def get_args(): 
         
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
-    parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")       
+    parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")
+    parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")    
 
@@ -49,6 +50,8 @@ if __name__ == '__main__':
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
     task_image_dict = {info.name : info for info in task_images }
 
+    coord_images = Coord(all_images, os.path.join("progress", f"{args.sal}_{args.marker}"))
+
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
 
     if args.action == "list_images":
@@ -65,9 +68,9 @@ if __name__ == '__main__':
         me = ModelEnv(args.model)
         if args.action == "create_sals":
             if args.sal == "cpe":
-                create_cpe_sals(me, all_images)
+                create_cpe_sals(me, coord_images)
             elif args.sal == "cam":
-                create_cam_sals(me, all_images)
+                create_cam_sals(me, coord_images)
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")

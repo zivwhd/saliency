@@ -1,5 +1,5 @@
 
-import os, glob
+import os, glob, random
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
@@ -71,4 +71,55 @@ class ImagenetSource:
         return image_name    
 
         
+class Coord:
+
+    def __init__(self, items, base_path):
+        self.items = items
+        self.base_path = base_path
+        self.iter_items = None
+        self.iter_last_wip = None
+
+    def __iter__(self):
+        self.iter_last_wip = None
+        self.iter_items = [] + self.items
+        random.shuffle(self.iter_items)
+
+    def mark_done(self):
+        if self.iter_last_wip:
+            wip_path, done_path = self.iter_last_wip
+            os.rename(wip_path, done_path)            
+            self.iter_last_wip = None
+
+    def __next__(self):
+
+        self.mark_done()
+
+        while self.iter_items:
+            item = self.iter_items.pop()
+            name = item.name
+            
+            os.makedirs(self.base_path, exist_ok=True)
+
+            rnd = random.randint(int(1e9))
+            tmp_path = os.path.join(self.base_path, f"{name}.{rnd:x}.tmp")
+            wip_path = os.path.join(self.base_path, f"{name}.wip")
+            done_path = os.path.join(self.base_path, f"{name}.done")
+
+            if os.path.isfile(done_path):
+                continue
+
+            with open(tmp_path) as tmp_file:
+                pass
+
+            try:
+                os.rename(tmp_path, wip_path)
+                self.iter_last_name = (wip_path, done_path)
+                return item
+            
+            except OSError as e:        
+                if os.path.exists(tmp_path):
+                    os.remove(tmp_path)
+            
+        self.mark_done()
+        raise StopIteration
 

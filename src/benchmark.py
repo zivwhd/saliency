@@ -135,26 +135,8 @@ class SelectKthLogit(nn.Module):
         return result
     
 
-def acquire_file(destination_path):
-    try:
-        # Create a temporary file in the same directory as the destination path
-        temp_file = tempfile.NamedTemporaryFile(delete=False, dir=os.path.dirname(destination_path), suffix='.tmp', mode='w', encoding='utf-8')
-        temp_file_name = temp_file.name
-        temp_file.close()  # Close the temporary file so we can rename it
-
-        # Attempt to rename the temporary file to the destination path
-        os.rename(temp_file_name, destination_path)
-
-        # Rename successful, return True
-        return True
-    except OSError as e:
-        # If renaming fails (e.g., file already exists), remove the temporary file
-        if os.path.exists(temp_file_name):
-            os.remove(temp_file_name)
-        logging.info(f"Failed to acquire file: {e}")
-        return False
     
-def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_scores=False):
+def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False):
 
     for itr, img in enumerate(all_images):    
         
@@ -164,17 +146,6 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
         pidx = image_name.find(".")
         if pidx > 0:
             image_name = image_name[0:pidx]
-
-        if exist_name:
-            progress_path = os.path.join("results", "progress", f"{exist_name}_{image_name}")            
-    
-            if os.path.exists(progress_path):
-                logging.info(f"## {itr} {image_path} {image_name} - Found skipping")
-                continue
-
-            acquire_path = os.path.join("results", "acquire", f"{exist_name}_{image_name}")
-            if not acquire_file(acquire_path):
-                continue
 
         inp = me.get_image(image_path)
         logits = me.model(inp).cpu()
@@ -189,10 +160,6 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
             if variant.startswith("_"):
                 continue
             save_saliency(sal, variant, image_name, run=run_idx)
-
-        os.makedirs(os.path.dirname(progress_path), exist_ok=True)
-        with open(progress_path, "wt") as pf:
-            pf.write(".")
         
         if not with_scores:
             continue
