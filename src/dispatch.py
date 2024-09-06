@@ -57,8 +57,10 @@ if __name__ == '__main__':
         if args.action == "create_sals":
             if args.sal == "cpe":
                 create_cpe_sals(me, task_images)
-            elif args.action == "cam":
+            elif args.sal == "cam":
                 create_cam_sals(me, task_images)
+            
+
 
         
     
