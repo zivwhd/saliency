@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##resource allocation
-#SBATCH --ntasks=11
+#SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16g
 #SBATCH --gres=gpu:1

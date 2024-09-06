@@ -34,7 +34,7 @@ def get_args():
 
 if __name__ == '__main__':
         
-    logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.DEBUG)
+    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
     logging.info("start")    
     args = get_args()
     

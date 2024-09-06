@@ -88,6 +88,7 @@ class Coord:
     def mark_done(self):
         if self.iter_last_wip:
             wip_path, done_path = self.iter_last_wip
+            logging.debug("setting done {done_path}")
             os.rename(wip_path, done_path)            
             self.iter_last_wip = None
 
@@ -115,12 +116,14 @@ class Coord:
             try:
                 os.rename(tmp_path, wip_path)
                 self.iter_last_name = (wip_path, done_path)
+                logging.debug("handling {name}")
                 return item
             
             except OSError as e:        
                 if os.path.exists(tmp_path):
                     os.remove(tmp_path)
-            
+            logging.debug(f"done {self.base_path}")
         self.mark_done()
+
         raise StopIteration
 
