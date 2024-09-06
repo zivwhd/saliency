@@ -59,7 +59,8 @@ if __name__ == '__main__':
                 create_cpe_sals(me, task_images)
             elif args.sal == "cam":
                 create_cam_sals(me, task_images)
-        if args.action == "scores":
+        elif args.action == "scores":
+            logging.info("------------- scores")
             result_paths = get_all_results()
             create_scores(me, task_images, result_paths, update=True)
             
