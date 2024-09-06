@@ -59,9 +59,9 @@ if __name__ == '__main__':
                 create_cpe_sals(me, task_images)
             elif args.sal == "cam":
                 create_cam_sals(me, task_images)
-        elif args.action == "scores":
-            logging.info("------------- scores")
+        elif args.action == "scores":            
             result_paths = get_all_results()
+            logging.info(f"found {len(result_paths)} saliency maps")
             create_scores(me, task_images, result_paths, update=True)
             
 
