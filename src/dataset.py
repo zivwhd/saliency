@@ -109,7 +109,7 @@ class Coord:
             if os.path.isfile(done_path):
                 continue
 
-            with open(tmp_path) as tmp_file:
+            with open(tmp_path,"wb") as tmp_file:
                 pass
 
             try:
