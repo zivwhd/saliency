@@ -23,7 +23,7 @@ def get_args():
     parser.add_argument("--action", choices=["list_images", "create_sals"], help="TBD")
     parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")       
     parser.add_argument("--selection", choices=["dbl","selection0"], default="selection0", help="TBD")       
-    parser.add_argument("--model", choices=["resnet18","resnet50"], default="selection0", help="TBD")       
+    parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")       
 
     args = parser.parse_args()    
     return args
