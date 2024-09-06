@@ -4,7 +4,7 @@ import torchvision
 import torch.nn as nn
 
 import os, glob, json, pickle
-import random
+import random, logging
 
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -131,15 +131,8 @@ class SelectKthSoftmax(nn.Module):
         self.softmax = nn.Softmax(dim=-1)
         self.loss  = nn.CrossEntropyLoss()
 
-    def forward(self, x):
-        # Select the k-th logit
-        ## torch.log(self.sigmoid(x)),
-        #print("ooo", x.shape)
-        #values = torch.stack([x], dim=-1)
-        
+    def forward(self, x):        
         values =  self.softmax(x)
-        #print("ppp", values.shape)
-        #print(">>>>", x.shape, values.shape)
         result = values[...,self.k]
         
         return result
@@ -176,13 +169,14 @@ def create_saliency_data(me, algo, all_images, run_idx=0, exist_name=None, with_
         if exist_name:
             progress_path = os.path.join("results", "progress", exist_name, image_name)
             if os.path.exists(progress_path):
-                print("##", itr, image_path, image_name, " - Found skipping")
+                logging.info(f"## {itr} {image_path} {image_name} - Found skipping")
                 continue
 
         inp = me.get_image(image_path)
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))
         print("##", itr, image_path, image_name, topidx, img.desc)
+        logging.info("creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
 
         #mdl = nn.Sequential(me.model, SelectKthLogit(topidx))
         sal_dict = algo(me, inp, topidx)
