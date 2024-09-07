@@ -116,7 +116,7 @@ class Coord:
             try:
                 os.rename(tmp_path, wip_path)
                 self.iter_last_name = (wip_path, done_path)
-                logging.debug("handling {name}")
+                logging.debug(f"handling {name}")
                 return item
             
             except OSError as e:        
