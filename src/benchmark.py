@@ -258,7 +258,9 @@ def summarize_scores_df(df):
     smry =df.groupby('variant').agg(
         mean_del_auc=('del_auc', 'mean'),
         mean_ins_auc=('ins_auc', 'mean'),
-        row_count=('variant', 'size')
+        std_del_auc=('del_auc', 'std'),
+        std_ins_auc=('ins_auc', 'std'),
+        n_valid=('variant', 'size')
     ).reset_index()
     return smry    
 
