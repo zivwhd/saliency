@@ -152,6 +152,7 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         except:
             logging.exception("Failed getting image")
             if skip_img_error:
+                logging.info("Skipping")
                 continue
 
         logits = me.model(inp).cpu()

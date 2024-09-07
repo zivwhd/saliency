@@ -50,7 +50,7 @@ if __name__ == '__main__':
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
     task_image_dict = {info.name : info for info in task_images }
 
-    coord_images = Coord(all_images, os.path.join("progress", f"{args.sal}_{args.marker}"))
+    coord_images = Coord(all_images, os.path.join("progress", f"{args.action}_{args.sal}_{args.marker}"))
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
 
