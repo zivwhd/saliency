@@ -76,7 +76,7 @@ if __name__ == '__main__':
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")
-            results_prog = Coord(result_paths, progress_path, getname=get_score_name)            
+            result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
             create_scores(me, result_prog, update=True)
             
 
