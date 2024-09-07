@@ -209,13 +209,17 @@ def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
             logging.debug(f"scores  {idx}, {sal_name}, {scores['del_auc']}, {scores['ins_auc']}")
     return scores_dict
 
-def create_scores(me, images, result_paths, update=True):
+def get_score_name(path):
+    return (os.path.basename(os.path.dirname(path)) + "_" + os.path.basename(path))
+
+def create_scores(me, result_paths, update=True, subset=None):
     for path in result_paths:
         
         image_name = os.path.basename(path)
         variant = os.path.basename(os.path.dirname(path))
         logging.debug(f"checking: {path} name={image_name} variant={variant}")
-        if image_name not in images:
+
+        if subset and image_name not in subset:
             continue
 
         logging.debug(f"handling {path}")
@@ -258,7 +262,7 @@ def summarize_scores_df(df):
     ).reset_index()
     return smry    
 
-
+                     
 class CombSaliencyCreator:
     def __init__(self, inner):
         self.inner = inner

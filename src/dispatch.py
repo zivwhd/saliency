@@ -48,9 +48,9 @@ if __name__ == '__main__':
     
     all_images = sorted(list(isrc.get_all_images().values()), key=lambda x:x.name)
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
-    task_image_dict = {info.name : info for info in task_images }
 
-    coord_images = Coord(all_images, os.path.join("progress", f"{args.action}_{args.sal}_{args.marker}"))
+    progress_path = os.path.join("progress", f"{args.action}_{args.sal}_{args.marker}")
+    coord_images = Coord(all_images, progress_path)
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
 
@@ -74,7 +74,8 @@ if __name__ == '__main__':
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")
-            create_scores(me, task_image_dict, result_paths, update=True)
+            results_prog = Coord(result_paths, progress_path, getname=get_score_name)            
+            create_scores(me, result_prog, update=True)
             
 
 

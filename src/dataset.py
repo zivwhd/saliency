@@ -73,11 +73,12 @@ class ImagenetSource:
         
 class Coord:
 
-    def __init__(self, items, base_path):
+    def __init__(self, items, base_path, getname=lambda x: x.name):
         self.items = items
+        self.getname = getname
         self.base_path = base_path
         self.iter_items = None
-        self.iter_last_wip = None
+        self.iter_last_wip = None        
 
     def __iter__(self):
         self.iter_last_wip = None
@@ -101,7 +102,7 @@ class Coord:
 
         while self.iter_items:
             item = self.iter_items.pop()
-            name = item.name
+            name = self.getname(item)
             
             os.makedirs(self.base_path, exist_ok=True)
 
