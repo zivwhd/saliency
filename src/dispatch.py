@@ -24,7 +24,7 @@ def get_args():
         
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
-    parser.add_argument("--sal", choices=["cpe","cam"], default="cpe", help="TBD")
+    parser.add_argument("--sal", choices=["cpe","cam", "any"], default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50"], default="resnet50", help="TBD")    
@@ -71,6 +71,8 @@ if __name__ == '__main__':
                 create_cpe_sals(me, coord_images)
             elif args.sal == "cam":
                 create_cam_sals(me, coord_images)
+            elif args.sal == "any":
+                assert False, "unexpected sal"
         elif args.action == "scores":            
             result_paths = get_all_results()
             logging.info(f"found {len(result_paths)} saliency maps")
