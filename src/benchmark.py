@@ -136,7 +136,7 @@ class SelectKthLogit(nn.Module):
     
 
     
-def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False):
+def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, skip_img_error=True):
 
     for itr, img in enumerate(all_images):    
         
@@ -147,7 +147,13 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False):
         if pidx > 0:
             image_name = image_name[0:pidx]
 
-        inp = me.get_image(image_path)
+        try:
+            inp = me.get_image(image_path)
+        except:
+            logging.exception("Failed getting image")
+            if skip_img_error:
+                continue
+
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
