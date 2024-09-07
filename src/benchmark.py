@@ -212,15 +212,15 @@ def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
 def get_score_name(path):
     return (os.path.basename(os.path.dirname(path)) + "_" + os.path.basename(path))
 
-def create_scores(me, result_paths, update=True, subset=None):
+def create_scores(me, result_paths, images, update=True):
     for path in result_paths:
         
         image_name = os.path.basename(path)
         variant = os.path.basename(os.path.dirname(path))
         logging.debug(f"checking: {path} name={image_name} variant={variant}")
 
-        if subset and image_name not in subset:
-            continue
+        #if image_name not in images:
+        #    continue
 
         logging.debug(f"handling {path}")
         info = images[image_name]
