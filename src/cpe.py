@@ -3,6 +3,7 @@ from skimage.segmentation import slic,mark_boundaries
 import torch
 import cv2, logging
 from scipy.spatial import Voronoi
+import torch.nn.functional as F
 
 #try:
 #    from tqdm import tqdm
@@ -226,3 +227,171 @@ class IpwSalCreator:
                 res[f"{self.desc}_{nmasks}_ipw_{clip}"] = ipwg.get_ips_sal(clip)
         logging.debug(f"IpSalCreator: total masks={total};")
         return res 
+    
+
+class SimpGen:
+    def __init__(self, segsize=68, ishape = (224,224), force_mask=None, collect_masks=False):
+        self.treatment = None
+        self.ctrl = None
+        self.treatment2 = None
+        self.ctrl2 = None
+        self.total_masks = 0        
+        self.weights = None
+
+        self.segsize = segsize
+        self.pad = self.segsize // 2
+        self.ishape = ishape
+        self.mgen = SqMaskGen(segsize, mshape=ishape)
+        self.weights = torch.zeros(ishape)
+        self.sals = torch.zeros(ishape)
+        self.sals2 = torch.zeros(ishape)
+        self.force_mask = force_mask
+
+        self.collect_masks = collect_masks
+        self.all_masks = []
+        self.all_pred = []
+
+    def gen_(self, model, inp, itr=125, batch_size=32):
+        
+        h = self.ishape[0]
+        w = self.ishape[1]
+        pad = self.pad
+
+        force_mask = self.force_mask
+        if force_mask is not None:
+            force_mask = force_mask.unsqueeze(0).to(inp.device)
+
+        for idx in tqdm(range(itr)):
+            masks = self.mgen.gen_masks(batch_size)
+            self.total_masks += masks.shape[0]
+            #if type(exp_masks) == np.ndarray:
+            #    exp_masks = torch.tensor(exp_masks)
+            #masks = masks.unsqueeze(1)            
+            dmasks = masks.to(inp.device)    
+            if force_mask is not None:
+                dmasks = dmasks | force_mask
+
+            out = masked_output(model, inp, dmasks)
+            mout = out.unsqueeze(-1).unsqueeze(-1)
+
+            if self.collect_masks:
+                self.all_masks.append(masks.cpu())
+                self.all_pred.append(mout.cpu())
+            streatment = mout * dmasks.unsqueeze(1)
+            sctrl = mout * (1 - 1.0 * dmasks.unsqueeze(1))
+
+            treatment = streatment.sum(dim=0)
+            ctrl = sctrl.sum(dim=0)
+
+            treatment2 = (streatment*streatment).sum(dim=0)
+            ctrl2 = (sctrl*sctrl).sum(dim=0)
+              
+            weights = dmasks.sum(dim=0, keepdim=True)
+
+            if self.treatment is None:
+                self.treatment = treatment
+                self.ctrl = ctrl
+                self.treatment2 = treatment2
+                self.ctrl2 = ctrl2
+                self.weights = weights
+            else:
+                self.treatment += treatment
+                self.ctrl += ctrl
+                self.treatment2 += treatment2
+                self.ctrl2 += ctrl2
+                self.weights += weights
+            
+
+    def gen(self, model, inp, nmasks, batch_size=32, **kwargs):        
+        with torch.no_grad():
+            self.gen_(model=model, inp=inp, itr=nmasks//batch_size, batch_size=batch_size, **kwargs)
+            if nmasks % batch_size:
+                self.gen_(model=model, inp=inp, itr=1, batch_size=nmasks % batch_size, **kwargs)
+
+    def var(self, values, values2, weights):
+        return (values2 / weights) - (values * values) / (weights * weights)
+    
+    def get_ate_sal(self):
+        ctrl_weights = (self.total_masks - self.weights)
+        ate = (self.treatment /  self.weights) - (self.ctrl / ctrl_weights)
+        
+        treatment_var = self.var(self.treatment, self.treatment2, self.weights)
+        ctrl_var = self.var(self.ctrl, self.ctrl2, ctrl_weights)
+        ate_var = treatment_var + ctrl_var
+
+        return ate, ate_var
+
+
+def gsobel(K):    
+    assert K % 2 == 1
+    arng = torch.arange(K, dtype=torch.float32)
+    offs = arng-arng.mean()
+    dist = offs.abs()    
+    return torch.nan_to_num(offs / (dist.unsqueeze(0)**2 +  dist.unsqueeze(1)**2),0)
+
+sblx = gsobel(31)
+sbly = sblx.transpose(0,1)
+
+class RelIpwGen:
+    def __init__(self, segsize=64, ishape = (224,224)):
+        super(self).__init(segsize=segsize, ishape=ishape, force_mask=None, collect_masks=True)
+        
+        sobelK = ((segsize // 2) - 1 + (segsize // 2) % 2)
+        self.rdist = sobelK
+        self.sblx = gsobel(sobelK)
+        self.sbly = sblx.transpose(0,1)
+
+    def get_ips_sal(self, clip=0.1):
+        
+        ## first get simple ate sal - to find potential confounder
+        ate, ate_var = self.get_ate_sal()
+        isal = ate.cpu()
+
+        ## find saliency gradient - the potnetial confounder is upward
+        ctx = F.conv2d(isal.unsqueeze(0), sblx.unsqueeze(0).unsqueeze(0), padding="same")[0,0]
+        cty = F.conv2d(isal.unsqueeze(0), sbly.unsqueeze(0).unsqueeze(0), padding="same")[0,0]
+        csz = (ctx**2 + cty**2).sqrt()
+
+        offsx = (ctx*dist/csz).to(torch.int32)
+        offsy = (cty*dist/csz).to(torch.int32)
+
+        H, W = self.ishape
+        idxx = offsx + torch.arange(W).unsqueeze(0)
+        idxy = offsy + torch.arange(W).unsqueeze(0)
+        isok = ((csz > cszbar) & (idxx >= 0) & (idxx < W) & (idxy >= 0) & (idxy < H))
+        
+        confidx = torch.maximum(torch.minimum(idxx.flatten()+idxy.flatten()*H, torch.tensor(H*W-1)), torch.tensor([0]))
+
+        gidx = None
+        prev_bmask_shape = None
+        s_saliency = None
+        s_weights = None
+
+        for idx, bmasks in enumerate(simp.all_masks):
+    
+        if bmasks.shape != prev_bmask_shape:
+            gidx = ((torch.arange(bmasks.shape[0]) * confidx.numel()).unsqueeze(1) + confidx.unsqueeze(0)).flatten()
+            prev_bmask_shape = bmasks.shape
+            
+        ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
+        mout = simp.all_pred[idx]
+        #print(mout)
+        #print(bmasks.shape)
+        ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
+        cat = ((bmasks > 0.5) * 1 + (ref > 0.5) * 2).unsqueeze(0)
+        
+        mbin = (icats == cat)
+        #print(cat.shape, mout.shape, mbin.shape)
+        saliency = (mout.squeeze(1).unsqueeze(0) * mbin).sum(dim=1)
+        print(mbin.shape)
+        weights = mbin.sum(dim=1)    
+        if s_saliency is None:
+            s_saliency = saliency
+            s_weights = weights
+        else:
+            s_saliency += saliency
+            s_weights += weights
+
+
+
+
