@@ -256,7 +256,7 @@ class SimpGen:
     def var(self, values, values2, weights):
         return (values2 / weights) - (values * values) / (weights * weights)
     
-    def get_ate_sal(self):
+    def get_ate_sal_i(self):
         ctrl_weights = (self.total_masks - self.weights)
         ate = (self.treatment /  self.weights) - (self.ctrl / ctrl_weights)
         
@@ -266,6 +266,8 @@ class SimpGen:
 
         return ate, ate_var
 
+    def get_ate_sal(self):
+        return self.get_ate_sal_i()[0]
 
 def gsobel(K):    
     assert K % 2 == 1
@@ -289,54 +291,78 @@ class RelIpwGen:
     def get_ips_sal(self, clip=0.1):
         
         ## first get simple ate sal - to find potential confounder
-        ate, ate_var = self.get_ate_sal()
+        ate = self.get_ate_sal()
         isal = ate.cpu()
 
         ## find saliency gradient - the potnetial confounder is upward
         ctx = F.conv2d(isal.unsqueeze(0), sblx.unsqueeze(0).unsqueeze(0), padding="same")[0,0]
         cty = F.conv2d(isal.unsqueeze(0), sbly.unsqueeze(0).unsqueeze(0), padding="same")[0,0]
         csz = (ctx**2 + cty**2).sqrt()
+        cszbar = torch.quantile(csz, 0.01)
 
+        ## calculate offsets 
         offsx = (ctx*dist/csz).to(torch.int32)
         offsy = (cty*dist/csz).to(torch.int32)
 
+        # offset to indexes, validation
         H, W = self.ishape
         idxx = offsx + torch.arange(W).unsqueeze(0)
-        idxy = offsy + torch.arange(W).unsqueeze(0)
+        idxy = offsy + torch.arange(H).unsqueeze(0)
         isok = ((csz > cszbar) & (idxx >= 0) & (idxx < W) & (idxy >= 0) & (idxy < H))
         
+        ## flatten indexes
         confidx = torch.maximum(torch.minimum(idxx.flatten()+idxy.flatten()*H, torch.tensor(H*W-1)), torch.tensor([0]))
 
+        icats = torch.arange(4).unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
         gidx = None
         prev_bmask_shape = None
         s_saliency = None
         s_weights = None
 
+        # iterate over masks, and acummulate alienct, weights in bins
         for idx, bmasks in enumerate(simp.all_masks):
     
-        if bmasks.shape != prev_bmask_shape:
-            gidx = ((torch.arange(bmasks.shape[0]) * confidx.numel()).unsqueeze(1) + confidx.unsqueeze(0)).flatten()
-            prev_bmask_shape = bmasks.shape
+            if bmasks.shape != prev_bmask_shape:
+                gidx = ((torch.arange(bmasks.shape[0]) * confidx.numel()).unsqueeze(1) + confidx.unsqueeze(0)).flatten()
+                prev_bmask_shape = bmasks.shape
+                
+            ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
+            mout = simp.all_pred[idx]
+            #print(mout)
+            #print(bmasks.shape)
+            ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
+            cat = ((bmasks > 0.5) * 1 + (ref > 0.5) * 2).unsqueeze(0)
             
-        ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
-        mout = simp.all_pred[idx]
-        #print(mout)
-        #print(bmasks.shape)
-        ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
-        cat = ((bmasks > 0.5) * 1 + (ref > 0.5) * 2).unsqueeze(0)
+            mbin = (icats == cat)
+            #print(cat.shape, mout.shape, mbin.shape)
+            saliency = (mout.squeeze(1).unsqueeze(0) * mbin).sum(dim=1)
+            print(mbin.shape)
+            weights = mbin.sum(dim=1)    
+            if s_saliency is None:
+                s_saliency = saliency
+                s_weights = weights
+            else:
+                s_saliency += saliency
+                s_weights += weights
+
+        cidx = torch.arange(4)
+        treatment_sal = s_saliency[(cidx & 1) == 1]  ## dim:0 is of size 2
+        control_sal = s_saliency[(cidx & 1) == 0]
+
+        p_treatment_weights = s_weights[(cidx & 1) == 1]
+        p_control_weights = s_weights[(cidx & 1) == 0]
         
-        mbin = (icats == cat)
-        #print(cat.shape, mout.shape, mbin.shape)
-        saliency = (mout.squeeze(1).unsqueeze(0) * mbin).sum(dim=1)
-        print(mbin.shape)
-        weights = mbin.sum(dim=1)    
-        if s_saliency is None:
-            s_saliency = saliency
-            s_weights = weights
-        else:
-            s_saliency += saliency
-            s_weights += weights
+        t_clipping = torch.tensor([clip])    
+        c_clipping = torch.tensor([clip])    
 
+        treatment_prob =  torch.max(p_treatment_weights / (p_treatment_weights + p_control_weights + 1), t_clipping)
+        control_prob =  torch.max(p_control_weights / (p_treatment_weights + p_control_weights + 1), c_clipping)
 
+        ipw = (
+            ((treatment_sal / treatment_prob).sum(dim=0) / (p_treatment_weights / treatment_prob).sum(dim=0)) -
+            ((control_sal / control_prob).sum(dim=0) / (p_control_weights / control_prob).sum(dim=0)) ).unsqueeze(0)            
+
+        return ipw
+#treatment_prob.shape, p_treatment_weights.shape, p_control_weights.shape, t_clipping.shape
 
 
