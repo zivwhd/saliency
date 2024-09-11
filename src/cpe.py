@@ -210,7 +210,7 @@ class IpwSalCreator:
         self.desc = desc
         self.clip = clip
         self.batch_size = batch_size
-        self.ipwg = IpwGen
+        self.ipwg = ipwg
         self.kwargs = kwargs
         
 
@@ -337,10 +337,12 @@ def gsobel(K):
 sblx = gsobel(31)
 sbly = sblx.transpose(0,1)
 
-class RelIpwGen:
+class RelIpwGen(SimpGen):
     def __init__(self, segsize=64, ishape = (224,224)):
-        super(self).__init(segsize=segsize, ishape=ishape, force_mask=None, collect_masks=True)
-        
+        super().__init__(segsize=segsize, ishape=ishape, force_mask=None, collect_masks=True)
+        #def __init__(self, segsize=68, ishape = (224,224), force_mask=None, collect_masks=False):
+
+        logging.debug(f"RelIpwGen {segsize}")
         sobelK = ((segsize // 2) - 1 + (segsize // 2) % 2)
         self.rdist = sobelK
         self.sblx = gsobel(sobelK)
@@ -359,8 +361,8 @@ class RelIpwGen:
         cszbar = torch.quantile(csz, 0.01)
 
         ## calculate offsets 
-        offsx = (ctx*dist/csz).to(torch.int32)
-        offsy = (cty*dist/csz).to(torch.int32)
+        offsx = (ctx*self.rdist/csz).to(torch.int32)
+        offsy = (cty*self.rdist/csz).to(torch.int32)
 
         # offset to indexes, validation
         H, W = self.ishape
@@ -378,14 +380,15 @@ class RelIpwGen:
         s_weights = None
 
         # iterate over masks, and acummulate alienct, weights in bins
-        for idx, bmasks in enumerate(simp.all_masks):
+        logging.debug(f"number of batches: {len(self.all_masks)}")
+        for idx, bmasks in enumerate(self.all_masks):
     
             if bmasks.shape != prev_bmask_shape:
                 gidx = ((torch.arange(bmasks.shape[0]) * confidx.numel()).unsqueeze(1) + confidx.unsqueeze(0)).flatten()
                 prev_bmask_shape = bmasks.shape
                 
             ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
-            mout = simp.all_pred[idx]
+            mout = self.all_pred[idx]
             #print(mout)
             #print(bmasks.shape)
             ref = bmasks.flatten().gather(0, gidx).reshape(bmasks.shape)
@@ -394,7 +397,7 @@ class RelIpwGen:
             mbin = (icats == cat)
             #print(cat.shape, mout.shape, mbin.shape)
             saliency = (mout.squeeze(1).unsqueeze(0) * mbin).sum(dim=1)
-            print(mbin.shape)
+            #print(mbin.shape)
             weights = mbin.sum(dim=1)    
             if s_saliency is None:
                 s_saliency = saliency

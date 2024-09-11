@@ -252,6 +252,7 @@ def load_scores_df(variant_names=None, base_path="results/scores"):
             append_row(
                 res, 
                 image=image_name, variant=variant, del_auc=scores["del_auc"], ins_auc=scores["ins_auc"])
+            
     return pd.DataFrame(res)
 
 def summarize_scores_df(df):
