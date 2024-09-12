@@ -250,7 +250,7 @@ def create_scores(me, result_paths, images, update=True):
 
 def load_scores_df(model_name, variant_names=None, base_path=None):
     if base_path is None:
-        base_path = os.join("results", model_name, "scores")
+        base_path = os.path.join("results", model_name, "scores")
 
     if variant_names is None:
         variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]
