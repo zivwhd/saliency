@@ -13,6 +13,8 @@ import numpy as np
 import pdb
 from collections import defaultdict
 
+import timm
+
 from saleval import *
 
 class ModelEnv:
@@ -24,14 +26,18 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
+        if 'resnet' in arch:
         # Get a network pre-trained on ImageNet.
-        model = torchvision.models.__dict__[arch](pretrained=True)
-        # Switch to eval mode to make the visualization deterministic.
-        model.eval()
-        # We do not need grads for the parameters.
-        for param in model.parameters():
-            param.requires_grad_(False)
+            model = torchvision.models.__dict__[arch](pretrained=True)
+            #for param in model.parameters():
+            #    param.requires_grad_(False)
 
+        elif 'vit' in arch:
+            model = timm.create_model(arch, pretrained=True)
+        else:
+            assert False, "unexpected arch"
+        
+        model.eval()        
         model = model.to(dev)
         return model
 
@@ -54,13 +60,23 @@ class ModelEnv:
         img = Image.open(path)
         # Pre-process the image and convert into a tensor
         ## TODO: for which models are these transformation relevant
-        transform = torchvision.transforms.Compose([
-            torchvision.transforms.Resize(self.shape),
-            torchvision.transforms.CenterCrop(self.shape),
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                         std=[0.229, 0.224, 0.225]),
-        ])
+        if 'resnet' in self.arch:
+            transform = torchvision.transforms.Compose([
+                torchvision.transforms.Resize(self.shape),
+                torchvision.transforms.CenterCrop(self.shape),
+                torchvision.transforms.ToTensor(),
+                torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225]),
+            ])
+        elif 'vit' in self.arch:
+            transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+        else:
+            assert False, "unexpected arch"
+
 
         x = transform(img).unsqueeze(0)
         return x.to(self.device)
@@ -71,27 +87,27 @@ class ModelEnv:
 
 
 
-def get_result_path(variant, image_name, run=0, result_type="saliency"):
-    return os.path.join("results", result_type, f"{variant}_{run}", image_name)
+def get_result_path(model_name, variant, image_name, run=0, result_type="saliency"):
+    return os.path.join("results", model_name, result_type, f"{variant}_{run}", image_name)
 
-def get_all_results(subset=None):
-    all_sals = glob.glob(os.path.join("results", "saliency", "*", "*"))
+def get_all_results(model_name, subset=None): ## PPAA
+    all_sals = glob.glob(os.path.join("results", model_name, "saliency", "*", "*"))
     if subset:
         all_sals = [x for x in all_sals if os.path.basename(x) in subset]
     return all_sals
 
 
-def get_saliency_path(variant, image_name, run=0):
-    return get_result_path(variant=variant, image_name=image_name, run=run, result_type="saliency")
+def get_saliency_path(model_name, variant, image_name, run=0):
+    return get_result_path(model_name=model_name, variant=variant, image_name=image_name, run=run, result_type="saliency")
 
-def save_saliency(obj, variant, image_name, run=0):    
-    path = get_saliency_path(variant, image_name, run)
+def save_saliency(obj, model_name, variant, image_name, run=0):     ## PPAA
+    path = get_saliency_path(model_name, variant, image_name, run)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(obj, path)
 
-def save_scores(scores_dict, image_name, run=0, update=False):
+def save_scores(scores_dict, model_name, image_name, run=0, update=False):
     for variant, scores in scores_dict.items():
-        path = get_result_path(variant, image_name, run, result_type="scores")
+        path = get_result_path(model_name,variant, image_name, run, result_type="scores")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if update and os.path.exists(path):
             with open(path, "rb") as sof:
@@ -166,13 +182,13 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         for variant, sal  in sal_dict.items():
             if variant.startswith("_"):
                 continue
-            save_saliency(sal, variant, image_name, run=run_idx)
+            save_saliency(sal, me.arch, variant, image_name, run=run_idx)
         
         if not with_scores:
             continue
 
         scores_dict = get_sal_scores(me, inp, sal_dict, with_breakdown=False)
-        save_scores(scores_dict, image_name, run=run_idx, update=True)
+        save_scores(scores_dict, me.arch, image_name, run=run_idx, update=True)
 
 def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
     smodel = nn.Sequential(me.model, nn.Softmax(dim=1)) 
@@ -228,11 +244,13 @@ def create_scores(me, result_paths, images, update=True):
         inp = me.get_image(info.path)
         sal_dict = {variant : torch.load(path)}
         scores_dict = get_sal_scores(me, inp, sal_dict)
-        save_scores(scores_dict, image_name, update=update)
+        save_scores(scores_dict, me.arch, image_name, update=update)
 
 
 
-def load_scores_df(variant_names=None, base_path="results/scores"):
+def load_scores_df(model_name, variant_names=None, base_path=None):
+    if base_path is None:
+        base_path = os.join("results", model_name, "scores")
 
     if variant_names is None:
         variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]

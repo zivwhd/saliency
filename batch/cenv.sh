@@ -53,6 +53,7 @@ pip3 install scikit-image
 pip3 install opencv-python
 pip3 install grad-cam
 pip3 install pandas
+pip3 install timm
 
 
 # Verify the installation
