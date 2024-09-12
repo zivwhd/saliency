@@ -1,4 +1,5 @@
 
+import torch
 from baselines.AttrViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
 from baselines.AttrViT.ViT_explanation_generator import LRP
 
