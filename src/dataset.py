@@ -94,7 +94,7 @@ class Coord:
                 os.rename(wip_path, done_path)            
                 self.iter_last_wip = None
         except:
-            logging.debug("failed marking done")
+            logging.exception("failed marking done")
 
     def __next__(self):
 
