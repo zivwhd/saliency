@@ -55,7 +55,7 @@ if __name__ == '__main__':
     all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
 
-    progress_path = os.path.join("progress", args.model, "{args.action}_{args.sal}_{args.marker}")
+    progress_path = os.path.join("progress", args.model, f"{args.action}_{args.sal}_{args.marker}")
     coord_images = Coord(all_images, progress_path)
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
