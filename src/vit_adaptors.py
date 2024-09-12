@@ -15,7 +15,7 @@ class AttrVitSaliencyCreator:
         model = vit_LRP(pretrained=True).cuda()
         model.eval()
         attribution_generator = LRP(model)
-        transformer_attribution = attribution_generator.generate_LRP(inp, method="transformer_attribution", index=topidx).detach()
+        transformer_attribution = attribution_generator.generate_LRP(inp, method="transformer_attribution", index=catidx).detach()
         transformer_attribution = transformer_attribution.reshape(1, 1, 14, 14)
         transformer_attribution = torch.nn.functional.interpolate(transformer_attribution, scale_factor=16, mode='bilinear')
         transformer_attribution = transformer_attribution.reshape(224, 224).data.cpu().unsqueeze(0) ##.numpy()
