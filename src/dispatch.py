@@ -5,7 +5,7 @@ print("## dispatch.py ")
 import argparse, logging, os
 from dataset import ImagenetSource, Coord
 from adaptors import CamSaliencyCreator, METHOD_CONV
-from vit_adaptors import AttrVitSaliencyCreator 
+from vit_adaptors import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from benchmark import *
 from cpe import *
 
@@ -13,30 +13,34 @@ def create_cpe_sals(me, images, segsize=64):
     logging.info("create_cpe_sals")
     algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32)
     logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0,  with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0)
 
 def create_rcpe_sals(me, images, segsize=64):
     logging.info("create_rcpe_sals")
     algo = IpwSalCreator(f"RCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32, ipwg=RelIpwGen)
     logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0,  with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0)
 
 def create_cam_sals(me, images):
     logging.info("create_cam_sals")
     algo = CamSaliencyCreator(list(METHOD_CONV.keys()))
-    create_saliency_data(me, algo, images, run_idx=0, with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0)
 
 def create_tattr_sals(me, images):
     logging.info("create_tattr_sals")
     algo = AttrVitSaliencyCreator()
-    create_saliency_data(me, algo, images, run_idx=0, with_scores=False)
+    create_saliency_data(me, algo, images, run_idx=0)
 
+def create_dimpl_sals(me, images):
+    logging.info("create_dimpl_sals")
+    algo = DimplVitSaliencyCreator()
+    create_saliency_data(me, algo, images, run_idx=0)
 
 def get_args(): 
         
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
-    parser.add_argument("--sal", choices=["cpe","cam", "rcpe", "tattr", "any"], default="cpe", help="TBD")
+    parser.add_argument("--sal", choices=["cpe","cam", "rcpe", "tattr", "dimpl", "any"], default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50","vit_small_patch16_224"], default="resnet50", help="TBD")    
