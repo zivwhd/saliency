@@ -84,17 +84,10 @@ if __name__ == '__main__':
     else:
         me = ModelEnv(args.model)
         if args.action == "create_sals":
-            if args.sal == "cpe":
-                create_cpe_sals(me, coord_images)
-            if args.sal == "rcpe":
-                create_rcpe_sals(me, coord_images)
-            elif args.sal == "cam":
-                create_cam_sals(me, coord_images)
-            elif args.sal == "tattr":
-                create_tattr_sals(me, coord_images)
-
-            elif args.sal == "any":
-                assert False, "unexpected sal"
+            ## call create_*_sals
+            cname = f"create_{args.sal}_sals"
+            func = locals()[cname]
+            func(me, coord_images)
         elif args.action == "scores":            
             result_paths = get_all_results(args.model)
             logging.info(f"found {len(result_paths)} saliency maps")
