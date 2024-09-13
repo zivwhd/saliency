@@ -4,12 +4,12 @@ Hacked together by / Copyright 2020 Ross Wightman
 import torch
 import torch.nn as nn
 from einops import rearrange
-from baselines.AttrViT.modules.layers_ours import *
+from modules.layers_ours import *
 
-from baselines.AttrViT.helpers import load_pretrained
-from baselines.AttrViT.weight_init import trunc_normal_
-from baselines.AttrViT.layer_helpers import to_2tuple
-
+from helpers import load_pretrained
+from weight_init import trunc_normal_
+from layer_helpers import to_2tuple
+import timm
 
 def _cfg(url='', **kwargs):
     return {
@@ -406,6 +406,17 @@ def _conv_filter(state_dict, patch_size=16):
             v = v.reshape((v.shape[0], 3, patch_size, patch_size))
         out_dict[k] = v
     return out_dict
+
+def vit_small_patch16_224(pretrained=False, **kwargs):
+    model = VisionTransformer(
+        patch_size=16, embed_dim=384, depth=12, num_heads=6, mlp_ratio=4, qkv_bias=True, **kwargs)
+    model.default_cfg = default_cfgs['vit_small_patch16_224']
+    if pretrained:
+        timm_model = timm.create_model('vit_small_patch16_224', pretrained=True)
+        model.load_state_dict(timm_model.state_dict())
+        print('Loaded pretrained small vit!')
+    return model
+
 
 def vit_base_patch16_224(pretrained=False, **kwargs):
     model = VisionTransformer(
