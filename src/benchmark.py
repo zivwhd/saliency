@@ -16,6 +16,7 @@ from collections import defaultdict
 import timm
 
 from saleval import *
+from metrics import *
 
 class ModelEnv:
 
@@ -158,6 +159,7 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         
         image_name = img.name
         image_path = img.path 
+        target = img.target
 
         pidx = image_name.find(".")
         if pidx > 0:
@@ -175,8 +177,18 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         topidx = int(torch.argmax(logits))        
         logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
 
+        
         #mdl = nn.Sequential(me.model, SelectKthLogit(topidx))
-        sal_dict = algo(me, inp, topidx)
+
+        top_sal_dict = algo(me, inp, topidx)
+        
+        if target == topidx:
+            sal_dict = {key : torch.concat([x,x], dim=0) for key, x in target_sal_dict.items()}
+        else:
+            target_sal_dict = algo(me, inp, target)
+            assert (target_sal_dict.keys() == top_sal_dict.keys())
+            sal_dict = {key : torch.concat([top_sal_dict[key], target_sal_dict[key]], dim=0) for key in top_sal_dict.keys()}
+
 
         logging.info("done, saving")
         for variant, sal  in sal_dict.items():
@@ -187,10 +199,17 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         if not with_scores:
             continue
 
-        scores_dict = get_sal_scores(me, inp, sal_dict, with_breakdown=False)
+        scores_dict = get_sal_scores(me, inp, img, sal_dict)
         save_scores(scores_dict, me.arch, image_name, run=run_idx, update=True)
 
-def get_sal_scores(me, inp, sal_dict, with_breakdown=True):
+def get_sal_scores(me, inp, info, sal_dict):
+    metrics = Metrics()
+    return {
+        name : metrics.get_metrics(me.model, inp, sal, info)
+        for name, sal in sal_dict.items()
+    }
+    
+def get_sal_scores(me, inp, info, sal_dict, with_breakdown=True):
     smodel = nn.Sequential(me.model, nn.Softmax(dim=1)) 
     scores_dict = {}
     flat_sal_dict = {}
@@ -243,7 +262,7 @@ def create_scores(me, result_paths, images, update=True):
 
         inp = me.get_image(info.path)
         sal_dict = {variant : torch.load(path)}
-        scores_dict = get_sal_scores(me, inp, sal_dict)
+        scores_dict = get_sal_scores(me, inp, info, sal_dict)
         save_scores(scores_dict, me.arch, image_name, update=update)
 
 
@@ -266,20 +285,22 @@ def load_scores_df(model_name, variant_names=None, base_path=None):
             image_name = os.path.basename(scores_path)
             with open(scores_path, "rb") as sf:
                 scores = pickle.load(sf)
-            
+
+
             append_row(
                 res, 
-                image=image_name, variant=variant, del_auc=scores["del_auc"], ins_auc=scores["ins_auc"])
+                image=image_name, variant=variant, 
+                **scores)    
             
     return pd.DataFrame(res)
 
 def summarize_scores_df(df):
+    meta_cols = ["image","variant"]
+    metric_cols = [x for x in df.columns if x not in meta_cols]
+    metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}
     smry =df.groupby('variant').agg(
-        mean_del_auc=('del_auc', 'mean'),
-        mean_ins_auc=('ins_auc', 'mean'),
-        std_del_auc=('del_auc', 'std'),
-        std_ins_auc=('ins_auc', 'std'),
-        n_valid=('variant', 'size')
+        n_valid=('variant', 'size'),
+        **metrics
     ).reset_index()
     return smry    
 

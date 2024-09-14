@@ -89,6 +89,7 @@ class DimplVitSaliencyCreator:
             return heatmap
             #img_dict.append({"image": im2, "title": 't_attr'})
         elif operation == 'dix':
+            ## REVIEW - we'd like to run dix1
             dix_attribution1 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 1)
             dix_attribution2 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 2)
             dix_attribution=dix_attribution1+dix_attribution2

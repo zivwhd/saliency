@@ -2,10 +2,11 @@
 
 print("## dispatch.py ")
 
-import argparse, logging, os
+import argparse, logging, os, re
 from dataset import ImagenetSource, Coord
-from adaptors import CamSaliencyCreator, METHOD_CONV
+from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
 from vit_adaptors import AttrVitSaliencyCreator, DimplVitSaliencyCreator
+from RISE import RiseSaliencyCreator
 from benchmark import *
 from cpe import *
 
@@ -36,11 +37,26 @@ def create_dimpl_sals(me, images):
     algo = DimplVitSaliencyCreator()
     create_saliency_data(me, algo, images, run_idx=0)
 
+def create_rise_sals(me, images):
+    logging.info("create_rise_sals")
+    algo = RiseSaliencyCreator()
+    create_saliency_data(me, algo, images, run_idx=0)
+
+def create_captum_sals(me, images):
+    logging.info("create_captum_sals")
+    algo = CaptumCamSaliencyCreator()
+    create_saliency_data(me, algo, images, run_idx=0)
+
+
+def get_creators():
+    ptrn = re.compile("create_(.*)_sals")
+    return [match.group(1) for match in [ptrn.match(vr) for vr in globals()] if match is not None]
+
 def get_args(): 
-        
+    creators = get_creators() + ['any']
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
-    parser.add_argument("--sal", choices=["cpe","cam", "rcpe", "tattr", "dimpl", "any"], default="cpe", help="TBD")
+    parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=["resnet18","resnet50","vit_small_patch16_224"], default="resnet50", help="TBD")    
