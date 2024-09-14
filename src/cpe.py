@@ -170,6 +170,7 @@ class IpwGen(IpwGenBase):
             
             mmasks = exp_masks[..., self.pad:self.pad+h, self.pad:self.pad+w]
             out = masked_output(model, inp, mmasks.squeeze(1)).cpu()            
+            
             mout = out.unsqueeze(-1).unsqueeze(-1)
 
             #cat = ((mmasks > 0.5) + 
@@ -185,8 +186,7 @@ class IpwGen(IpwGenBase):
             mbin = (
                 torch.arange(self.num_cat).unsqueeze(-1).unsqueeze(-1).unsqueeze(-1).unsqueeze(-1) ==
                 cat.unsqueeze(0))
-
-
+            
             saliency = (mout.unsqueeze(0) * mbin).sum(dim=1)
             weights = mbin.sum(dim=1)
             if self.saliency is None:
@@ -205,6 +205,7 @@ class IpwGen(IpwGenBase):
 
 class IpwSalCreator:
 
+    multi_target = True
     def __init__(self, desc, nmasks, batch_size=32, clip=[0.1], ipwg = IpwGen, **kwargs):        
         self.nmasks = nmasks
         self.desc = desc

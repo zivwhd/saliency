@@ -146,9 +146,12 @@ class SelectKthLogit(nn.Module):
         self.loss  = nn.CrossEntropyLoss()
 
     def forward(self, x):
-        values = torch.stack([x], dim=-1)        
-        #values = torch.stack((x, self.sigmoid(x), self.softmax(x), torch.logit(self.softmax(x))), dim=-1)
-        result = values[...,self.k,:]
+        if type(self.k) == int:            
+            values = torch.stack([x], dim=-1)
+            result = values[:,self.k,:]            
+        else:
+            result = x[:, self.k]                            
+        
         return result
     
 
@@ -178,13 +181,18 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
 
         
-        #mdl = nn.Sequential(me.model, SelectKthLogit(topidx))
+        multi_target = getattr(algo, "multi_target", False)
 
-        top_sal_dict = algo(me, inp, topidx)
-        
         if target == topidx:
-            sal_dict = {key : torch.concat([x,x], dim=0) for key, x in target_sal_dict.items()}
+            top_sal_dict = algo(me, inp, topidx)        
+            sal_dict = {key : torch.concat([x,x], dim=0) for key, x in top_sal_dict.items()}
+        elif multi_target:
+            logging.dbug("multi_target")
+            sal_dict = algo(me, inp, (topidx, target) )
+            for msal in sal_dict.values():
+                assert (msal.shape[0] == 2)            
         else:
+            top_sal_dict = algo(me, inp, topidx)
             target_sal_dict = algo(me, inp, target)
             assert (target_sal_dict.keys() == top_sal_dict.keys())
             sal_dict = {key : torch.concat([top_sal_dict[key], target_sal_dict[key]], dim=0) for key in top_sal_dict.keys()}
