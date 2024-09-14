@@ -187,7 +187,7 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
             top_sal_dict = algo(me, inp, topidx)        
             sal_dict = {key : torch.concat([x,x], dim=0) for key, x in top_sal_dict.items()}
         elif multi_target:
-            logging.dbug("multi_target")
+            logging.debug("multi_target")
             sal_dict = algo(me, inp, (topidx, target) )
             for msal in sal_dict.values():
                 assert (msal.shape[0] == 2)            
