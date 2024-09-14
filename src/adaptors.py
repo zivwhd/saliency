@@ -55,7 +55,7 @@ class CaptumCamSaliencyCreator:
         cinp.requires_grad_()  # Enable gradients on input
         attribution = guided_gc.attribute(cinp, target=catidx) 
         dsal = attribution.squeeze(0).squeeze(0).cpu().detach().numpy()
-        sal = cv2.resize(dsal, tuple(inp.shape[-2:]))
+        sal = torch.tensor(cv2.resize(dsal, tuple(inp.shape[-2:])))
         return dict(captumLayerGradCam=sal)
         
 
