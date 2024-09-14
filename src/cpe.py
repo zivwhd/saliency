@@ -10,7 +10,7 @@ import torch.nn.functional as F
 #except:
 #    tqdm = lambda x: x
 tqdm = lambda x: x
-from tqdm import tqdm
+#from tqdm import tqdm
 
 import pdb
 
