@@ -104,7 +104,7 @@ def RISE_explain(model, inp, itr, seg=8, p1 = 0.5, batch_size=32):
 
 class RiseSaliencyCreator:
 
-    def __init__(self, nmasks=4000, seg=32, p1=0.5):
+    def __init__(self, nmasks=4000, seg=7, p1=0.5):
 
         self.nmasks = nmasks
         self.seg = seg
