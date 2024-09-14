@@ -209,7 +209,7 @@ def get_sal_scores(me, inp, info, sal_dict):
         for name, sal in sal_dict.items()
     }
     
-def get_sal_scores(me, inp, info, sal_dict, with_breakdown=True):
+def get_sal_scores_(me, inp, info, sal_dict, with_breakdown=True):
     smodel = nn.Sequential(me.model, nn.Softmax(dim=1)) 
     scores_dict = {}
     flat_sal_dict = {}
