@@ -60,8 +60,7 @@ class Metrics:
         logits = model(inp).cpu()
         probs = torch.softmax(logits, dim=1)
 
-        nsal = torch.maximum(saliency, torch.zeros(saliency.shape))
-
+        nsal = saliency
         salmax, salmin = nsal.max(), nsal.min()
         if salmax > salmin:
             mask = (nsal - salmin) / (salmax-salmin)
@@ -130,5 +129,5 @@ class Metrics:
         
         accuracy_auc  = auc(perturbation_steps, accuracy) * 100
         prob_auc = auc(perturbation_steps, probs) * 100
-        print(accuracy_auc, prob_auc)
+        #print(accuracy_auc, prob_auc)
         return (accuracy_auc, prob_auc)
