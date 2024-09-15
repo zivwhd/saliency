@@ -42,8 +42,13 @@ class ModelEnv:
         model = model.to(dev)
         return model
 
-    def narrow_model(self, catidx):
-        return nn.Sequential(self.model, SelectKthLogit(catidx))
+    def narrow_model(self, catidx, with_softmax=False):
+        modules = (
+            [self.model] + 
+            ([nn.Softmax()] if with_softmax else []) +
+            [SelectKthLogit(catidx)])
+
+        return nn.Sequential(*modules)
     
     def get_cam_target_layer(self):
         if self.arch == 'resnet50':

@@ -206,12 +206,13 @@ class IpwGen(IpwGenBase):
 class IpwSalCreator:
 
     multi_target = True
-    def __init__(self, desc, nmasks, batch_size=32, clip=[0.1], ipwg = IpwGen, **kwargs):        
+    def __init__(self, desc, nmasks, batch_size=32, clip=[0.1], ipwg = IpwGen, with_softmax=False, **kwargs):
         self.nmasks = nmasks
         self.desc = desc
         self.clip = clip
         self.batch_size = batch_size
         self.ipwg = ipwg
+        self.with_softmax = with_softmax
         self.kwargs = kwargs
         
 
@@ -223,7 +224,7 @@ class IpwSalCreator:
             added_nmasks = nmasks - total
             total = nmasks
             logging.debug(f"IpSalCreator: nmasks={nmasks}; added = {added_nmasks}")
-            ipwg.gen(me.narrow_model(catidx), inp, nmasks=added_nmasks, batch_size=self.batch_size)            
+            ipwg.gen(me.narrow_model(catidx, with_softmax=self.with_softmax), inp, nmasks=added_nmasks, batch_size=self.batch_size)            
             res[f"{self.desc}_{nmasks}_ate"] = ipwg.get_ate_sal()
             for clip in self.clip:
                 res[f"{self.desc}_{nmasks}_ipw_{clip}"] = ipwg.get_ips_sal(clip)

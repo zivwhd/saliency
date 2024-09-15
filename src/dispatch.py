@@ -16,6 +16,12 @@ def create_cpe_sals(me, images, segsize=64):
     logging.info("creating saliency maps")    
     create_saliency_data(me, algo, images, run_idx=0)
 
+def create_scpe_sals(me, images, segsize=64):
+    logging.info("create_cpe_sals")
+    algo = IpwSalCreator(f"PCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, wtih_softmax=True, batch_size=32)
+    logging.info("creating saliency maps")    
+    create_saliency_data(me, algo, images, run_idx=0)
+
 def create_rcpe_sals(me, images, segsize=64):
     logging.info("create_rcpe_sals")
     algo = IpwSalCreator(f"RCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32, ipwg=RelIpwGen)
