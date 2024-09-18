@@ -106,14 +106,16 @@ class Coord:
             name = self.getname(item)
             
             os.makedirs(self.base_path, exist_ok=True)
-
+            
             rnd = random.randint(0,int(1e9))
             #tmp_path = os.path.join(self.base_path, f"{name}.{rnd:x}.tmp")
             wip_path = os.path.join(self.base_path, f"{name}.wip")
             done_path = os.path.join(self.base_path, f"{name}.done")
 
             if os.path.isfile(done_path):
-                continue
+                continue            
+
+            os.makedirs(os.path.dirname(wip_path), exist_ok=True)
 
             if self.acquire(wip_path):
                 self.iter_last_wip = (wip_path, done_path)

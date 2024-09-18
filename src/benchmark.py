@@ -263,7 +263,7 @@ def get_sal_scores_(me, inp, info, sal_dict, with_breakdown=True):
     return scores_dict
 
 def get_score_name(path):
-    return (os.path.basename(os.path.dirname(path)) + "_" + os.path.basename(path))
+    return (os.path.basename(os.path.dirname(path)) + "/" + os.path.basename(path))
 
 def create_scores(me, result_paths, images, update=True):
     for path in result_paths:
