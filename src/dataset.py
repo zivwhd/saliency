@@ -1,5 +1,6 @@
 
 import os, glob, random
+import errno
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
@@ -126,7 +127,7 @@ class Coord:
 
         raise StopIteration
 
-    def acquire(path):
+    def acquire(self, path):
         try:
             # Open file with O_CREAT (create) and O_EXCL (fail if exists)
             fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
