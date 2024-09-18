@@ -107,28 +107,35 @@ class Coord:
             os.makedirs(self.base_path, exist_ok=True)
 
             rnd = random.randint(0,int(1e9))
-            tmp_path = os.path.join(self.base_path, f"{name}.{rnd:x}.tmp")
+            #tmp_path = os.path.join(self.base_path, f"{name}.{rnd:x}.tmp")
             wip_path = os.path.join(self.base_path, f"{name}.wip")
             done_path = os.path.join(self.base_path, f"{name}.done")
 
             if os.path.isfile(done_path):
                 continue
 
-            with open(tmp_path,"wb") as tmp_file:
-                pass
-
-            try:
-                os.rename(tmp_path, wip_path)
+            if self.acquire(path):
                 self.iter_last_wip = (wip_path, done_path)
                 logging.debug(f"acquired {wip_path}")
                 logging.debug(f"handling {name}")
                 return item
-            
-            except OSError as e:        
-                if os.path.exists(tmp_path):
-                    os.remove(tmp_path)
-            logging.debug(f"done {self.base_path}")
+            else:
+                logging.debug(f"skipping {wip_path}")
+
         self.mark_done()
 
         raise StopIteration
 
+    def acquire(path):
+        try:
+            # Open file with O_CREAT (create) and O_EXCL (fail if exists)
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_RDWR)
+            #print(f"File {path} created successfully.")
+            os.close(fd)
+            return True
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                #print(f"File {filename} already exists.")
+                return False
+            else:
+                raise  # For other types of OSError
