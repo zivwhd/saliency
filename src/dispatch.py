@@ -39,16 +39,19 @@ def get_captum_sal_creator():
 ALL_CNN_CREATORS = ["pcpe", "cam", "captum", "rise"]
 ALL_VIT_CREATORS = ["pcpe", "dimpl", "tattr", "rise"]
 
-def create_sals_by_name(names, me, images):
+def create_sals_by_name(names, me, images, marker="c1"):
     if type(names) == str:
         names = [names]
 
     for name in names:
         logging.info(f"create sals: {name}")
+        progress_path = os.path.join("progress", me.arch, f"{create_sals}_{name}_{marker}")
+        coord_images = Coord(images, progress_path)
+
         cname = f"get_{name}_sal_creator"
         func = globals()[cname]
         algo = func()
-        create_saliency_data(me, algo, images, run_idx=0)
+        create_saliency_data(me, algo, coord_images, run_idx=0)
 
 #def create_cnn_sals(me, images):
 #    logging.info("create_captum_sals")
@@ -128,7 +131,7 @@ if __name__ == '__main__':
                     sal_names = ALL_VIT_CREATORS
                 else:
                     assert False
-            create_sals_by_name(sal_names, me, coord_images)
+            create_sals_by_name(sal_names, me, all_images, marker=args.marker)
         elif args.action == "scores":            
             result_paths = get_all_results(args.model)
             logging.info(f"found {len(result_paths)} saliency maps")
