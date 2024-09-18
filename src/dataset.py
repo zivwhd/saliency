@@ -120,6 +120,7 @@ class Coord:
             try:
                 os.rename(tmp_path, wip_path)
                 self.iter_last_wip = (wip_path, done_path)
+                logging.debug(f"acquired {wip_path}")
                 logging.debug(f"handling {name}")
                 return item
             
