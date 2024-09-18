@@ -114,7 +114,7 @@ class Coord:
             if os.path.isfile(done_path):
                 continue
 
-            if self.acquire(path):
+            if self.acquire(wip_path):
                 self.iter_last_wip = (wip_path, done_path)
                 logging.debug(f"acquired {wip_path}")
                 logging.debug(f"handling {name}")
