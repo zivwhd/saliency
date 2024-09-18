@@ -51,6 +51,8 @@ class DimplVitSaliencyCreator:
             model = ViTmodel.vit_small_patch16_224(pretrained=True).to(device)
         elif me.arch == "vit_base_patch16_224":
             model = ViTmodel.vit_base_patch16_224(pretrained=True).to(device)
+        elif me.arch in ["resnet50"]:
+            model = me.model
         else:
             raise Exception(f"unexpected arch {arch}")
         
@@ -92,9 +94,10 @@ class DimplVitSaliencyCreator:
             ## REVIEW - we'd like to run dix1
             dix_attribution1 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 1)
             dix_attribution2 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 2)
-            dix_attribution=dix_attribution1+dix_attribution2
+            dix_attribution=dix_attribution1 +dix_attribution2
             im3, score, heatmap_cv, blended_img_mask, heatmap, t = blend_transformer_heatmap(image.cpu(), dix_attribution.cpu())
             #img_dict.append({"image": im3, "title": 'DIX', 'heatmap':heatmap, "ttt":t })
             return heatmap
         else:
             raise Exception(f"Unexpected operation {operation}")        
+

@@ -27,7 +27,7 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
-        if 'resnet' in arch:
+        if 'resnet' in arch or 'vgg' in arch:
         # Get a network pre-trained on ImageNet.
             model = torchvision.models.__dict__[arch](pretrained=True)
             #for param in model.parameters():
@@ -53,6 +53,11 @@ class ModelEnv:
     def get_cam_target_layer(self):
         if self.arch == 'resnet50':
             return self.model.layer4
+            #return self.model.layer4
+        
+        elif self.arch == 'vgg16':
+            return self.model.features[-1]
+            
         raise Exception('Unexpected arch')
     
     def get_device(self, gpu=0):
@@ -66,7 +71,7 @@ class ModelEnv:
         img = Image.open(path)
         # Pre-process the image and convert into a tensor
         ## TODO: for which models are these transformation relevant
-        if 'resnet' in self.arch:
+        if 'resnet' in self.arch or 'vgg' in self.arch:
             transform = torchvision.transforms.Compose([
                 torchvision.transforms.Resize(self.shape),
                 torchvision.transforms.CenterCrop(self.shape),

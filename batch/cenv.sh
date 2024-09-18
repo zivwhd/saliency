@@ -46,18 +46,28 @@ echo installing ...
 
 
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-conda install matplotlib scipy numpy -y
+
+pip3 install lightning
+pip3 install matplotlib
+pip3 install scipy
+pip3 install numpy
+
+#conda install matplotlib scipy numpy -y
+
+
 
 pip3 install scikit-learn
 pip3 install scikit-image
 pip3 install opencv-python
+pip3 install transformers
 pip3 install grad-cam
 pip3 install pandas
 pip3 install timm
 pip3 install einops
 pip3 install captum
 
-
+pip3 install git+https://github.com/dr-aheydari/SoftAdapt.git
+pip3 install torchshow
 # Verify the installation
 echo verifying ...
 srun nvcc --version

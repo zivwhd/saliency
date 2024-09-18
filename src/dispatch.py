@@ -10,62 +10,75 @@ from RISE import RiseSaliencyCreator
 from benchmark import *
 from cpe import *
 
-def create_cpe_sals(me, images, segsize=64):
-    logging.info("create_cpe_sals")
-    algo = IpwSalCreator(f"CPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32)
-    logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0)
 
-def create_pcpe_sals(me, images, segsize=64):
-    logging.info("create_pcpe_sals")
-    algo = IpwSalCreator(f"PCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, with_softmax=True, batch_size=32)
-    logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_cpe_sal_creator(segsize=64):
+    return IpwSalCreator(f"CPE_{segsize}", [10, 100, 250, 500,1000,2000,4000], segsize=segsize, batch_size=32)
 
-def create_rcpe_sals(me, images, segsize=64):
-    logging.info("create_rcpe_sals")
-    algo = IpwSalCreator(f"RCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32, ipwg=RelIpwGen)
-    logging.info("creating saliency maps")    
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_pcpe_sal_creator(segsize=64):
+    return IpwSalCreator(f"PCPE_{segsize}", [10, 100, 250, 500, 1000, 2000,4000], segsize=segsize, with_softmax=True, batch_size=32)
 
-def create_cam_sals(me, images):
-    logging.info("create_cam_sals")
-    algo = CamSaliencyCreator(list(METHOD_CONV.keys()))
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_rcpe_sal_creator(segsize=64):
+    return IpwSalCreator(f"RCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32, ipwg=RelIpwGen)
 
-def create_tattr_sals(me, images):
-    logging.info("create_tattr_sals")
-    algo = AttrVitSaliencyCreator()
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_cam_sal_creator():
+    return CamSaliencyCreator()
 
-def create_dimpl_sals(me, images):
-    logging.info("create_dimpl_sals")
-    algo = DimplVitSaliencyCreator()
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_tattr_sal_creator():
+    return AttrVitSaliencyCreator()
 
-def create_rise_sals(me, images):
-    logging.info("create_rise_sals")
-    algo = RiseSaliencyCreator()
-    create_saliency_data(me, algo, images, run_idx=0)
+def get_dimpl_sal_creator():
+    return DimplVitSaliencyCreator()
 
-def create_captum_sals(me, images):
+def get_rise_sal_creator():
+    return RiseSaliencyCreator()
+
+def get_captum_sal_creator():
+    return CaptumCamSaliencyCreator()
+
+
+ALL_CNN_CREATORS = ["pcpe", "cam", "captum", "rise"]
+ALL_VIT_CREATORS = ["pcpe", "dimpl", "tattr", "rise"]
+
+def create_sals_by_name(names, me, images):
+    if type(names) == str:
+        names = [names]
+
+    for name in names:
+        logging.info(f"create sals: {name}")
+        cname = f"get_{name}_sal_creator"
+        func = globals()[cname]
+        algo = func(me, coord_images)
+        create_saliency_data(me, algo, images, run_idx=0)
+
+#def create_cnn_sals(me, images):
+#    logging.info("create_captum_sals")
+#    algo_list = [
+#        CaptumCamSaliencyCreator(),
+#    ]
+#    create_saliency_data(me, algo, images, run_idx=0)
+
+def create_cpe_sals(me, images):
     logging.info("create_captum_sals")
     algo = CaptumCamSaliencyCreator()
     create_saliency_data(me, algo, images, run_idx=0)
 
 
 def get_creators():
-    ptrn = re.compile("create_(.*)_sals")
+    ptrn = re.compile("get_(.*)_sal_creator")
     return [match.group(1) for match in [ptrn.match(vr) for vr in globals()] if match is not None]
 
+VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224"]
+CNN_MODELS = ["resnet50","vgg16"] ## "resnet18"
+ALL_MODELS = CNN_MODELS + VIT_MODELS
+
 def get_args(): 
-    creators = get_creators() + ['any']
+    creators = get_creators() + ['any','all']
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
-    parser.add_argument("--model", choices=["resnet18","resnet50","vit_small_patch16_224"], default="resnet50", help="TBD")    
+    parser.add_argument("--model", choices=CNN_MODELS, default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
     return args
@@ -106,10 +119,16 @@ if __name__ == '__main__':
     else:
         me = ModelEnv(args.model)
         if args.action == "create_sals":
-            ## call create_*_sals
-            cname = f"create_{args.sal}_sals"
-            func = locals()[cname]
-            func(me, coord_images)
+            model_name = args.model
+            sal_names = args.sal
+            if sal_names == 'all':
+                if model_name in CNN_MODELS:
+                    sal_names = ALL_CNN_CREATORS
+                elif model_name in VIT_MODELS:
+                    sal_names = ALL_VIT_CREATORS
+                else:
+                    assert False
+            create_sals_by_name(sal_names, me, coord_images)
         elif args.action == "scores":            
             result_paths = get_all_results(args.model)
             logging.info(f"found {len(result_paths)} saliency maps")
