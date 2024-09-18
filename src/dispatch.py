@@ -47,7 +47,7 @@ def create_sals_by_name(names, me, images):
         logging.info(f"create sals: {name}")
         cname = f"get_{name}_sal_creator"
         func = globals()[cname]
-        algo = func(me, coord_images)
+        algo = func()
         create_saliency_data(me, algo, images, run_idx=0)
 
 #def create_cnn_sals(me, images):
