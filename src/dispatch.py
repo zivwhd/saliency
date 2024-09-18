@@ -45,7 +45,7 @@ def create_sals_by_name(names, me, images, marker="c1"):
 
     for name in names:
         logging.info(f"create sals: {name}")
-        progress_path = os.path.join("progress", me.arch, f"{create_sals}_{name}_{marker}")
+        progress_path = os.path.join("progress", me.arch, f"create_sals_{name}_{marker}")
         coord_images = Coord(images, progress_path)
 
         cname = f"get_{name}_sal_creator"
