@@ -39,10 +39,11 @@ for image_name in images:
         model_name, _, mthd, iname = parts[-4:]
         assert iname == image_name ##+ '.JPEG'
         
+        print("checking", path, model_name, mthd, image_name)
         if mthd not in methods:
-            print("skipping", path)
+            print("skipping")
             continue
-        print("including", path, model_name, mthd, image_name)
+        print("including")
         sal_name =f"SAL-{model_name}-{mthd}-{image_name}"
         print(sal_name)
 
