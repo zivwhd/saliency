@@ -52,6 +52,7 @@ for image_name in images:
         print("including")
         sal_name =f"SAL-{model_name}-{mthd}-{image_name}"
         print(sal_name)
+        shell(["cp", path, os.path.join(DEST, sal_name)]) 
 
         
         
