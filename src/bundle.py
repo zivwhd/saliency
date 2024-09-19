@@ -11,6 +11,14 @@ methods = [
     "PCPE_64_500_ate_0",
     "PCPE_64_100_ate_0",
     "PCPE_64_10_ate_0",
+    "RISE_4000_7_0.5_0",
+    "pgc_GradCAM_0",
+    "pgc_AblationCAM_0",
+    "pgc_FullGrad_0",
+    "pgc_GradCAMPlusPlus_0_0",
+    "dimpl_dix_0_0",
+    "dimpl_t-attr_0_0",
+    "dimpl_gae_0_0"
 ]
 
 images = [
