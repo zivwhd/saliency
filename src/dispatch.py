@@ -53,18 +53,31 @@ def create_sals_by_name(names, me, images, marker="c1"):
         algo = func()
         create_saliency_data(me, algo, coord_images, run_idx=0)
 
-#def create_cnn_sals(me, images):
-#    logging.info("create_captum_sals")
-#    algo_list = [
-#        CaptumCamSaliencyCreator(),
-#    ]
-#    create_saliency_data(me, algo, images, run_idx=0)
+def create_model_sals(model_name, sal_names, marker="c1"):
+    me = ModelEnv(model_name)    
+    if sal_names == 'all':
+        if model_name in CNN_MODELS:
+            sal_names = ALL_CNN_CREATORS
+        elif model_name in VIT_MODELS:
+            sal_names = ALL_VIT_CREATORS
+        else:
+            assert False
+    create_sals_by_name(sal_names, me, all_images, marker=marker)
 
-def create_cpe_sals(me, images):
-    logging.info("create_captum_sals")
-    algo = CaptumCamSaliencyCreator()
-    create_saliency_data(me, algo, images, run_idx=0)
+def create_model_scores(model_name, marker="c1"):
+    me = ModelEnv(model_name)            
+    result_paths = get_all_results(model_name)
+    logging.info(f"found {len(result_paths)} saliency maps")
+    progress_path = os.path.join("progress", args.model, f"scores_any_{marker}")
+    result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
+    create_scores(me, result_prog, all_images_dict, update=True)
 
+def create_model_summary(model_name):
+    base_csv_path = os.path.join("results", model_name)
+    df = load_scores_df(model_name)
+    df.to_csv(f'{base_csv_path}/results.csv', index=False)
+    smry = summarize_scores_df(df)
+    smry.to_csv(f'{base_csv_path}/summary.csv', index=False)
 
 def get_creators():
     ptrn = re.compile("get_(.*)_sal_creator")
@@ -77,7 +90,7 @@ ALL_MODELS = CNN_MODELS + VIT_MODELS
 def get_args(): 
     creators = get_creators() + ['any','all']
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
@@ -112,31 +125,19 @@ if __name__ == '__main__':
         for img in task_images:
             print(f"{img.name}")
     elif args.action == "summary":
-        base_csv_path = os.path.join("results", args.model)
-        df = load_scores_df(args.model)
-        df.to_csv(f'{base_csv_path}/results.csv', index=False)
-
-        smry = summarize_scores_df(df)
-        smry.to_csv(f'{base_csv_path}/summary.csv', index=False)
-
-    else:
-        me = ModelEnv(args.model)
-        if args.action == "create_sals":
-            model_name = args.model
-            sal_names = args.sal
-            if sal_names == 'all':
-                if model_name in CNN_MODELS:
-                    sal_names = ALL_CNN_CREATORS
-                elif model_name in VIT_MODELS:
-                    sal_names = ALL_VIT_CREATORS
-                else:
-                    assert False
-            create_sals_by_name(sal_names, me, all_images, marker=args.marker)
-        elif args.action == "scores":            
-            result_paths = get_all_results(args.model)
-            logging.info(f"found {len(result_paths)} saliency maps")
-            result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
-            create_scores(me, result_prog, all_images_dict, update=True)
+        create_model_summary(args.model)
+    elif args.action == "create_sals":        
+        model_name = args.model
+        sal_names = args.sal
+        create_model_sals(model_name, sal_names, args.marker)
+    elif args.action == "scores":
+        create_model_scores(args.model, args.marker)
+    elif args.action == "all":
+        for model_name in ALL_MODELS:
+            logging.info("##### {model_name} ######")
+            create_model_sals(model_name, "all", args.marker)
+            create_model_scores(model_name, args.marker)
+            create_model_summary(model_name)
             
 
 
