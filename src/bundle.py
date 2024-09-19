@@ -23,7 +23,7 @@ def shell(cmd):
     
 os.makedirs(DEST_PATH, exist_ok=True)    
 for image_name in images:    
-    shell("cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH)
+    shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
     sal_paths = glob.glob(os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}"))
 
