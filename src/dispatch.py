@@ -73,6 +73,7 @@ def create_model_scores(model_name, marker="c1"):
     create_scores(me, result_prog, all_images_dict, update=True)
 
 def create_model_summary(model_name):
+    logging.info("summary for {model_name}")
     base_csv_path = os.path.join("results", model_name)
     df = load_scores_df(model_name)
     df.to_csv(f'{base_csv_path}/results.csv', index=False)
@@ -94,7 +95,7 @@ def get_args():
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
-    parser.add_argument("--model", choices=CNN_MODELS, default="resnet50", help="TBD")    
+    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
     return args
@@ -125,7 +126,12 @@ if __name__ == '__main__':
         for img in task_images:
             print(f"{img.name}")
     elif args.action == "summary":
-        create_model_summary(args.model)
+        if args.model == "all":
+            model_names = ALL_MODELS
+        else:
+            model_names = [args.model]
+        for name in model_names:
+            create_model_summary(name)
     elif args.action == "create_sals":        
         model_name = args.model
         sal_names = args.sal
