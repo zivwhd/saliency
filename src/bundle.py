@@ -1,4 +1,5 @@
-import sys, os, subprocess
+#!/bin/python
+import sys, os, subprocess, glob
 
 
 methods = [
@@ -29,16 +30,17 @@ for image_name in images:
     sal_paths = [x for x in sal_path if x.split("/")[-2] in methods]
 
     for path in sal_paths:
-        mthd = x.split("/")[-2]
+        parts = path.split("/")
+        model_name, _, mthd, iname = parts[-4:]
+        assert iname == image_name
+        
         if mthd not in methods:
             print("skipping", path)
             continue
-        print("including", path)
-        
+        print("including", path, model_name, mthd, image_name)
+        sal_name =f"SAL-{model_name}-{mthd}-{image_name}"
+        print(sal_name)
 
-    for method in methods:
-
-        sal_path = os.path.join(BASE_PATH, "saliency.run/results")
         
         
 
