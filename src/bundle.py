@@ -18,16 +18,17 @@ IMG_PATH = os.path.join(BASE_PATH, "data", "imagenet", "validation")
 
 
 def shell(cmd):
-    print(">> {cmd}")
+    print(f">> {cmd}")
     subprocess.run(cmd)
     
 os.makedirs(DEST_PATH, exist_ok=True)    
 for image_name in images:    
     shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
-    sal_paths = glob.glob(os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}"))
+    ptrn = os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}")
+    sal_paths = glob.glob(ptrn)
     
-
+    print("### ", sal_paths)
     for path in sal_paths:
         parts = path.split("/")
         model_name, _, mthd, iname = parts[-4:]
