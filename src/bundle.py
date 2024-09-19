@@ -21,7 +21,7 @@ def shell(cmd):
     print(">> {cmd}")
     subprocess.run(cmd)
     
-os.makedirs(dest, exist_ok=True)    
+os.makedirs(DEST_PATH, exist_ok=True)    
 for image_name in images:    
     shell("cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH)
 
