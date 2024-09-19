@@ -68,7 +68,7 @@ def create_model_scores(model_name, marker="c1"):
     me = ModelEnv(model_name)            
     result_paths = get_all_results(model_name)
     logging.info(f"found {len(result_paths)} saliency maps")
-    progress_path = os.path.join("progress", args.model, f"scores_any_{marker}")
+    progress_path = os.path.join("progress", model_name, f"scores_any_{marker}")
     result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
     create_scores(me, result_prog, all_images_dict, update=True)
 
