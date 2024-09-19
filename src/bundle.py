@@ -26,6 +26,7 @@ for image_name in images:
     shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
     ptrn = os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}")
+    print("## ", ptrn)
     sal_paths = glob.glob(ptrn)
     
     print("### ", sal_paths)
