@@ -80,7 +80,7 @@ class CaptumCamSaliencyCreator:
 
         # Convert the attribution to numpy
         
-        attribution = attribution.squeeze().cpu().detach()
+        attribution = attribution.squeeze().cpu().detach().to(torch.float32)
         attribution = attribution.sum(dim=0).unsqueeze(0)
         return attribution
 
@@ -101,7 +101,7 @@ class CaptumCamSaliencyCreator:
         attribution = gshap.attribute(cinp.unsqueeze(0), baselines=baseline_dist, target=catidx)
 
         # Convert the attribution to numpy for visualization
-        attribution = attribution.squeeze().cpu().detach()
+        attribution = attribution.squeeze().cpu().detach().to(torch.float32)
 
 
         # Sum over the color channels (RGB) to get a single grayscale attribution map
