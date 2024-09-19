@@ -137,16 +137,22 @@ if __name__ == '__main__':
         sal_names = args.sal
         create_model_sals(model_name, sal_names, args.marker)
     elif args.action == "scores":
-        create_model_scores(args.model, args.marker)
+        if args.model == 'all':
+            model_names = ALL_MODELS
+        else:
+            model_names = [args.model]
+        for model_name in model_names:
+            logging.info(f"##### scores {model_name} ######")
+            create_model_scores(model_name, args.marker)
     elif args.action == "all":
         for model_name in ALL_MODELS:
-            logging.info("##### saliency {model_name} ######")
+            logging.info(f"##### saliency {model_name} ######")
             create_model_sals(model_name, "all", args.marker)
         for model_name in ALL_MODELS:
-            logging.info("##### scores {model_name} ######")            
+            logging.info(f"##### scores {model_name} ######")            
             create_model_scores(model_name, args.marker)
         for model_name in ALL_MODELS:
-            logging.info("##### scores (2) {model_name} ######")            
+            logging.info(f"##### scores (2) {model_name} ######")            
             create_model_scores(model_name, args.marker)
             
 
