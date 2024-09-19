@@ -37,7 +37,7 @@ for image_name in images:
     for path in sal_paths:
         parts = path.split("/")
         model_name, _, mthd, iname = parts[-4:]
-        assert iname == image_name ##+ '.JPEG'
+        assert iname == image_name ##+ '.JPEG' 
         
         print("checking", path, model_name, mthd, image_name)
         if mthd not in methods:
