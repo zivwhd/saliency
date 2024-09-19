@@ -8,7 +8,7 @@ methods = [
 ]
 
 images = [
-    "ILSVRC2012_val_0000719"
+    "ILSVRC2012_val_00007197"
 ]
 
 BASE_PATH = "/home/weziv5/work"
@@ -31,7 +31,7 @@ for image_name in images:
     for path in sal_paths:
         parts = path.split("/")
         model_name, _, mthd, iname = parts[-4:]
-        assert iname == image_name
+        assert iname == image_name + '.JPEG'
         
         if mthd not in methods:
             print("skipping", path)
