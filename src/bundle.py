@@ -26,8 +26,7 @@ for image_name in images:
     shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
     sal_paths = glob.glob(os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}"))
-
-    sal_paths = [x for x in sal_path if x.split("/")[-2] in methods]
+    
 
     for path in sal_paths:
         parts = path.split("/")
