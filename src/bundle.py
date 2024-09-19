@@ -3,8 +3,14 @@ import sys, os, subprocess, glob
 
 
 methods = [
-    "PCPE_64_4000_ipw_0.1_0"
-    "PCPE_64_10_ate_0"
+    "PCPE_64_4000_ipw_0.1_0",
+    "PCPE_64_2000_ipw_0.1_0",
+    "PCPE_64_4000_ate_0.1_0",
+    "PCPE_64_2000_ate_0.1_0",
+    "PCPE_64_1000_ate_0",
+    "PCPE_64_500_ate_0",
+    "PCPE_64_100_ate_0",
+    "PCPE_64_10_ate_0",
 ]
 
 images = [
