@@ -8,7 +8,11 @@ methods = [
 ]
 
 images = [
-    "ILSVRC2012_val_00007197"
+    "ILSVRC2012_val_00043161"
+    "ILSVRC2012_val_00023950"
+    "ILSVRC2012_val_00037825"
+    "ILSVRC2012_val_00046566"
+    "ILSVRC2012_val_00006117"
 ]
 
 BASE_PATH = "/home/weziv5/work"
