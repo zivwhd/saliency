@@ -36,8 +36,8 @@ def get_captum_sal_creator():
     return CaptumCamSaliencyCreator()
 
 
-ALL_CNN_CREATORS = ["pcpe", "cam", "captum", "rise"]
-ALL_VIT_CREATORS = ["pcpe", "dimpl", "tattr", "rise"]
+ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "captum" ]
+ALL_VIT_CREATORS = ["pcpe", "rise", "dimpl", "tattr"]
 
 def create_sals_by_name(names, me, images, marker="c1"):
     if type(names) == str:
@@ -134,10 +134,14 @@ if __name__ == '__main__':
         create_model_scores(args.model, args.marker)
     elif args.action == "all":
         for model_name in ALL_MODELS:
-            logging.info("##### {model_name} ######")
+            logging.info("##### saliency {model_name} ######")
             create_model_sals(model_name, "all", args.marker)
+        for model_name in ALL_MODELS:
+            logging.info("##### scores {model_name} ######")            
             create_model_scores(model_name, args.marker)
-            create_model_summary(model_name)
+        for model_name in ALL_MODELS:
+            logging.info("##### scores (2) {model_name} ######")            
+            create_model_scores(model_name, args.marker)
             
 
 
