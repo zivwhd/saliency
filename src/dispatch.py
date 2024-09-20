@@ -5,7 +5,7 @@ print("## dispatch.py ")
 import argparse, logging, os, re
 from dataset import ImagenetSource, Coord
 from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
-from vit_adaptors import AttrVitSaliencyCreator, DimplVitSaliencyCreator
+from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from RISE import RiseSaliencyCreator
 from benchmark import *
 from cpe import *

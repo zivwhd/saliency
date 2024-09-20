@@ -38,25 +38,32 @@ def show_sal_scores(img, scores_dict, sals_dict):
     plt.show()
 
 def showsal(sal, img, caption="", quantile=0.9):
-    stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
-    stdsal = (stdsal > 0.7)
+    #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
+    #stdsal = (stdsal > 0.7)
     
-    plt.subplot(1, 3, 1)
+    plt.subplot(1, 4, 1)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
     plt.xticks([])  
     plt.yticks([])
-    plt.subplot(1, 3, 2)
+    plt.subplot(1, 4, 2)
     plt.imshow(img)    
     plt.imshow(sal, cmap='jet', alpha=0.4)  # Set alpha for transparency
     plt.xticks([])  
     plt.yticks([])
     
-    plt.subplot(1, 3, 3)
+    plt.subplot(1, 4, 3)
     bar = torch.quantile(sal, quantile)
     masked_img = ((sal > bar).unsqueeze(-1)).numpy() *img
     #img = img * 
     #plt.imshow((stdsal*img).astype(int))  # Set alpha for transparency
+    plt.imshow(masked_img)
+    plt.xticks([])  
+    plt.yticks([])
+
+    plt.subplot(1, 4, 4)
+    mask = (sal - sal.min()) / (sal.max()-sal.min())
+    masked_img = (mask.unsqueeze(-1).numpy() *img).astype(int)
     plt.imshow(masked_img)
     plt.xticks([])  
     plt.yticks([])
