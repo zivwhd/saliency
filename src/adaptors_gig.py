@@ -48,12 +48,12 @@ class IGSaliencyCreator:
         integrated_gradients = saliency.IntegratedGradients()
         vanilla_integrated_gradients_mask_3d = integrated_gradients.GetMask(
             im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, batch_size=20)
-        ig_sal = torch.tensor(np.sum(np.abs(vanilla_integrated_gradients_mask_3d), axis=2)).unsqueeze(0)
+        ig_sal = torch.tensor(np.sum(np.abs(vanilla_integrated_gradients_mask_3d), axis=2)).unsqueeze(0).float()
 
         guided_ig = saliency.GuidedIG()
         guided_ig_mask_3d = guided_ig.GetMask(
         im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, max_dist=1.0, fraction=0.5)
-        gig_sal = torch.tensor(np.sum(np.abs(guided_ig_mask_3d), axis=2)).unsqueeze(0)
+        gig_sal = torch.tensor(np.sum(np.abs(guided_ig_mask_3d), axis=2)).unsqueeze(0).float()
 
         res = {f"IG_{self.nsteps}" : ig_sal, f"GIG_{self.nsteps}" : gig_sal}
         return res
