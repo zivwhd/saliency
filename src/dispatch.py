@@ -6,6 +6,7 @@ import argparse, logging, os, re
 from dataset import ImagenetSource, Coord
 from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
 from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
+from adaptors_gig import IGSaliencyCreator
 from RISE import RiseSaliencyCreator
 from benchmark import *
 from cpe import *
@@ -35,6 +36,8 @@ def get_rise_sal_creator():
 def get_captum_sal_creator():
     return CaptumCamSaliencyCreator()
 
+def get_gig_sal_creator():
+    return IGSaliencyCreator()
 
 ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "captum" ]
 ALL_VIT_CREATORS = ["pcpe", "rise", "dimpl", "tattr"]
