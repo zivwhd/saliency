@@ -80,8 +80,10 @@ class CaptumCamSaliencyCreator:
 
         # Convert the attribution to numpy
         
-        attribution = attribution.squeeze().cpu().detach().to(torch.float32)
-        attribution = attribution.sum(dim=0).unsqueeze(0)
+        attribution = attribution.cpu().detach().to(torch.float32)
+        print("IG", attribution.shape)
+        #attribution = attribution.sum(dim=0).unsqueeze(0)
+        attribution = attribution.abs().sum(dim=1)
         return attribution
 
     def GradientShap(self, me, inp, catidx, num_baselines=20):
@@ -101,11 +103,13 @@ class CaptumCamSaliencyCreator:
         attribution = gshap.attribute(cinp.unsqueeze(0), baselines=baseline_dist, target=catidx)
 
         # Convert the attribution to numpy for visualization
-        attribution = attribution.squeeze().cpu().detach().to(torch.float32)
-
+        attribution = attribution.cpu().detach().to(torch.float32)
+        print("GS", attribution.shape)
 
         # Sum over the color channels (RGB) to get a single grayscale attribution map
-        attribution = attribution.sum(axis=0).unsqueeze(0)
+        #attribution = attribution.sum(axis=0).unsqueeze(0)
+
+        attribution = attribution.abs().sum(dim=1)
         return attribution.cpu()
 
 
