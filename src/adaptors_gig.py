@@ -11,8 +11,9 @@ class IGSaliencyCreator:
         self.nsteps = nsteps
 
     def __call__(self, me, inp, catidx):
-
-        model = me.model
+        inp = inp.cpu()
+        device = inp.device
+        model = me.model.to(device) ##.cpu()
         class_idx_str = 'class_idx_str'
         call_model_args = {class_idx_str: catidx}
         im = inp[0].transpose(0,1).transpose(1,2).cpu().numpy()
@@ -23,6 +24,7 @@ class IGSaliencyCreator:
             images = np.transpose(images, (0,3,1,2))
             images = torch.tensor(images, dtype=torch.float32)            
             images = images.requires_grad_(True)
+            images = images.to(device)
             
             target_class_idx =  call_model_args[class_idx_str]
             output = model(images)
@@ -32,7 +34,7 @@ class IGSaliencyCreator:
                 outputs = output[:,target_class_idx]
                 grads = torch.autograd.grad(outputs, images, grad_outputs=torch.ones_like(outputs))
                 grads = torch.movedim(grads[0], 1, 3)
-                gradients = grads.detach().numpy()
+                gradients = grads.detach().cpu().numpy()
                 return {saliency.base.INPUT_OUTPUT_GRADIENTS: gradients}
             else:
                 one_hot = torch.zeros_like(output)
