@@ -97,7 +97,7 @@ def get_args():
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
-    parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000"], default="rsample3", help="TBD")       
+    parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000", "rsample10K"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
