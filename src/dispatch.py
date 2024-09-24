@@ -8,6 +8,7 @@ from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
 from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from adaptors_gig import IGSaliencyCreator
 from RISE import RiseSaliencyCreator
+from cexcnn import CexCnnSaliencyCreator
 from benchmark import *
 from cpe import *
 
@@ -38,6 +39,9 @@ def get_captum_sal_creator():
 
 def get_gig_sal_creator():
     return IGSaliencyCreator()
+
+def get_cex_sal_creator():
+    return CexCnnSaliencyCreator()
 
 ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "captum" ]
 ALL_VIT_CREATORS = ["pcpe", "rise", "dimpl", "tattr"]
