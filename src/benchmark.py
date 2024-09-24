@@ -49,10 +49,10 @@ class ModelEnv:
             [SelectKthLogit(catidx)])
 
         return nn.Sequential(*modules)
-    
+        
     def get_cam_target_layer(self):
         if self.arch == 'resnet50':
-            return self.model.layer4
+            return self.model.layer4[-1]
             #return self.model.layer4
         
         elif self.arch == 'vgg16':
@@ -60,6 +60,13 @@ class ModelEnv:
             
         raise Exception('Unexpected arch')
     
+    def get_cex_conv_layer(self):
+        
+        if self.arch == 'resnet50':
+            return self.model.layer4[-1].conv3
+
+        raise Exception('Unexpected arch')
+
     def get_device(self, gpu=0):
         device = torch.device(
             f'cuda:{gpu}'

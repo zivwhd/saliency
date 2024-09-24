@@ -15,7 +15,7 @@ class Metrics:
         return tensor
 
     
-    def get_metrics(self, model, inp, saliency, info, nsteps=100):
+    def get_metrics(self, model, inp, saliency, info, nsteps=20):
 
         logits = model(inp).cpu()
         topidx = int(torch.argmax(logits))
@@ -80,7 +80,8 @@ class Metrics:
         return float(adp), float(pic)
         
 
-    def pert_metrics(self, model, inp, saliency, target, is_neg=False, nsteps=100):
+    def pert_metrics(self, model, inp, saliency, target, is_neg=False, nsteps=100, 
+                     with_steps=False, finish=None):
         org_shape = inp.shape
         data = inp.clone().cpu()
 
@@ -88,6 +89,11 @@ class Metrics:
 
         if is_neg:
             vis = -vis
+
+        if finish is None:
+            finish = 0
+        else:
+            finish = finish.reshape(org_shape[0], org_shape[1], -1)
 
         vis = vis.reshape(org_shape[0], -1)
 
@@ -104,7 +110,7 @@ class Metrics:
                 #print("###", vis.numel() , vis.device)
                 _, idx = torch.topk(vis, perturbation_size, dim=-1)  # get top k pixels        
                 idx = idx.unsqueeze(1).repeat(1, org_shape[1], 1)
-                _data = _data.reshape(org_shape[0], org_shape[1], -1)
+                _data = _data.reshape(org_shape[0], org_shape[1], -1)                
                 _data = _data.scatter_(-1, idx, 0)
                 _data = _data.reshape(*org_shape)
 
@@ -130,4 +136,6 @@ class Metrics:
         accuracy_auc  = auc(perturbation_steps, accuracy) * 100
         prob_auc = auc(perturbation_steps, probs) * 100
         #print(accuracy_auc, prob_auc)
+        if with_steps:
+            return (accuracy_auc, prob_auc, accuracy, probs)
         return (accuracy_auc, prob_auc)

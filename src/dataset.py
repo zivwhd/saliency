@@ -4,7 +4,8 @@ import errno
 from dataclasses import dataclass
 from functools import lru_cache
 import logging
-
+from PIL import Image
+import torchvision
 
 @dataclass
 class ImageInfo:
@@ -71,7 +72,29 @@ class ImagenetSource:
         image_name = image_file_name[0:image_file_name.find(".")]
         return image_name    
 
-        
+class CustomImageNetDataset:
+
+    def __init__(self, images):
+        self.images = images
+        self.targets = [x.target for x in images]
+
+    def __len__(self):
+        return len(self.images)
+    
+    def __getitem__(self, idx):
+        info = self.images[idx]
+        img = Image.open(info.path)
+        shape = (224,224)
+        transform = torchvision.transforms.Compose([
+            torchvision.transforms.Resize(shape),
+            torchvision.transforms.CenterCrop(shape),
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                             std=[0.229, 0.224, 0.225])])
+
+        tns = transform(img)
+        return tns, info.target
+
 class Coord:
 
     def __init__(self, items, base_path, getname=lambda x: x.name):
@@ -142,3 +165,5 @@ class Coord:
                 return False
             else:
                 raise  # For other types of OSError
+
+
