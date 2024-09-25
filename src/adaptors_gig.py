@@ -11,7 +11,7 @@ class IGSaliencyCreator:
         self.nsteps = nsteps
 
     def __call__(self, me, inp, catidx):
-        orig_device = inp.device()
+        orig_device = inp.device
         inp = inp.cpu()
         device = inp.device
         model = me.model.to(device) ##.cpu()
