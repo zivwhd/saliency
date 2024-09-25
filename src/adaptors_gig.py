@@ -11,6 +11,7 @@ class IGSaliencyCreator:
         self.nsteps = nsteps
 
     def __call__(self, me, inp, catidx):
+        orig_device = inp.device()
         inp = inp.cpu()
         device = inp.device
         model = me.model.to(device) ##.cpu()
@@ -54,6 +55,6 @@ class IGSaliencyCreator:
         guided_ig_mask_3d = guided_ig.GetMask(
         im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, max_dist=1.0, fraction=0.5)
         gig_sal = torch.tensor(np.sum(np.abs(guided_ig_mask_3d), axis=2)).unsqueeze(0).float()
-
+        model = me.model.to(orig_device)
         res = {f"IG_{self.nsteps}" : ig_sal, f"GIG_{self.nsteps}" : gig_sal}
         return res
