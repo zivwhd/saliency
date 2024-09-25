@@ -71,9 +71,15 @@ def create_model_sals(model_name, sal_names, marker="c1"):
             assert False
     create_sals_by_name(sal_names, me, all_images, marker=marker)
 
+def include_result(x):
+    if (("CPE_" in x) and ("_4000_" not in x) and ("_2000_" not in x)):
+        return False
+    return True
+
 def create_model_scores(model_name, marker="c1"):
     me = ModelEnv(model_name)            
     result_paths = get_all_results(model_name)
+    result_paths = [x for x in result_paths if include_result(x)]
     logging.info(f"found {len(result_paths)} saliency maps")
     progress_path = os.path.join("progress", model_name, f"scores_any_{marker}")
     result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
