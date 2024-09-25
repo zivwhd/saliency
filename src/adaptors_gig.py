@@ -12,7 +12,7 @@ class IGSaliencyCreator:
 
     def __call__(self, me, inp, catidx):
         orig_device = inp.device
-        inp = inp.cpu()
+        #inp = inp.cpu()
         device = inp.device
         model = me.model.to(device) ##.cpu()
         class_idx_str = 'class_idx_str'
@@ -37,7 +37,7 @@ class IGSaliencyCreator:
                 grads = torch.movedim(grads[0], 1, 3)
                 gradients = grads.detach().cpu().numpy()
                 return {saliency.base.INPUT_OUTPUT_GRADIENTS: gradients}
-            else:
+            else:                
                 one_hot = torch.zeros_like(output)
                 one_hot[:,target_class_idx] = 1
                 model.zero_grad()
