@@ -306,7 +306,7 @@ def load_scores_df(model_name, variant_names=None, base_path=None):
 
     def append_row(res, **kwargs):
         for key, value in kwargs.items():
-            if key in supported_metrics:
+            if "target_" not in key:
                 res[key].append(value)
         
     res = defaultdict(list)
