@@ -1,4 +1,3 @@
-
 import os, glob, random
 import errno
 from dataclasses import dataclass
@@ -6,6 +5,7 @@ from functools import lru_cache
 import logging
 from PIL import Image
 import torchvision
+import atexit
 
 @dataclass
 class ImageInfo:
@@ -102,13 +102,21 @@ class Coord:
         self.getname = getname
         self.base_path = base_path
         self.iter_items = None
-        self.iter_last_wip = None        
+        self.iter_last_wip = None
+        atexit.register(self.cleanup)
 
     def __iter__(self):
         self.iter_last_wip = None
         self.iter_items = [] + self.items
         random.shuffle(self.iter_items)
         return self
+
+    def cleanup(self):        
+        if self.iter_last_wip:
+            wip_path, done_path = self.iter_last_wip
+            logging.info(f"cleanup {wip_path}")
+            os.unlink(wip_path)
+        
 
     def mark_done(self):
         try:
