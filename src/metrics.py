@@ -15,7 +15,7 @@ class Metrics:
         return tensor
 
     
-    def get_metrics(self, model, inp, saliency, info, nsteps=20):
+    def get_metrics(self, model, inp, saliency, info, nsteps=20, pred_only=True):
 
         logits = model(inp).cpu()
         topidx = int(torch.argmax(logits))
@@ -25,6 +25,15 @@ class Metrics:
         pred_pos_auc, pred_del_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=False, nsteps=nsteps)
         pred_neg_auc, pred_ins_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=True, nsteps=nsteps)
         pred_adp, pred_pic = self.get_adp_pic(model, inp, saliency[0], topidx)
+
+        if pred_only:
+            return dict(
+                pred_pos_auc=pred_pos_auc,
+                pred_neg_auc=pred_neg_auc,
+                pred_del_auc=pred_del_auc,
+                pred_ins_auc=pred_ins_auc,
+                pred_adp=pred_adp,
+                pred_pic=pred_pic)
 
         if target == topidx:
             target_pos_auc, target_del_auc = pred_pos_auc, pred_del_auc

@@ -173,7 +173,8 @@ class SelectKthLogit(nn.Module):
     
 
     
-def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, skip_img_error=True):
+def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, skip_img_error=True,
+                         pred_only=True):
 
     for itr, img in enumerate(all_images):    
         
@@ -200,7 +201,9 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         
         multi_target = getattr(algo, "multi_target", False)
 
-        if target == topidx:
+        if pred_only:
+            sal_dict = algo(me, inp, topidx)
+        elif target == topidx:
             top_sal_dict = algo(me, inp, topidx)        
             sal_dict = {key : torch.concat([x,x], dim=0) for key, x in top_sal_dict.items()}
         elif multi_target:
@@ -299,9 +302,12 @@ def load_scores_df(model_name, variant_names=None, base_path=None):
     if variant_names is None:
         variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]
 
+    supported_metrics = ["pred_pos_auc", "pred_neg_auc", "pred_del_auc", "pred_ins_auc", "pred_adp", "pred_pic"]
+
     def append_row(res, **kwargs):
         for key, value in kwargs.items():
-            res[key].append(value)
+            if key in supported_metrics:
+                res[key].append(value)
         
     res = defaultdict(list)
     for variant in variant_names:
