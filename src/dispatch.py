@@ -43,7 +43,7 @@ def get_gig_sal_creator():
 def get_cex_sal_creator():
     return CexCnnSaliencyCreator()
 
-ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "cex", "gig:" ]
+ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "cex", "gig" ]
 ALL_VIT_CREATORS = ["pcpe", "rise", "dimpl", "tattr"]
 
 def create_sals_by_name(names, me, images, marker="c1"):
