@@ -31,6 +31,9 @@ def get_tattr_sal_creator():
 def get_dimpl_sal_creator():
     return DimplVitSaliencyCreator()
 
+def get_dix_sal_creator():
+    return DimplVitSaliencyCreator(['dix'])
+
 def get_rise_sal_creator():
     return RiseSaliencyCreator()
 
