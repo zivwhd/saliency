@@ -31,9 +31,8 @@ class ModelEnv:
         # Get a network pre-trained on ImageNet.
             model = torchvision.models.__dict__[arch](pretrained=True)
             #for param in model.parameters():
-            #    param.requires_grad_(False)
-
-        elif 'vit' in arch:
+            #    param.requires_grad_(False)        
+        elif 'vit' in arch or 'convnext' in arch:
             model = timm.create_model(arch, pretrained=True)
         else:
             assert False, "unexpected arch"
@@ -57,7 +56,10 @@ class ModelEnv:
         
         elif self.arch == 'vgg16':
             return self.model.features[-1]
-            
+        
+        elif self.arch == 'convnext_base':
+            return self.model.stages[-1].blocks[-1]
+                        
         raise Exception('Unexpected arch')
     
     def get_cex_conv_layer(self):
@@ -67,7 +69,10 @@ class ModelEnv:
 
         elif self.arch == 'vgg16':
             return self.model.features[-3]
-        
+
+        elif self.arch == 'convnext_base':
+            return self.model.stages[-1].blocks[-1].conv_dw
+
         raise Exception('Unexpected arch')
 
     def get_device(self, gpu=0):
@@ -81,7 +86,7 @@ class ModelEnv:
         img = Image.open(path)
         # Pre-process the image and convert into a tensor
         ## TODO: for which models are these transformation relevant
-        if 'resnet' in self.arch or 'vgg' in self.arch:
+        if 'resnet' in self.arch or 'vgg' in self.arch or 'convnext' in self.arch:
             transform = torchvision.transforms.Compose([
                 torchvision.transforms.Resize(self.shape),
                 torchvision.transforms.CenterCrop(self.shape),
