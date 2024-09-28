@@ -65,6 +65,9 @@ class ModelEnv:
         if self.arch == 'resnet50':
             return self.model.layer4[-1].conv3
 
+        elif self.arch == 'vgg16':
+            return self.model.features[-3]
+        
         raise Exception('Unexpected arch')
 
     def get_device(self, gpu=0):
