@@ -19,6 +19,14 @@ def get_cpe_sal_creator(segsize=64):
 def get_pcpe_sal_creator(segsize=64):
     return IpwSalCreator(f"PCPE_{segsize}", [10, 100, 250, 500, 1000, 2000,4000], segsize=segsize, with_softmax=True, batch_size=32)
 
+def get_pcpe_abl_seg_creator():
+    inner = [
+        IpwSalCreator(f"ABL_{segsize}", [2000], segsize=segsize, with_softmax=True, batch_size=32)
+        for segsize in [20, 32, 48,64,80]
+    ]
+    return CombSaliencyCreator(inner)
+
+
 def get_rcpe_sal_creator(segsize=64):
     return IpwSalCreator(f"RCPE_{segsize}", [500,1000,2000,4000], segsize=segsize, batch_size=32, ipwg=RelIpwGen)
 
