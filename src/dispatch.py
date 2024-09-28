@@ -75,7 +75,11 @@ def create_model_sals(model_name, sal_names, marker="c1"):
     create_sals_by_name(sal_names, me, all_images, marker=marker)
 
 def include_result(x):
+    if x.startswith('_'):
+        return False
     if (("CPE_" in x) and ("_4000_" not in x) and ("_2000_" not in x)):
+        return False
+    if ('CexCnn_' in x) and ('_0.75_' not in x) and ('_0.95_' not in x) and ('_0.995_' not in x):
         return False
     return True
 
@@ -91,7 +95,7 @@ def create_model_scores(model_name, marker="c1"):
 def create_model_summary(model_name):
     logging.info("summary for {model_name}")
     base_csv_path = os.path.join("results", model_name)
-    df = load_scores_df(model_name)
+    df = load_scores_df(model_name, filter_func=include_result)
     df.to_csv(f'{base_csv_path}/results.csv', index=False)
     smry = summarize_scores_df(df)
     smry.to_csv(f'{base_csv_path}/summary.csv', index=False)

@@ -298,14 +298,14 @@ def create_scores(me, result_paths, images, update=True):
 
 
 
-def load_scores_df(model_name, variant_names=None, base_path=None):
+def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None):
     if base_path is None:
         base_path = os.path.join("results", model_name, "scores")
 
     if variant_names is None:
         variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]
 
-    supported_metrics = ["pred_pos_auc", "pred_neg_auc", "pred_del_auc", "pred_ins_auc", "pred_adp", "pred_pic"]
+    variant_names = [x for x in variant_names if filter_func(x)]    
 
     def append_row(res, **kwargs):
         for key, value in kwargs.items():
@@ -313,7 +313,7 @@ def load_scores_df(model_name, variant_names=None, base_path=None):
                 res[key].append(value)
         
     res = defaultdict(list)
-    for variant in variant_names:
+    for variant in variant_names:        
         score_files = glob.glob(os.path.join(base_path, variant, "*"))
         for scores_path in score_files:
             image_name = os.path.basename(scores_path)

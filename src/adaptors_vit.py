@@ -84,7 +84,7 @@ class DimplVitSaliencyCreator:
             elif arch == "vit_small_patch16_224":
                 model_tattr = ViT_LRP.vit_small_patch16_224(pretrained=True).to(device)
             else: 
-                raise Exception("Unexpected arch {arch}")
+                raise Exception(f"Unexpected arch {arch}")
 
             t_attr = transformer_attribution(model_tattr, [], image.device, label, image.to(device), 0).detach()
             im2, score, heatmap_cv, blended_img_mask, heatmap, t = blend_transformer_heatmap(image.cpu(), t_attr.cpu())
