@@ -60,12 +60,16 @@ def shell(cmd):
 os.makedirs(DEST_PATH, exist_ok=True)    
 for idx, image_name in enumerate(images):    
     print(f"========== {idx} {image_name} ===========")
-    shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
     ptrn = os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}")
     print("## ", ptrn)
     sal_paths = glob.glob(ptrn)
     
+    if not sal_paths:
+        continue
+
+    shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
+
     print("### ", sal_paths)
     for path in sal_paths:
         parts = path.split("/")
