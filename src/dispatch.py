@@ -19,6 +19,9 @@ def get_cpe_sal_creator(segsize=64):
 def get_pcpe_sal_creator(segsize=64):
     return IpwSalCreator(f"PCPE_{segsize}", [10, 100, 250, 500, 1000, 2000,4000], segsize=segsize, with_softmax=True, batch_size=32)
 
+def get_pcpe_abl_clip_creator(segsize=64):
+    return IpwSalCreator(f"PCPE_{segsize}", [2000, 4000], clip=[0, 0.01, 0.1, 0.2, 0.25, 0.5, 0.75, 1], segsize=segsize, with_softmax=True, batch_size=32)
+
 def get_pcpe_abl_seg_sal_creator():
     inner = [
         IpwSalCreator(f"ABL_{segsize}", [2000], segsize=segsize, with_softmax=True, batch_size=32)
