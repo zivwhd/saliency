@@ -2,24 +2,24 @@
 import sys, os, subprocess, glob
 
 methods = [
-    "PCPE_64_4000_ipw_0.1_0_0",
-    "PCPE_64_2000_ipw_0.1_0_0",
-    "PCPE_64_2000_ate_0_0",
-    "PCPE_64_4000_ate_0_0",
-    "pgc_GradCAM_0_0",
-    "pgc_AblationCAM_0_0",
-    "pgc_GradCAMPlusPlus_0_0",
-    "pgc_LayerCAM_0_0",
-    "pgc_FullGrad_0_0",
-    "RISE_4000_7_0.5_0_0",
-    "CexCnn_0.95_0_0",
-    "CexCnn_0.995_0_0",
-    "CexCnn_0.75_0_0",
-    "GIG_100_0_0",
-    "IG_100_0_0",
-    "dimpl_dix_0_0",
-    "dimpl_t-attr_0_0",
-    "dimpl_gae_0_0"
+    "PCPE_64_4000_ipw_0.1_0",
+    "PCPE_64_2000_ipw_0.1_0",
+    "PCPE_64_2000_ate_0,
+    "PCPE_64_4000_ate_0",
+    "pgc_GradCAM_0",
+    "pgc_AblationCAM_0",
+    "pgc_GradCAMPlusPlus_0",
+    "pgc_LayerCAM_0",
+    "pgc_FullGrad_0",
+    "RISE_4000_7_0.5_0",
+    "CexCnn_0.95_0",
+    "CexCnn_0.995_0",
+    "CexCnn_0.75_0",
+    "GIG_100_0",
+    "IG_100_0",
+    "dimpl_dix_0",
+    "dimpl_t-attr_0",
+    "dimpl_gae_0"
 ]
 
 __methods_ = [
