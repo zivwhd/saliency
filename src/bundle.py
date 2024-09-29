@@ -61,7 +61,7 @@ os.makedirs(DEST_PATH, exist_ok=True)
 for idx, image_name in enumerate(images):    
     print(f"========== {idx} {image_name} ===========")
 
-    ptrn = os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}")
+    ptrn = os.path.join(BASE_PATH, f"saliency/results/*/saliency/*/{image_name}")
     print("## ", ptrn)
     sal_paths = glob.glob(ptrn)
     
