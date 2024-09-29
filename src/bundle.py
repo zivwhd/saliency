@@ -59,7 +59,7 @@ def shell(cmd):
     
 os.makedirs(DEST_PATH, exist_ok=True)    
 for idx, image_name in enumerate(images):    
-    print("### {idx} {image_name} ")
+    print(f"========== {idx} {image_name} ===========")
     shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
 
     ptrn = os.path.join(BASE_PATH, f"saliency.run/results/*/saliency/*/{image_name}")
