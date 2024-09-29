@@ -4,6 +4,7 @@ import torch
 import cv2, logging
 from scipy.spatial import Voronoi
 import torch.nn.functional as F
+import torch.nn as nn
 
 #try:
 #    from tqdm import tqdm
@@ -136,6 +137,12 @@ class IpwGenBase:
         ate = treatment-ctrl
         return ate
 
+    def get_exp_sal(self):
+        num_cat = self.saliency.shape[0]
+        idx = torch.arange(num_cat)
+        treatment = self.saliency[(idx & 1)==1].sum(dim=0) / self.weights[(idx & 1)==1].sum(dim=0)
+        return treatment        
+
 class IpwGen(IpwGenBase):
 
     def __init__(self, segsize=68, ishape = (224,224),
@@ -231,6 +238,57 @@ class IpwSalCreator:
         logging.debug(f"IpSalCreator: total masks={total};")
         return res 
     
+
+class SelectKthLogitSoftmax(nn.Module):
+    def __init__(self, k):
+        super().__init__()
+        self.k = k        
+        self.sigmoid = nn.Sigmoid()
+        self.softmax = nn.Softmax(dim=-1)
+        self.loss  = nn.CrossEntropyLoss()
+        assert type(self.k) == int
+
+    def forward(self, x):                
+        values = torch.stack([x, self.softmax(x)], dim=-1)
+        result = values[:,self.k,:]            
+        return result
+
+class AblIpwSalCreator:
+
+    def __init__(self, desc, nmasks, batch_size=32, clip=[0.1], ipwg = IpwGen, **kwargs):
+        self.nmasks = nmasks
+        self.desc = desc
+        self.clip = clip
+        self.batch_size = batch_size
+        self.ipwg = ipwg        
+        self.kwargs = kwargs
+        
+
+    def __call__(self, me, inp, catidx):
+        ipwg = self.ipwg(**self.kwargs)
+        total = 0
+        res = {}
+        for nmasks in self.nmasks:
+            added_nmasks = nmasks - total
+            total = nmasks
+            logging.debug(f"IpSalCreator: nmasks={nmasks}; added = {added_nmasks}")
+            model = nn.Sequential(me.model, SelectKthLogitSoftmax(catidx))
+            ipwg.gen(model, inp, nmasks=added_nmasks, batch_size=self.batch_size)
+
+            ate_sal = ipwg.get_ate_sal()            
+            res[f"{self.desc}_{nmasks}_ate_logit"] = ate_sal[0:1]
+            res[f"{self.desc}_{nmasks}_ate_prob"] = ate_sal[1:2]
+            exp_sal = ipwg.get_exp_sal()
+            res[f"{self.desc}_{nmasks}_exp_logit"] = exp_sal[0:1]
+            res[f"{self.desc}_{nmasks}_exp_prob"] = exp_sal[1:2]
+            for clip in self.clip:
+                ips_sal = ipwg.get_ips_sal(clip)
+                res[f"{self.desc}_{nmasks}_ipw_{clip}_logit"] = ips_sal[0:1]
+                res[f"{self.desc}_{nmasks}_ipw_{clip}_prob"] = ips_sal[1:2]
+
+        logging.debug(f"IpSalCreator: total masks={total};")
+        return res 
+
 
 
 ###
