@@ -77,7 +77,7 @@ for idx, image_name in enumerate(images):
             print("skipping")
             continue
         print("including")
-        sal_name =f"SAL-{model_name}-{mthd.repalce('-','')}-{image_name}"
+        sal_name =f"SAL-{model_name}-{mthd.replace('-','')}-{image_name}"
         print(sal_name)
         shell(["cp", path, os.path.join(DEST_PATH, sal_name)]) 
 
