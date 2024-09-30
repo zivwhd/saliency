@@ -15,7 +15,7 @@ def pkl_worker(input_queue, output_queue):
             with open(path, 'rb') as f:
                 obj = pickle.load(f)
             # Push the object into the output queue
-            output_queue.put(obj)
+            output_queue.put((path, obj))
         except queue.Empty:
             logging.info("Done reading")
             # No more items to process, exit the loop

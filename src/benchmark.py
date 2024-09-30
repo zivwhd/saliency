@@ -330,16 +330,19 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
                 logging.debug(f"loading scors: {scores_path}")
                 with open(scores_path, "rb") as sf:
                     scores = pickle.load(sf)
-                scores_list.append(scores)
+                append_row(
+                    res, 
+                    image=image_name, variant=variant, 
+                    **scores)    
+
         else:
             scores_list = read_pickle_files(score_files)
-
-
-        for scores in scores_list:
-            append_row(
-                res, 
-                image=image_name, variant=variant, 
-                **scores)    
+            for scores_path, scores in scores_list:
+                image_name = os.path.basename(scores_path)
+                append_row(
+                    res, 
+                    image=image_name, variant=variant, 
+                    **scores)    
             
     return pd.DataFrame(res)
 
