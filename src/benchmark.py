@@ -17,6 +17,7 @@ import timm
 
 from saleval import *
 from metrics import *
+from pklread import read_pickle_files
 
 class ModelEnv:
 
@@ -303,7 +304,7 @@ def create_scores(me, result_paths, images, update=True):
 
 
 
-def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None):
+def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True):
     if base_path is None:
         base_path = os.path.join("results", model_name, "scores")
 
@@ -320,13 +321,21 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
     res = defaultdict(list)
     for variant in variant_names:        
         score_files = glob.glob(os.path.join(base_path, variant, "*"))
-        for scores_path in score_files:
-            image_name = os.path.basename(scores_path)
-            logging.debug(f"loading scors: {scores_path}")
-            with open(scores_path, "rb") as sf:
-                scores = pickle.load(sf)
+
+        
+        if not dist:
+            scores_list = []
+            for scores_path in score_files:
+                image_name = os.path.basename(scores_path)
+                logging.debug(f"loading scors: {scores_path}")
+                with open(scores_path, "rb") as sf:
+                    scores = pickle.load(sf)
+                scores_list.append(scores)
+        else:
+            scores_list = read_pickle_files(score_files)
 
 
+        for scores in scores_list:
             append_row(
                 res, 
                 image=image_name, variant=variant, 
