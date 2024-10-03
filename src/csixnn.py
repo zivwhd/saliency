@@ -246,7 +246,7 @@ class IXNNSaliencyCreator:
         
         with open(cpath,"rb") as cpf:
             cp = pickle.load(cpf)
-            logging.info(f"loaded causal path at {cpath}: {cp.keys}")
+            logging.info(f"loaded causal path at {cpath}: {cp.keys()}")
             return cp
  
 
