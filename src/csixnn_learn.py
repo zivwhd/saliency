@@ -2,6 +2,7 @@ import os, logging
 from dataset import Coord, ImagenetSource
 from csixnn import *
 from benchmark import ModelEnv
+import cachetools
 
 MODELS = ['resnet50', 'vgg16']
 

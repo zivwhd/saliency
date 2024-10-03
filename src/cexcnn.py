@@ -2,6 +2,7 @@ import torch
 import cv2
 import numpy as np
 import logging
+import cachetools
 
 class CexCnnSaliencyCreator:
     def __init__(self, quanttiles=[0.5,0.75,0.9, 0.95, 0.99, 0.995]):
