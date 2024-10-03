@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     for target in prog:
         if os.path.exists(get_cp_path(BASE_PATH, me.arch, target)):
-            logging.info(f"skipping {target}")
-            continue
+            logging.info(f"overriding {target}")
+        #    continue
         generate_causal_path(me, target, isrc, device='cuda')
 

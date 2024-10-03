@@ -271,7 +271,7 @@ class ExplainNN(GetALLLayerInformation):
                 print("--- %s seconds for algorithm on one layer ---" % (time.time() - start_time))
 
         if self.verbose:
-            print(causal_path)
+            print("causal_path:", causal_path)
         causal_path['label'] = self.y_c
         ##  save_causal_graph(causal_path, self.args)    
         return causal_path
