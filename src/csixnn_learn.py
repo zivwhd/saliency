@@ -25,7 +25,7 @@ if __name__ == '__main__':
     isrc = ImagenetSource(selection_name=args.selection)
     me = ModelEnv(args.model)
     marker = "c1"
-    progress_path = os.path.join("progress", args.model, f"scores_any_{marker}")
+    progress_path = os.path.join("progress", args.model, f"cp_{marker}")
     target_list = list(range(1000))
     prog = Coord(target_list, progress_path, getname=str)
 
