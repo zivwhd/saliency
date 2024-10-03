@@ -234,7 +234,7 @@ class IXNNSaliencyCreator:
         for kk, ft in vis.items():
             sal += ft
         
-        sal = torch.tensor(sal).squeeze(2).unsqueeze(0)
+        sal = torch.tensor(sal).squeeze(2).unsqueeze(0).float()
         logging.debug(f"sal-shape {sal.shape}")
         return dict(IXNN=sal)
 
