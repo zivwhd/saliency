@@ -65,7 +65,7 @@ def get_gig_sal_creator():
 def get_cex_sal_creator():
     return CexCnnSaliencyCreator()
 
-def get_cex_sal_creator():
+def get_ixnn_sal_creator():
     return IXNNSaliencyCreator()
 
 ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "cex", "gig" ]
