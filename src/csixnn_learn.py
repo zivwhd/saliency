@@ -9,7 +9,7 @@ MODELS = ['resnet50', 'vgg16']
 def get_args():     
     parser = argparse.ArgumentParser(description="learn ixnn causal graph")
     parser.add_argument("--selection", choices=["remaining"], default="remaining", help="TBD")       
-    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
+    parser.add_argument("--model", choices=MODELS + ['all'], default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
     return args
