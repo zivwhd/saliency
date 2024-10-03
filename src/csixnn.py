@@ -220,7 +220,7 @@ class IXNNSaliencyCreator:
 
         vis = {}
         att = attributions['attributions']
-        features  = np.asarray(attributions[k])
+        features  = np.asarray(att)
         for i in range(features.shape[0]):
             feat = features[i]
             vmin, vmax = np.min(feat), np.max(feat)
