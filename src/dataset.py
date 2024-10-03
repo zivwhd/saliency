@@ -77,7 +77,7 @@ class CustomImageNetDataset:
     def __init__(self, images):
         self.images = images
         self.targets = [x.target for x in images]
-        self.prune()
+        #self.prune()
 
     def prune(self):
         bad_images = []
@@ -100,7 +100,7 @@ class CustomImageNetDataset:
     
     def __getitem__(self, idx):
         info = self.images[idx]
-        logging.debug(f"loading {info.path}")
+        #logging.debug(f"loading {info.path}")
         img = Image.open(info.path)
         shape = (224,224)
         transform = torchvision.transforms.Compose([
