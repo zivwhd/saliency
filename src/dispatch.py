@@ -9,8 +9,10 @@ from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from adaptors_gig import IGSaliencyCreator
 from RISE import RiseSaliencyCreator
 from cexcnn import CexCnnSaliencyCreator
+from csixnn import IXNNSaliencyCreator
 from benchmark import *
 from cpe import *
+
 
 
 def get_cpe_sal_creator(segsize=64):
@@ -62,6 +64,9 @@ def get_gig_sal_creator():
 
 def get_cex_sal_creator():
     return CexCnnSaliencyCreator()
+
+def get_cex_sal_creator():
+    return IXNNSaliencyCreator()
 
 ALL_CNN_CREATORS = ["pcpe", "rise", "cam", "cex", "gig" ]
 ALL_VIT_CREATORS = ["pcpe", "rise", "dimpl", "tattr"]
