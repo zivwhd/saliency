@@ -197,7 +197,7 @@ class IXNNSaliencyCreator:
 
         causal_path = self.get_causal_path(me.arch, catidx)
 
-        logging.info(f"causal_path: {causal_path.keys()})
+        logging.info(f"causal_path: {causal_path.keys()}")
         args = dict(
             device=inp.device, 
             verbose=True,
