@@ -179,7 +179,7 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH):
     logging.info(f"DONE generating causal path {duration}")
 
     cpath = get_cp_path(base_path, me.arch, target)    
-    logging.info('saving {cpath}')
+    logging.info(f'saving {cpath} {causal_path.keys()}')
     os.makedirs(os.path.dirname(cpath), exist_ok=True)
     
     with open(cpath,"wb") as cpf:
