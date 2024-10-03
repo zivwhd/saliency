@@ -82,7 +82,7 @@ class CustomImageNetDataset:
     def prune(self):
         bad_images = []
         logging.info("pruning bad images")
-        for idx in len(self):
+        for idx in range(len(self)):
             try:
                 self[idx]
             except:
@@ -92,7 +92,7 @@ class CustomImageNetDataset:
         self.images = [self.images[idx] for idx in range(len(self.images)) if idx not in bad_images]
         self.targets = [x.target for x in self.images]
 
-        logging.info("Done pruning {len(bad_images)}")
+        logging.info(f"Done pruning {len(bad_images)}")
 
 
     def __len__(self):
