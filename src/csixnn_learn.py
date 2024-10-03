@@ -1,4 +1,4 @@
-import os, path, logging
+import os, logging
 from dataset import Coord, ImagenetSource
 from csixnn import *
 from benchmark import ModelEnv
