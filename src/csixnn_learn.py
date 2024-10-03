@@ -32,5 +32,5 @@ if __name__ == '__main__':
         if os.path.exists(get_cp_path(BASE_PATH, me.arch, target)):
             logging.info(f"skipping {target}")
             continue
-        generate_causal_path(me, target, isrc, device='cuda'):
+        generate_causal_path(me, target, isrc, device='cuda')
 
