@@ -77,6 +77,23 @@ class CustomImageNetDataset:
     def __init__(self, images):
         self.images = images
         self.targets = [x.target for x in images]
+        self.prune()
+
+    def prune(self):
+        bad_images = []
+        logging.info("pruning bad images")
+        for idx in len(self):
+            try:
+                self[idx]
+            except:
+                logging.info(f"found bad image {idx} {self.images[idx].path}")
+                bad_images.append(idx)
+
+        self.images = [self.images[idx] for idx in range(len(self.images)) if idx not in bad_images]
+        self.targets = [x.target for x in self.images]
+
+        logging.info("Done pruning {len(bad_images)}")
+
 
     def __len__(self):
         return len(self.images)
