@@ -238,7 +238,7 @@ def get_path_specific_visual_attributions(input, layer_activations, weights, cau
     layers = list(causal_path.keys())[:-1]    
 
     if layer_name not in layers:
-        raise ValueError("layer name doesnt match names in causal graph, check causal_path dictionary")
+        raise ValueError(f"layer name {layer_name} doesnt match names in causal graph, check causal_path dictionary: {layers}")
     
     if layer_name == 'input':
         return
