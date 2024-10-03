@@ -68,6 +68,10 @@ pip3 install captum
 
 pip3 install git+https://github.com/dr-aheydari/SoftAdapt.git
 pip3 install torchshow
+
+pip3 install torchray
+pip3 install quantus
+
 # Verify the installation
 echo verifying ...
 srun nvcc --version

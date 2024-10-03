@@ -83,6 +83,7 @@ class CustomImageNetDataset:
     
     def __getitem__(self, idx):
         info = self.images[idx]
+        logging.debug(f"loading {info.path}")
         img = Image.open(info.path)
         shape = (224,224)
         transform = torchvision.transforms.Compose([
