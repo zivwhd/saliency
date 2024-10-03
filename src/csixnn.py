@@ -243,7 +243,10 @@ class IXNNSaliencyCreator:
     @functools.lru_cache(maxsize=None)
     def get_causal_path(self, arch, catidx):
         cpath = get_cp_path(self.base_path, arch, catidx)
+        
         with open(cpath,"rb") as cpf:
-            return pickle.load(cpf)
+            cp = pickle.load(cpf)
+            logging.info(f"loaded causal path at {cpath}: {cp.keys}")
+            return cp
  
 
