@@ -237,7 +237,7 @@ class IXNNSaliencyCreator:
         sal = torch.tensor(sal).squeeze(2).unsqueeze()
         return dict(IXNN=sal)
 
-    @functools.cached(cachetools.Cache(maxsize=0))
+    @functools.lru_cache(maxsize=None)
     def get_causal_path(arch, catidx):
         cpath = get_cp_path(self.base_path, arch, catidx)
         with open(cpath,"rb") as cpf:
