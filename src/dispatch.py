@@ -103,6 +103,9 @@ def include_result(x):
         return False
     if ('CexCnn_' in x) and ('_0.75_' not in x) and ('_0.95_' not in x) and ('_0.995_' not in x):
         return False
+    if ('CexCnnA_' in x) and ('_0.75_' not in x) and ('_0.95_' not in x) and ('_0.995_' not in x):
+        return False
+    
     return True
 
 def create_model_scores(model_name, marker="c1"):
@@ -202,7 +205,7 @@ if __name__ == '__main__':
         raise
     finally:
         logging.info("done")
-        
+
             
 
 
