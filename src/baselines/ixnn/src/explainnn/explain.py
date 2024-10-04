@@ -377,8 +377,7 @@ class ExplainNN(GetALLLayerInformation):
                     x = torch.concat([self.x_c[i].to(self.device) for i in range(from_sidx, to_sidx)])
                     Yw, Pw, prev_module = multiple_interventions_effect(idx, x, neuron_idx, self.reshape_weights, net, self.L_n_name, I_weights, u=u)
                     ##Yw, Pw (b,1000,) (b,1000,)
-                    ## neuron_idx here - is the target we're observing
-
+                    ## neuron_idx here - is the target we're observing                    
                     for i in range(from_sidx, to_sidx):
                         ti = i - from_sidx
                         entr1 = entropy(Pw[ti], self.observed_prob[i].detach().cpu().numpy())

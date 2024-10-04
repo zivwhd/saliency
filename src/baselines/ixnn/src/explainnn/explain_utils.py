@@ -141,9 +141,10 @@ def multiple_interventions_effect(neuron_idx, input, effect_neurons, flatten_alp
         
         #import pdb
         #pdb.set_trace()
+        
         y_hat = net(input)
         probs = F.softmax(y_hat, dim=1)
-
+        
         ## removed squeeze
         module.weight.data = initial_weights.clone()
         y_hat = y_hat.detach().cpu().numpy()

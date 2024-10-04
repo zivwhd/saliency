@@ -132,15 +132,60 @@ class SimpleResnet50(nn.Module):
         return x
     
 
+class SimpleVGG16(nn.Module):
+
+    def __init__(self, inner):
+        super().__init__()
+        ## hide params
+        self.inner = [inner]
+        self.features_head = [inner.features[0:26]]
+        self.features_tail = inner.features[26:]
+        self.avgpool = inner.avgpool
+        self.classifier = inner.classifier
+        self.cache = {}
+
+    def sig(self, x):
+        sig =  (
+            tuple(x.shape),
+            x.sum().cpu().float().tolist(), 
+            (x.flatten().cpu() * torch.arange(x.numel())).sum().float().tolist(),
+            ((x.flatten().cpu() ** 2) * torch.arange(x.numel())).sum().float().tolist()
+        )
+        return sig
+
+    def forward(self, x):
+
+        sig = self.sig(x)        
+        cvals = self.cache.get(sig)
+
+        if cvals is None:
+            x = self.features_head[0](x)
+            self.cache[sig] = x.cpu()
+            #print("save cache")
+        else:
+            #print("load cache")
+            device = x.device
+            x = cvals.to(device)
+
+        x = self.features_tail(x)
+        x = self.avgpool(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
+    
 def get_simplified_model(me):
     if me.arch == 'resnet50':
         return SimpleResnet50(me.model)
+    if me.arch == 'vgg16':
+        return SimpleVGG16(me.model)    
     else:
         raise Exception(f"unexpected arch {me.arch}")
 
 def get_simplified_model_layer_name(me):
     if me.arch == 'resnet50':
         return "bt_conv3"
+    if me.arch == 'resnet50':
+        return "features_tail.2"    
     else:
         raise Exception(f"unexpected arch {me.arch}")
     
