@@ -458,7 +458,7 @@ class ExplainNN(GetALLLayerInformation):
             g1_std = Yw.std(1)
             g2_mean = control_stats[0][0]
             g2_std = control_stats[1][0]
-            
+            print("Yw.shape", Yw.shape)
             if Yw.shape[1] == 1:
                 print(">> minimal effect", total_effect.squeeze().min() )
                 positive_effect_idx = torch.tensor(torch.where(total_effect.squeeze() < thr)).squeeze()
@@ -471,7 +471,9 @@ class ExplainNN(GetALLLayerInformation):
                 #method1 z score : difference of means 
                 var_of_diff = torch.sqrt(g1_std**2/(self.number_samples) + g2_std**2/self.number_samples)
                 dist = var_of_diff * 1.65 # z-score at pvalue 0.05 test
-                
+                print(" >> minimal_effect dist",  dist)
+                print("   ", g1_mean)
+                print("   ", g2_mean)
                 positive_effect_idx = torch.where(g1_mean < g2_mean - dist)[0]
                 positive_effect_idx = param_indices[positive_effect_idx]
 
