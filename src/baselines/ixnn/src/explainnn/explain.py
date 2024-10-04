@@ -254,7 +254,7 @@ class ExplainNN(GetALLLayerInformation):
             _, positive_cause = self.select_causal_path(ids, scores, path_total_effect['relative_diff'], 
                                                 Yw, observed_Y=self.observed_yhat[:, self.y_c], 
                                                 control_stats= (self.reference_mean, self.reference_std), 
-                                                thr=0.05, mode='threshold')
+                                                thr=0.10, mode='threshold')
             
             print(">> positive cause", positive_cause)
             if len(positive_cause) == 0:

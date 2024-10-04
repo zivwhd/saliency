@@ -176,7 +176,7 @@ class SimpleVGG16(nn.Module):
 def get_simplified_model(me):
     if me.arch == 'resnet50':
         return SimpleResnet50(me.model)
-    if me.arch == 'vgg16':
+    elif me.arch == 'vgg16':
         return SimpleVGG16(me.model)    
     else:
         raise Exception(f"unexpected arch {me.arch}")
@@ -184,7 +184,7 @@ def get_simplified_model(me):
 def get_simplified_model_layer_name(me):
     if me.arch == 'resnet50':
         return "bt_conv3"
-    if me.arch == 'resnet50':
+    elif me.arch == 'vgg16':
         return "features_tail.2"    
     else:
         raise Exception(f"unexpected arch {me.arch}")
