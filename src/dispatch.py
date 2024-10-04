@@ -200,6 +200,9 @@ if __name__ == '__main__':
     except:
         logging.exception("error")
         raise
+    finally:
+        logging.info("done")
+        
             
 
 
