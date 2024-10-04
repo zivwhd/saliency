@@ -189,7 +189,7 @@ def get_simplified_model_layer_name(me):
     else:
         raise Exception(f"unexpected arch {me.arch}")
     
-def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH):
+def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH, validate=True):
     from baselines.ixnn import setup
     from explainnn.explain import ExplainNN
 
@@ -225,6 +225,10 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH):
 
     cpath = get_cp_path(base_path, me.arch, target)    
     logging.info(f'saving {cpath} {causal_path.keys()}')
+    if validate:
+        expected_layer = get_simplified_model_layer_name(me)
+        logging.info(f"expected layer: {expected_layer}")
+        assert expected_layer in causal_path.keys()
     os.makedirs(os.path.dirname(cpath), exist_ok=True)
     
     with open(cpath,"wb") as cpf:
