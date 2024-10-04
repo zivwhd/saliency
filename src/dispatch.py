@@ -164,38 +164,42 @@ if __name__ == '__main__':
 
     logging.info(f"images: {len(task_images)}/{len(all_images)}")
 
-    if args.action == "list_images":
-        for img in task_images:
-            print(f"{img.name}")
-    elif args.action == "summary":
-        if args.model == "all":
-            model_names = ALL_MODELS
-        else:
-            model_names = [args.model]
-        for name in model_names:
-            create_model_summary(name)
-    elif args.action == "create_sals":        
-        model_name = args.model
-        sal_names = args.sal
-        create_model_sals(model_name, sal_names, args.marker)
-    elif args.action == "scores":
-        if args.model == 'all':
-            model_names = ALL_MODELS
-        else:
-            model_names = [args.model]
-        for model_name in model_names:
-            logging.info(f"##### scores {model_name} ######")
-            create_model_scores(model_name, args.marker)
-    elif args.action == "all":
-        for model_name in ALL_MODELS:
-            logging.info(f"##### saliency {model_name} ######")
-            create_model_sals(model_name, "all", args.marker)
-        for model_name in ALL_MODELS:
-            logging.info(f"##### scores {model_name} ######")            
-            create_model_scores(model_name, args.marker)
-        for model_name in ALL_MODELS:
-            logging.info(f"##### scores (2) {model_name} ######")            
-            create_model_scores(model_name, args.marker)
+    try:
+        if args.action == "list_images":
+            for img in task_images:
+                print(f"{img.name}")
+        elif args.action == "summary":
+            if args.model == "all":
+                model_names = ALL_MODELS
+            else:
+                model_names = [args.model]
+            for name in model_names:
+                create_model_summary(name)
+        elif args.action == "create_sals":        
+            model_name = args.model
+            sal_names = args.sal
+            create_model_sals(model_name, sal_names, args.marker)
+        elif args.action == "scores":
+            if args.model == 'all':
+                model_names = ALL_MODELS
+            else:
+                model_names = [args.model]
+            for model_name in model_names:
+                logging.info(f"##### scores {model_name} ######")
+                create_model_scores(model_name, args.marker)
+        elif args.action == "all":
+            for model_name in ALL_MODELS:
+                logging.info(f"##### saliency {model_name} ######")
+                create_model_sals(model_name, "all", args.marker)
+            for model_name in ALL_MODELS:
+                logging.info(f"##### scores {model_name} ######")            
+                create_model_scores(model_name, args.marker)
+            for model_name in ALL_MODELS:
+                logging.info(f"##### scores (2) {model_name} ######")            
+                create_model_scores(model_name, args.marker)
+    except:
+        logging.exception("error")
+        raise
             
 
 
