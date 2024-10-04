@@ -58,7 +58,7 @@ class CexCnnSaliencyCreator:
 
         sal_dict = {}
         for qntl, qresp in resp.items():
-            heatmap = (activations.cpu().squeeze(0) * qresp.unsqueeze(1).unsqueeze(1)).mean(dim=0).detach().clone()
+            heatmap = (activations.cpu().squeeze(0).abs() * qresp.unsqueeze(1).unsqueeze(1)).mean(dim=0).detach().clone()
             sal = torch.tensor(cv2.resize(heatmap.numpy(), (224,224))).unsqueeze(0)
-            sal_dict[f"CexCnn_{qntl}"] = sal
+            sal_dict[f"CexCnnA_{qntl}"] = sal
         return sal_dict
