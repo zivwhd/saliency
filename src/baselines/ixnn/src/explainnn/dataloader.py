@@ -32,20 +32,20 @@ def load_test_image(dataset_name, class_idx, batch_size=1, shuffle=True):
         The labels corresponding to the sample
     """
     _, test_set = get_dataset(dataset_name)
-    loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=shuffle, num_workers=8)
+    loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=shuffle, num_workers=1)
     if hasattr(loader.dataset, 'targets'):
         target_indices = np.where(np.asarray(loader.dataset.targets) == class_idx)[0]
     else:
         targets = [t for _, t in loader.dataset]
         target_indices = np.where(np.asarray(targets) == class_idx)[0]
     sampler = torch.utils.data.sampler.SubsetRandomSampler(target_indices)
-    test_loader = DataLoader(dataset=test_set, sampler=sampler, batch_size=batch_size, num_workers=8)
+    test_loader = DataLoader(dataset=test_set, sampler=sampler, batch_size=batch_size, num_workers=1)
     sample, labels = next(iter(test_loader))
     return sample, labels
 
 def select_easy_test_examples(model, dataset_name, class_idx, n_sample, batch_size, shuffle=False, internal_batch_size=32, device=torch.device('cpu')):   
     _, test_set = get_dataset(dataset_name)
-    loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=shuffle, num_workers=8, pin_memory=True)
+    loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=shuffle, num_workers=1, pin_memory=True)
     if hasattr(loader.dataset, 'targets'):
         target_indices = np.where(np.asarray(loader.dataset.targets) == class_idx)[0]
     else:
@@ -53,7 +53,7 @@ def select_easy_test_examples(model, dataset_name, class_idx, n_sample, batch_si
         target_indices = np.where(np.asarray(targets) == class_idx)[0]
 
     sampler = torch.utils.data.sampler.SubsetRandomSampler(target_indices)
-    test_loader = DataLoader(dataset=test_set, sampler=sampler, batch_size=1, num_workers=8, pin_memory=True)
+    test_loader = DataLoader(dataset=test_set, sampler=sampler, batch_size=1, num_workers=1, pin_memory=True)
     samples = torch.Tensor().to(device)
     labels = torch.LongTensor().to(device)
     probs = torch.Tensor().to(device)

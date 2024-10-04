@@ -121,7 +121,7 @@ class Coord:
         self.base_path = base_path
         self.iter_items = None
         self.iter_last_wip = None
-        #atexit.register(self.cleanup)
+        atexit.register(self.cleanup)
 
     def __iter__(self):
         self.iter_last_wip = None

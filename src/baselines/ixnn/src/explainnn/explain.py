@@ -173,7 +173,7 @@ class ExplainNN(GetALLLayerInformation):
             print("provided dataset", val_set)
         
         print(val_set)
-        loader = DataLoader(dataset=val_set, batch_size=1, shuffle=shuffle, num_workers=8)
+        loader = DataLoader(dataset=val_set, batch_size=1, shuffle=shuffle, num_workers=1)
         
         target_indices = torch.where(torch.as_tensor(loader.dataset.targets) == self.target_idx)[0]
         print(f"num samples for target {self.target_idx}: {target_indices.shape}")
