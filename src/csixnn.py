@@ -139,7 +139,7 @@ class SimpleVGG16(nn.Module):
         ## hide params
         self.inner = [inner]
         self.features_head = [inner.features[0:26]]
-        self.features_tail = inner.features[26:]
+        self.features_tail = nn.Sequential(*[x for x in inner.features[26:]])
         self.avgpool = inner.avgpool
         self.classifier = inner.classifier
         self.cache = {}
