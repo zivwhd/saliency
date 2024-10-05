@@ -365,7 +365,7 @@ class ExplainNN(GetALLLayerInformation):
         
         t = 0        
         print(f"## {len(indices)} {len(selected_indices)} {n_samples} {neuron_idx}")
-        logging.debug(f"## {len(indices)} {len(selected_indices)} {n_samples} {neuron_idx}")
+        logging.debug(f"## {len(indices)} {len(selected_indices)} {n_samples} {len(neuron_idx)}")
         import time
         last_time = time.time()
         processed_nidx = 0
