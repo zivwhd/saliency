@@ -338,6 +338,7 @@ class ExplainNN(GetALLLayerInformation):
     def compute_path_total_effect(self, neuron_idx, n_samples=1, u=0.0):
         ## neuron_idx here is the target 
         print("comp_total_effect", neuron_idx)
+        logging.debug("compute_path_total_effect {neuron_idx}")
 
         #self.model, self.L_n_name
 
@@ -408,7 +409,7 @@ class ExplainNN(GetALLLayerInformation):
             print("--- %s seconds for all interventions and effects ---" % str(float(t)/(itr+1)))   
             print("--- top time", top_end_time - top_start_time)
         path_total_effect = {'diff': Te, 'relative_diff': Te_n}
-         
+        logging.debug("done computing total effect")
         return score, path_total_effect, interventional_Y, ids
 
     def get_structural_module(self, name, model):
