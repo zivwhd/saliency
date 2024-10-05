@@ -363,7 +363,7 @@ class ExplainNN(GetALLLayerInformation):
         #self.model, self.L_n_name
 
         #check edge case: weights are scalar values or 1d vector
-        if len(torch.stack(self.layer_wise_params).shape) <= 1 or torch.stack(self.layer_wise_params).shape[1] == 1:
+        if len(torch.stack(self.layer_wise_params).shape) <= 1 ##: or torch.stack(self.layer_wise_params).shape[1] == 1: - groups 
             logging.debug(f"no layer_wise_params {torch.stack(self.layer_wise_params).shape}")
             scores = [0.0]
             return scores, None, None, None
