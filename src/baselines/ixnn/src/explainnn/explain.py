@@ -382,25 +382,29 @@ class ExplainNN(GetALLLayerInformation):
         processed_nidx = 0
         top_start_time = time.time()
         batch_size = 25
-        c = 0
-        for itr, idx in enumerate(indices):
-            if idx in selected_indices:
-                processed_nidx += 1
-                print(".", end="")
-                if (processed_nidx % 40 == 0):
-                    if (processed_nidx % 120 == 0):
-                        logging.debug(f"...{processed_nidx}...")
-                    print(int(time.time()-last_time), processed_nidx)
-                    #processed_nidx = 0
-                    last_time = time.time()
+        
 
-                net = self.model
-                start_time = time.time()
+        for from_sidx in range(0, n_samples, batch_size):                
+            to_sidx = min(from_sidx + batch_size, n_samples)
+            x = torch.concat([self.x_c[i].to(self.device) for i in range(from_sidx, to_sidx)])
 
-                for from_sidx in range(0, n_samples, batch_size):                
-                    to_sidx = min(from_sidx + batch_size, n_samples)
+            c = 0
+            for itr, idx in enumerate(indices):
+                if idx in selected_indices:
+                    processed_nidx += 1
+                    print(".", end="")
+                    if (processed_nidx % 40 == 0):
+                        if (processed_nidx % 120 == 0):
+                            logging.debug(f"...{processed_nidx}...")
+                        print(int(time.time()-last_time), processed_nidx)
+                        #processed_nidx = 0
+                        last_time = time.time()
 
-                    x = torch.concat([self.x_c[i].to(self.device) for i in range(from_sidx, to_sidx)])
+                    net = self.model
+                    start_time = time.time()
+
+                    ############
+                    
                     Yw, Pw, prev_module = multiple_interventions_effect(idx, x, neuron_idx, self.reshape_weights, net, self.L_n_name, I_weights, u=u)
                     ##Yw, Pw (b,1000,) (b,1000,)
                     ## neuron_idx here - is the target we're observing                    

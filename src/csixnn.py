@@ -142,9 +142,12 @@ class SimpleVGG16(nn.Module):
         self.features_tail = nn.Sequential(*[x for x in inner.features[26:]])
         self.avgpool = inner.avgpool
         self.classifier = inner.classifier
-        self.cache = {}
+        #self.cache = {}
+        self.prev_sig = None
+        self.prev_vals = None
 
     def sig(self, x):
+        
         sig =  (
             tuple(x.shape),
             x.sum().cpu().float().tolist(), 
@@ -155,23 +158,22 @@ class SimpleVGG16(nn.Module):
 
     def forward(self, x):
 
-        sig = self.sig(x)        
-        cvals = self.cache.get(sig)
+        sig = self.sig(x)
 
-        if cvals is None:
+        if sig != self.prev_sig:
             x = self.features_head[0](x)
             if x.shape[0] > 1:
-                self.cache[sig] = x.detach().cpu()
+                self.prev_sig = sig 
+                self.prev_vals = x               
                 logging.debug(f"cached {x.shape} {x.numel()}")            
+            else:
+                self.prev_sig = None
         else:
             #print("load cache")
-            device = x.device
-            x = cvals.to(device)
+            x = self.prev_vals
 
-        x = self.features_tail(x)
-        print("## [0]", x.shape)
-        x = self.avgpool(x)
-        print("## [1]", x.shape)
+        x = self.features_tail(x)        
+        x = self.avgpool(x)        
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
