@@ -13,7 +13,7 @@ CONFIG_FILE = ROOT_DIR.joinpath('config.yaml')
 SUPPORTED_DATASET = ['MNIST', 'CIFAR10', 'ImageNet']
 SUPPORTED_MODEL = ['LeNet']
 SUPPORTED_CLASSIFICATION_LAYERS_NAMES = {'fc', 'classifier', 'classifier.0', 'classifier.2', 'classifier.3','classifier.4',
-                                         'classifier.5', 'classifier.6'}
+                                         'classifier.5', 'classifier.6','head.fc'}
 MAX_DIM = 600
 
 ATTR_DATASET = {
