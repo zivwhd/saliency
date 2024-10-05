@@ -493,7 +493,7 @@ class ExplainNN(GetALLLayerInformation):
                 print("WARNING: none selected")
                 p_idx = torch.where(te < te.quantile(0.05))[0]
             positive_effect_idx = [ids[k.item()] for k in p_idx]
-            print(">> selected", positive_effect_idx.shape)
+            print(">> selected", len(positive_effect_idx))
 
         return [], positive_effect_idx
 
