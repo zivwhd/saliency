@@ -471,9 +471,9 @@ class ExplainNN(GetALLLayerInformation):
                 #method1 z score : difference of means 
                 var_of_diff = torch.sqrt(g1_std**2/(self.number_samples) + g2_std**2/self.number_samples)
                 dist = var_of_diff * 1.65 # z-score at pvalue 0.05 test
-                print(" >> minimal_effect dist",  dist)
-                print("   ", g1_mean)
-                print("   ", g2_mean)
+                #print(" >> minimal_effect dist",  dist)
+                #print("   ", g1_mean)
+                #print("   ", g2_mean)
                 positive_effect_idx = torch.where(g1_mean < g2_mean - dist)[0]
                 positive_effect_idx = param_indices[positive_effect_idx]
 
@@ -485,9 +485,10 @@ class ExplainNN(GetALLLayerInformation):
             positive_effect_idx = list(topk)
     
         elif len(positive_effect_idx) == 0: 
-            print("WARNING: positive_effect_idx is 0.0 after thresholding, altenative method is used instead")
+            print("WARNING: positive_effect_idx is 0.0 after thresholding, altenative method is used instead")            
             te = total_effect.mean(1)
-            p_idx = torch.where(te < -0.001)[0]
+            print(">> te:", te.min(), te.max())
+            p_idx = torch.where(te < 0.001)[0] ## PUSH_ASSERT -0.001
             positive_effect_idx = [ids[k.item()] for k in p_idx]
 
         return [], positive_effect_idx
