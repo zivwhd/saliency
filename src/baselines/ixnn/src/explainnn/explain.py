@@ -417,9 +417,9 @@ class ExplainNN(GetALLLayerInformation):
                         Te_n[idx].append((Yw[ti][self.y_c] / self.observed_yhat[i][self.y_c] - 1))
                         interventional_Y[idx].append(Yw[ti][self.y_c])
 
-                ids[c] = idx
-                c += 1
-                t += (time.time() - start_time)
+                    ids[c] = idx
+                    c += 1
+                    t += (time.time() - start_time)
 
         print("")
         top_end_time = time.time()
