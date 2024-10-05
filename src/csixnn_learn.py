@@ -4,7 +4,7 @@ from csixnn import *
 from benchmark import ModelEnv
 import functools
 
-MODELS = ['resnet50', 'vgg16']
+MODELS = ['resnet50', 'vgg16','convnext_base']
 
 def get_args():     
     parser = argparse.ArgumentParser(description="learn ixnn causal graph")
