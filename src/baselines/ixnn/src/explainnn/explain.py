@@ -252,6 +252,7 @@ class ExplainNN(GetALLLayerInformation):
             u=0.0
             if self.soft:
                 u = torch.FloatTensor(1).uniform_(self.beta, self.beta+0.01).item()
+            logging.debug("calling compute_path_total_effect")
             scores, path_total_effect, Yw, ids = self.compute_path_total_effect(effect_neurons, n_samples=self.number_samples, u=u)
             print(">> scores, total_effect, Yw: ", desc(scores), desc(path_total_effect), desc(Yw))
             if Yw is None: continue   
@@ -260,7 +261,7 @@ class ExplainNN(GetALLLayerInformation):
                                                 Yw, observed_Y=self.observed_yhat[:, self.y_c], 
                                                 control_stats= (self.reference_mean, self.reference_std), 
                                                 thr=0.05, mode='threshold')
-            logging.debug("doen selecting {len(positive_cause)}")
+            logging.debug(f"done selecting {len(positive_cause)}")
             print(">> positive cause: ", positive_cause)
             if len(positive_cause) == 0:
                 print("cannot explore deeper")
