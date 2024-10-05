@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from explainnn.explain_utils import *
 from explainnn.dataset import get_dataset
 from explainnn.definitions import OUTPUT_DIR, ATTR_DATASET
+import logging
 
 def desc(x):
     return str(type(x))
@@ -176,7 +177,8 @@ class ExplainNN(GetALLLayerInformation):
         loader = DataLoader(dataset=val_set, batch_size=1, shuffle=shuffle, num_workers=1)
         
         target_indices = torch.where(torch.as_tensor(loader.dataset.targets) == self.target_idx)[0]
-        print(f"num samples for target {self.target_idx}: {target_indices.shape}")
+        print(f"num samples for target {self.target_idx}: {target_indices.shape}")    
+        logging.debug(f"num samples for target {self.target_idx}: {target_indices.shape}")
         sampler = torch.utils.data.sampler.SubsetRandomSampler(target_indices)
         val_loader = DataLoader(dataset=val_set, sampler=sampler, batch_size=1, shuffle=shuffle, num_workers=1) ## PUSH_ASSERT
 
@@ -187,6 +189,7 @@ class ExplainNN(GetALLLayerInformation):
         cs_sample = defaultdict(list)
         l, p  = [], []
         c=0
+        logging.debug("loading input")
         for x_in, _ in val_loader:
             x_in = x_in.to(self.device)
             logits = self.model(x_in)
@@ -226,19 +229,21 @@ class ExplainNN(GetALLLayerInformation):
     # learn causal structure over N samples of given token/query 
     def cross_sample_path_effect_analysis(self, layers_index, soft=False):
         
-        
+        logging.debug("cross_sample_path_effect_analysis")
+
         input_dict = self.load_input(shuffle=False)
         self.read_input_dict(input_dict)
-
+        
         effect_neurons = [self.target_idx]
         causal_path = defaultdict()
         
-        for idx in layers_index:
+        for idx in layers_index:            
             start_time = time.time()
+            logging.debug(f"iteration {idx}")
             if self.verbose:
                 print(f'layer idx: {idx} / {len(layers_index)} ')
             self.get_layer_weights(idx)
-            
+            logging.debug(f"cs layer {idx} {self.L_n_1_name}")
             if idx == list(layers_index)[-1]:
                 # edge case input layer -> first layer
                 causal_path[self.L_n_name] = ([0], [], positive_cause)
@@ -250,13 +255,13 @@ class ExplainNN(GetALLLayerInformation):
             scores, path_total_effect, Yw, ids = self.compute_path_total_effect(effect_neurons, n_samples=self.number_samples, u=u)
             print(">> scores, total_effect, Yw: ", desc(scores), desc(path_total_effect), desc(Yw))
             if Yw is None: continue   
-            
+            logging.debug("selecting causal path")
             _, positive_cause = self.select_causal_path(ids, scores, path_total_effect['relative_diff'], 
                                                 Yw, observed_Y=self.observed_yhat[:, self.y_c], 
                                                 control_stats= (self.reference_mean, self.reference_std), 
                                                 thr=0.05, mode='threshold')
-            
-            print(">> positive cause", positive_cause)
+            logging.debug("doen selecting {len(positive_cause)}")
+            print(">> positive cause: ", positive_cause)
             if len(positive_cause) == 0:
                 print("cannot explore deeper")
                 #print("PUSH_ASSERT - continuing instead of breaking")
@@ -273,10 +278,12 @@ class ExplainNN(GetALLLayerInformation):
         if self.verbose:
             print("causal_path:", causal_path)
         causal_path['label'] = self.y_c
+        logging.debug("done select causal_path")
         ##  save_causal_graph(causal_path, self.args)    
         return causal_path
 
     def cross_sample_path_effect_analysis_layer(self, layers_index, causal_graph_in, layer_name, soft=False):
+        logging.debug("cross_sample_path_effect_analysis_layer")        
         input_dict = self.load_input(shuffle=False)
         self.read_input_dict(input_dict)
         if self.verbose:
@@ -284,8 +291,10 @@ class ExplainNN(GetALLLayerInformation):
         effect_neurons = [self.target_idx]
         causal_path = defaultdict()
         
+        logging.debug("starting iterations")        
         for idx in layers_index:
             self.get_layer_weights(idx)
+            logging.debug(f"iteration {idx} : {self.L_n_name} ")        
             if self.L_n_name not in causal_graph_in.keys() and self.L_n_name != layer_name:
                 if self.verbose:
                     print(f'Skipping layer {self.L_n_name}, as it is not relevant')
