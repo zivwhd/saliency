@@ -7,6 +7,7 @@ import pickle
 from scipy import signal, special
 import torch
 import torch.nn.functional as F
+import logging
 
 from explainnn.definitions import SUPPORTED_CLASSIFICATION_LAYERS_NAMES, MAX_DIM, OUTPUT_DIR
 
@@ -94,10 +95,11 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         if len(w.shape)>1:
             w = torch.sum(w, axis=(1,2))
         indices = torch.argsort(w)
-        topk = min(int(len(w) * 0.1), 850) ## PUSH_ASSERT
-        smallestk = int(len(w) * 0.05)
+        topk = min(int(len(w) * 0.1), 850) ## PUSH_ASSERT        
+        smallestk = min(int(len(w) * 0.05), 850)
         I_indices = indices[len(w)-topk:]
         I_indices = sorted(list(set(torch.cat([I_indices, indices[:smallestk], indices[len(w)//2-smallestk//2:len(w)//2+smallestk//2]])))) 
+        logging.debug("I_indices={I_indices}; topk={topk} smallestk={smallestk}")
     else:
         I_indices = []
     return I_weights, flatten_alpha, I_indices
