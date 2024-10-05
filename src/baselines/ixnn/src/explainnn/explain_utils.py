@@ -86,7 +86,7 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         try:
             w = weights[idx]
         except:
-            logging.debug(f"bad idx {k} {idx}")
+            logging.debug(f"bad idx {k} {idx} {target_neuron_idx}")
             raise 
 
         if flatten_alpha:
