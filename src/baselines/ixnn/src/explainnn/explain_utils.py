@@ -73,7 +73,7 @@ def get_module(model):
 def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neuron_idx, pre_flattened_dims):
     weights = deepcopy(layer_wise_params)
     
-    logging.debug(f"weights: {weights.shape}")
+    logging.debug(f"weights: {len(weights)}")
     flatten_alpha = False
     rule = 'conv' in Ln_1_name and any(x in Ln_name for x in SUPPORTED_CLASSIFICATION_LAYERS_NAMES)
     
