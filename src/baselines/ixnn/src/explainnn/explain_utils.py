@@ -85,7 +85,7 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         logging.error(f"WARNING: target idx don't match weights {Ln_name}")
         logging.debug(f"### {target_neuron_idx}")
         ## patch for vgg16 avgpool
-        if Ln_name == 'NNN'
+        if Ln_name == 'NNN':
             target_neuron_idx = list(set([(idx // 49) for idx in target_neuron_idx]))
         else:
             target_neuron_idx = list(range(len(weights)))
