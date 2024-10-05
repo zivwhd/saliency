@@ -99,7 +99,7 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         smallestk = min(int(len(w) * 0.05), 850)
         I_indices = indices[len(w)-topk:]
         I_indices = sorted(list(set(torch.cat([I_indices, indices[:smallestk], indices[len(w)//2-smallestk//2:len(w)//2+smallestk//2]])))) 
-        logging.debug(f"I_indices={I_indices}; topk={topk} smallestk={smallestk}")
+        logging.debug(f"I_indices={len(I_indices)}; topk={topk} smallestk={smallestk}")
     else:
         I_indices = []
     return I_weights, flatten_alpha, I_indices
