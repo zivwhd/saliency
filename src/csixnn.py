@@ -169,7 +169,9 @@ class SimpleVGG16(nn.Module):
             x = cvals.to(device)
 
         x = self.features_tail(x)
+        print("## [0]", x.shape)
         x = self.avgpool(x)
+        print("## [1]", x.shape)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
