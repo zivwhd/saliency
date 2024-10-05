@@ -308,6 +308,7 @@ class ExplainNN(GetALLLayerInformation):
                                                 Yw, observed_Y=self.observed_yhat[:, self.y_c], 
                                                 control_stats= (self.reference_mean, self.reference_std), 
                                                 thr=0.05, mode='threshold')
+                print("##2##", len(positive_cause))
                 if len(positive_cause) == 0:
                     print("cannot explore deeper")
                     break
