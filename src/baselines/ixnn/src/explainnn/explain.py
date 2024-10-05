@@ -243,7 +243,7 @@ class ExplainNN(GetALLLayerInformation):
             if self.verbose:
                 print(f'layer idx: {idx} / {len(layers_index)} ')
             self.get_layer_weights(idx)
-            logging.debug(f"cs layer {idx} {self.L_n_1_name}")
+            logging.debug(f"cs layer {idx} {self.L_n_name}")
             if idx == list(layers_index)[-1]:
                 # edge case input layer -> first layer
                 causal_path[self.L_n_name] = ([0], [], positive_cause)
@@ -338,7 +338,7 @@ class ExplainNN(GetALLLayerInformation):
     def compute_path_total_effect(self, neuron_idx, n_samples=1, u=0.0):
         ## neuron_idx here is the target 
         print("comp_total_effect", neuron_idx)
-        logging.debug(f"compute_path_total_effect {neuron_idx} {self.L_n_1_name} {self.L_n_name}")
+        logging.debug(f"compute_path_total_effect {len(neuron_idx)} {self.L_n_1_name} {self.L_n_name}")
 
         #self.model, self.L_n_name
 
