@@ -359,6 +359,7 @@ class ExplainNN(GetALLLayerInformation):
 
         indices = range(0, I_weights.shape[1])
         if len(I_indices) != 0:
+            logging.debug(f"with selection {len(I_indices)}")
             selected_indices = I_indices
         else: 
             selected_indices = indices  
