@@ -206,6 +206,7 @@ def get_last_conv_dims(model, input_dims, device):
     for k in range(1,len(feat_dims)):
         prev = names[k-1]
         curr = names[k]
+        logging.info(f'{k}: curr={curr} prev={prev} featcurr={feat_dims[curr]} featprev={feat_dims[prev]')
         if 'conv' in prev and 'fc' in curr:
             c = feat_dims[prev][1][1]
             d = feat_dims[curr][0][1]
@@ -221,7 +222,7 @@ def get_last_conv_dims(model, input_dims, device):
         
         elif 'avgpool' in prev and any(x in curr for x in SUPPORTED_CLASSIFICATION_LAYERS_NAMES):
             feat_dims['pre-flattened'] = feat_dims[prev][0]
-    
+            
     return feat_dims
 
 def adjust_indices_after_flatten(indices, flattened_dims):
