@@ -174,11 +174,33 @@ class SimpleVGG16(nn.Module):
         x = self.classifier(x)
         return x
     
+
+class SimpleConvnext(nn.Module):
+    
+    def __init__(self, inner):
+        super().__init__()
+        self.inner = [inner]        
+        self.norm_pre = inner.norm_pre       
+        self.head = inner.head
+
+    def forward(self, x):
+
+        x = self.inner[0].stem(x)
+        x = self.inner[0].stages[0:-1](x)
+        x = self.inner[0].stages[-1:](x)
+        x = self.norm_pre(x)
+        x = self.head(x)
+        return x
+        
+
 def get_simplified_model(me):
     if me.arch == 'resnet50':
         return SimpleResnet50(me.model)
     elif me.arch == 'vgg16':
         return SimpleVGG16(me.model)    
+    elif me.arch == 'convnext_base':
+        return SimpleConvnext(me.model)    
+    
     else:
         raise Exception(f"unexpected arch {me.arch}")
 
