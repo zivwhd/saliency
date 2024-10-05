@@ -248,6 +248,7 @@ class ExplainNN(GetALLLayerInformation):
             layers_index = self.override_layers_index
             self.get_layer_weights(layers_index[0])
             effect_neurons = list(range(len(self.layer_wise_params)))
+            logging.info("setting effect_neurons: {len(effect_neurons)}")
                 
         for idx in layers_index:            
             start_time = time.time()
@@ -267,8 +268,10 @@ class ExplainNN(GetALLLayerInformation):
             logging.debug("calling compute_path_total_effect")
             scores, path_total_effect, Yw, ids = self.compute_path_total_effect(effect_neurons, n_samples=self.number_samples, u=u)
             print(">> scores, total_effect, Yw: ", desc(scores), desc(path_total_effect), desc(Yw))
-            logging.debug(">> scores, total_effect, Yw:  {desc(scores)}, {desc(path_total_effect)}, {desc(Yw)}")
-            if Yw is None: continue   
+            logging.debug(f">> scores, total_effect, Yw:  {desc(scores)}, {desc(path_total_effect)}, {desc(Yw)}")
+            if Yw is None: 
+                logging.info("No Yw")
+                continue   
             logging.debug("selecting causal path")
             _, positive_cause = self.select_causal_path(ids, scores, path_total_effect['relative_diff'], 
                                                 Yw, observed_Y=self.observed_yhat[:, self.y_c], 
@@ -361,6 +364,7 @@ class ExplainNN(GetALLLayerInformation):
 
         #check edge case: weights are scalar values or 1d vector
         if len(torch.stack(self.layer_wise_params).shape) <= 1 or torch.stack(self.layer_wise_params).shape[1] == 1:
+            logging.debug(f"no layer_wise_params {torch.stack(self.layer_wise_params).shape}")
             scores = [0.0]
             return scores, None, None, None
         else:
