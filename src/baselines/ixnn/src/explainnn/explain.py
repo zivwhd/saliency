@@ -338,7 +338,7 @@ class ExplainNN(GetALLLayerInformation):
     def compute_path_total_effect(self, neuron_idx, n_samples=1, u=0.0):
         ## neuron_idx here is the target 
         print("comp_total_effect", neuron_idx)
-        logging.debug("compute_path_total_effect {neuron_idx}")
+        logging.debug(f"compute_path_total_effect {neuron_idx}")
 
         #self.model, self.L_n_name
 
