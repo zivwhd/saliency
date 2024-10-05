@@ -436,7 +436,7 @@ class ExplainNN(GetALLLayerInformation):
         self.layer_indices = self.global_info_dict['layers_index']
         self.layer_names = self.global_info_dict['layers_names']
         
-        desc = {idx : len(self.global_info_dict['layer_wise_params'][idx]) for idx in self.layer_indices[0:10]}
+        desc = {idx : len(self.global_info_dict['layer_wise_params'][idx]) for idx in list(self.layer_indices)[0:10]}
         logging.debug(f"$$$ {desc}")
             
         if self.top_down:
