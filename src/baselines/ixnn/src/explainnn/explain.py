@@ -12,6 +12,10 @@ from explainnn.definitions import OUTPUT_DIR, ATTR_DATASET
 import logging
 
 def desc(x):
+    if type(x) == dict:
+        return f"dict({len(x)})"
+    if type(x) == list:
+        return f"list({len(x)})"    
     return str(type(x))
 
 class Hook():
@@ -255,6 +259,7 @@ class ExplainNN(GetALLLayerInformation):
             logging.debug("calling compute_path_total_effect")
             scores, path_total_effect, Yw, ids = self.compute_path_total_effect(effect_neurons, n_samples=self.number_samples, u=u)
             print(">> scores, total_effect, Yw: ", desc(scores), desc(path_total_effect), desc(Yw))
+            logging.debug(">> scores, total_effect, Yw:  {desc(scores)}, {desc(path_total_effect)}, {desc(Yw)}")
             if Yw is None: continue   
             logging.debug("selecting causal path")
             _, positive_cause = self.select_causal_path(ids, scores, path_total_effect['relative_diff'], 
