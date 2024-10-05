@@ -81,6 +81,10 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         shape = list(pre_flattened_dims)[1:]
         flatten_alpha = True
         
+    if any([idx >= len(weights) for idx in target_neuron_idx]):
+        logging.error("WARNING: target idx don't match weights")
+        target_neuron_idx = list(range(len(weights)))
+
     for k, idx in enumerate(target_neuron_idx):
         
         try:
