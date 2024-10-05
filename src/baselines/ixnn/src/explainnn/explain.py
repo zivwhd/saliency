@@ -277,6 +277,9 @@ class ExplainNN(GetALLLayerInformation):
             # update effects
             print("Updating effect_neurons", positive_cause)            
             effect_neurons = positive_cause
+            if self.L_n_name == 'classifier.0':
+                logging.info("WARN: patch for VGG16 avgpool - mapping indexes")
+                effect_neurons = list(set([(idx // 49) for idx in effect_neurons]))
             logging.debug(f">> updating effect neurons {effect_neurons}")
     
             if self.verbose:     
