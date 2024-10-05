@@ -94,7 +94,7 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
         if len(w.shape)>1:
             w = torch.sum(w, axis=(1,2))
         indices = torch.argsort(w)
-        topk = max(int(len(w) * 0.1), 850) ## PUSH_ASSERT
+        topk = min(int(len(w) * 0.1), 850) ## PUSH_ASSERT
         smallestk = int(len(w) * 0.05)
         I_indices = indices[len(w)-topk:]
         I_indices = sorted(list(set(torch.cat([I_indices, indices[:smallestk], indices[len(w)//2-smallestk//2:len(w)//2+smallestk//2]])))) 
