@@ -362,6 +362,7 @@ class ExplainNN(GetALLLayerInformation):
             logging.debug(f"with selection {len(I_indices)}")
             selected_indices = I_indices
         else: 
+            logging.debug(f"no selection")
             selected_indices = indices  
         
         t = 0        
