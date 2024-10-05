@@ -157,13 +157,14 @@ class ExplainNN(GetALLLayerInformation):
         self.soft = args['soft_interventions']
         self.do_mediation_analysis = False
         self.verbose = verbose
-
+        self.override_layer_index = args.get("override_layers_index")
         self.model.eval()
         self.model = self.model.to(self.device)
         
         self.global_info_dict = self.get_global_info()
     
     def run(self, soft=False):
+        ## PPP        
         causal_path = self.cross_sample_path_effect_analysis(self.global_info_dict['layers_index'], soft=soft)
         return causal_path
 
@@ -233,6 +234,7 @@ class ExplainNN(GetALLLayerInformation):
     # learn causal structure over N samples of given token/query 
     def cross_sample_path_effect_analysis(self, layers_index, soft=False):
         
+        ## PPP
         logging.debug("cross_sample_path_effect_analysis")
 
         input_dict = self.load_input(shuffle=False)
@@ -240,7 +242,12 @@ class ExplainNN(GetALLLayerInformation):
         
         effect_neurons = [self.target_idx]
         causal_path = defaultdict()
-        
+
+        if self.override_layers_index:
+            layers_index = self.override_layers_index
+            self.get_layer_weights(layers_index[0])
+            effect_neurons = list(range(len(self.layer_wise_params)))
+                
         for idx in layers_index:            
             start_time = time.time()
             logging.debug(f"iteration {idx}")

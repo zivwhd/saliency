@@ -291,6 +291,9 @@ class IXNNSaliencyCreator:
             baseline_attr=False,
         )
 
+        if me.arch == 'vgg16':
+            args["override_layers_index"] = [3,4] ## or 3,4
+            
         fmdl = get_simplified_model(me)
         fmdl_layer_name = get_simplified_model_layer_name(me)
         explainer = ExplainNN(fmdl, args, beta=0, device=me.device, verbose=True)
