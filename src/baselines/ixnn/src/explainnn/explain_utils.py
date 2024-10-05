@@ -80,7 +80,7 @@ def get_interventional_weights(layer_wise_params, Ln_1_name, Ln_name, target_neu
     if rule:
         shape = list(pre_flattened_dims)[1:]
         flatten_alpha = True
-    
+        
     for k, idx in enumerate(target_neuron_idx):
         
         try:
