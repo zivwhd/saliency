@@ -239,7 +239,7 @@ def get_simplified_model_layer_name(me):
     elif me.arch == 'vgg16':
         return "features_tail.2"    
     elif me.arch == 'convnext_base':
-        return "stages_tail.0.blocks.2.conv_dw" ## 3,4
+        return "stages_tail.0.blocks.2.conv_dw" ## 5,6 stages_tail.0.blocks.2.conv_dw
     else:
         raise Exception(f"unexpected arch {me.arch}")
     
@@ -272,7 +272,7 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH, v
         args["override_layers_index"] = [3,4] ## or 3,4
         logging.info("VGG16 override")
     elif me.arch in ['convnext_base']:
-        args["override_layers_index"] = [4,5] ## or 3,4
+        args["override_layers_index"] = [5,6] ## or 3,4
         logging.info("ConvNext override")
 
     
