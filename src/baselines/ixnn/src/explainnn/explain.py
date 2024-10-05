@@ -272,7 +272,7 @@ class ExplainNN(GetALLLayerInformation):
             # update effects
             print("Updating effect_neurons", positive_cause)            
             effect_neurons = positive_cause
-            logging.debug(">> updating effect neurons", effect_neurons)
+            logging.debug(f">> updating effect neurons {effect_neurons}")
     
             if self.verbose:     
                 print("--- %s seconds for algorithm on one layer ---" % (time.time() - start_time))
@@ -517,6 +517,7 @@ class ExplainNN(GetALLLayerInformation):
                 p_idx = torch.where(te <= te.quantile(0.05))[0]
             positive_effect_idx = [ids[k.item()] for k in p_idx]
             print(">> selected", len(positive_effect_idx))
+            logging.debug(f">> selected {len(positive_effect_idx)} out of {len(ids)}")
 
         return [], positive_effect_idx
 
