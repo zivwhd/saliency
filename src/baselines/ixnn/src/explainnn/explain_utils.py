@@ -222,6 +222,8 @@ def get_last_conv_dims(model, input_dims, device):
         
         elif 'avgpool' in prev and any(x in curr for x in SUPPORTED_CLASSIFICATION_LAYERS_NAMES):
             feat_dims['pre-flattened'] = feat_dims[prev][0]
+        elif curr in ['head.fc']:
+            feat_dims['pre-flattened'] = feat_dims[curr][0]
             
     return feat_dims
 
