@@ -338,7 +338,7 @@ class ExplainNN(GetALLLayerInformation):
     def compute_path_total_effect(self, neuron_idx, n_samples=1, u=0.0):
         ## neuron_idx here is the target 
         print("comp_total_effect", neuron_idx)
-        logging.debug(f"compute_path_total_effect {neuron_idx}")
+        logging.debug(f"compute_path_total_effect {neuron_idx} {self.L_n_1_name} {self.L_n_name}")
 
         #self.model, self.L_n_name
 
@@ -365,7 +365,7 @@ class ExplainNN(GetALLLayerInformation):
         
         t = 0        
         print(f"## {len(indices)} {len(selected_indices)} {n_samples} {neuron_idx}")
-        logging.debug(f"## {len(indices)} {len(selected_indices)} {n_samples} {len(neuron_idx)}")
+        logging.debug(f"## {self.L_n_name} indices={len(indices)};  selected={len(selected_indices)}; samples={n_samples}; effect={len(neuron_idx)}")
         import time
         last_time = time.time()
         processed_nidx = 0

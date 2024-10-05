@@ -160,7 +160,7 @@ class SimpleVGG16(nn.Module):
 
         if cvals is None:
             x = self.features_head[0](x)
-            self.cache[sig] = x.cpu()
+            self.cache[sig] = x.detach().cpu()
             #print("save cache")
         else:
             #print("load cache")
