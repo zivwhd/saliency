@@ -488,8 +488,12 @@ class ExplainNN(GetALLLayerInformation):
             print("WARNING: positive_effect_idx is 0.0 after thresholding, altenative method is used instead")            
             te = total_effect.mean(1)
             print(">> te:", te.min(), te.max())
-            p_idx = torch.where(te < 0.001)[0] ## PUSH_ASSERT -0.001
+            p_idx = torch.where(te < -0.001)[0]
+            if p_idx.numel() == 0:
+                print("WARNING: none selected")
+                p_idx = torch.where(te < te.quantile(0.05))[0]
             positive_effect_idx = [ids[k.item()] for k in p_idx]
+            print(">> selected", positive_effect_idx.shape)
 
         return [], positive_effect_idx
 
