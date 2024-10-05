@@ -379,8 +379,10 @@ class ExplainNN(GetALLLayerInformation):
                 processed_nidx += 1
                 print(".", end="")
                 if (processed_nidx % 40 == 0):
+                    if (processed_nidx % 120 == 0):
+                        logging.debug(f"...{processed_nidx}...")
                     print(int(time.time()-last_time), processed_nidx)
-                    processed_nidx = 0
+                    #processed_nidx = 0
                     last_time = time.time()
 
                 net = self.model
