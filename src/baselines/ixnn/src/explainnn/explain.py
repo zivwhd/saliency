@@ -356,7 +356,7 @@ class ExplainNN(GetALLLayerInformation):
         ## neuron_idx here is the target 
         print("comp_total_effect", neuron_idx)
         logging.debug(f"compute_path_total_effect {len(neuron_idx)} {self.L_n_1_name} {self.L_n_name}")
-        logging.debug(f">> {neuron_idx}")
+        #logging.debug(f">> {neuron_idx}")
         #self.model, self.L_n_name
 
         #check edge case: weights are scalar values or 1d vector

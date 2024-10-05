@@ -268,9 +268,13 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH, v
         baseline_attr=False,
     )
 
-    if me.arch in ['vgg16', 'convnext_base']:
+    if me.arch in ['vgg16']:
         args["override_layers_index"] = [3,4] ## or 3,4
         logging.info("VGG16 override")
+    elif me.arch in ['convnext_base']:
+        args["override_layers_index"] = [4,5] ## or 3,4
+        logging.info("ConvNext override")
+
     
     explainer = ExplainNN(fmdl, args, beta=0, device=me.device, verbose=True)
     logging.info("generating causal path")
