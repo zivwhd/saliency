@@ -184,14 +184,39 @@ class SimpleConvnext(nn.Module):
     def __init__(self, inner):
         super().__init__()
         self.inner = [inner]        
-        self.norm_pre = inner.norm_pre       
+        self.norm_pre = inner.norm_pre
+        self.stages_tail = nn.Sequential(*inner.stages[-1:])
         self.head = inner.head
+        self.prev_sig = None
+        self.prev_vals = None
+
+    def sig(self, x):
+        
+        sig =  (
+            tuple(x.shape),
+            x.sum().cpu().float().tolist(), 
+            (x.flatten().cpu() * torch.arange(x.numel())).sum().float().tolist(),
+            ((x.flatten().cpu() ** 2) * torch.arange(x.numel())).sum().float().tolist()
+        )
+        return sig
 
     def forward(self, x):
 
-        x = self.inner[0].stem(x)
-        x = self.inner[0].stages[0:-1](x)
-        x = self.inner[0].stages[-1:](x)
+        sig = self.sig(x)
+
+        if sig != self.prev_sig:
+            x = self.inner[0].stem(x)
+            x = self.inner[0].stages[0:-1](x)
+            if x.shape[0] > 1:
+                self.prev_sig = sig 
+                self.prev_vals = x               
+                logging.debug(f"cached {x.shape} {x.numel()}")            
+            else:
+                self.prev_sig = None
+        else:
+            x = self.prev_vals
+
+        x = self.stages_tail(x)
         x = self.norm_pre(x)
         x = self.head(x)
         return x
@@ -213,6 +238,8 @@ def get_simplified_model_layer_name(me):
         return "bt_conv3"
     elif me.arch == 'vgg16':
         return "features_tail.2"    
+    elif me.arch == 'convnext_base':
+        return "stages_tail.0.blocks.2.conv_dw" ## 3,4
     else:
         raise Exception(f"unexpected arch {me.arch}")
     
@@ -241,7 +268,7 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH, v
         baseline_attr=False,
     )
 
-    if me.arch == 'vgg16':
+    if me.arch in ['vgg16', 'convnext_base']:
         args["override_layers_index"] = [3,4] ## or 3,4
         logging.info("VGG16 override")
     
