@@ -275,7 +275,7 @@ def generate_causal_path(me, target, isrc, device='cuda', base_path=BASE_PATH, v
         args["override_layers_index"] = [3,4] ## or 3,4
         logging.info("VGG16 override")
     elif me.arch in ['convnext_base']:
-        args["override_layers_index"] = [5,6] ## or 3,4
+        #args["override_layers_index"] = [5,6] ## or 3,4
         logging.info("ConvNext override")
 
     
