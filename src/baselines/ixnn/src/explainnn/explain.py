@@ -157,7 +157,7 @@ class ExplainNN(GetALLLayerInformation):
         self.soft = args['soft_interventions']
         self.do_mediation_analysis = False
         self.verbose = verbose
-        self.override_layer_index = args.get("override_layers_index")
+        self.override_layers_index = args.get("override_layers_index")
         self.model.eval()
         self.model = self.model.to(self.device)
         
@@ -244,6 +244,7 @@ class ExplainNN(GetALLLayerInformation):
         causal_path = defaultdict()
 
         if self.override_layers_index:
+            logging.info("overriding layers index: {self.override_layers_index}")
             layers_index = self.override_layers_index
             self.get_layer_weights(layers_index[0])
             effect_neurons = list(range(len(self.layer_wise_params)))
