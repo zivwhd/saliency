@@ -146,7 +146,8 @@ class TreSaliencyCreator:
         modes = ["logit","prob","pgit","spgit"]
         for mode in modes:
             sal = tre.create_sal(mode=mode)
-            res["TRE_{mode}_{self.limit}"] = sal
+            res[f"TRE_{mode}_{self.limit}"] = sal.unsqueeze(0)
+        return res
 
 
 
