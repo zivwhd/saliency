@@ -78,7 +78,7 @@ class TreGen:
 
 
     def probe(self, area_list, batch_size=32):
-        logging.info(f"probing {area_list}")
+        #logging.info(f"probing {area_list}")
         tnodes = []
         yidx = self.yidx
         xidx = self.xidx
