@@ -10,10 +10,14 @@ from adaptors_gig import IGSaliencyCreator
 from RISE import RiseSaliencyCreator
 from cexcnn import CexCnnSaliencyCreator
 from csixnn import IXNNSaliencyCreator
+from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
 
 
+
+def get_tre_sal_creator(limit=100):
+    return TreSaliencyCreator(limit)
 
 def get_cpe_sal_creator(segsize=64):
     return IpwSalCreator(f"CPE_{segsize}", [10, 100, 250, 500,1000,2000,4000], segsize=segsize, batch_size=32)
