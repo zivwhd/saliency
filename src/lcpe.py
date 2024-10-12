@@ -123,7 +123,7 @@ def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs
 
 class CompExpCreator:
 
-    def __init__(self, nmasks=500, segsize=48, batch_size=32, 
+    def __init__(self, nmasks=2000, segsize=48, batch_size=32, 
                  lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(11,11),
                  epochs=200,
                  **kwargs):
