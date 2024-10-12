@@ -107,7 +107,7 @@ def create_model_sals(model_name, sal_names, marker="c1"):
 def include_result(x):
     if x.startswith('_'):
         return False
-    if (("CPE_" in x) and ("_4000_" not in x) and ("_2000_" not in x)):
+    if (("CPE_" in x) and ("_4000_" not in x) and ("_2000_" not in x) and ("_500_" not in x)):
         return False
     if ('CexCnn_' in x) and ('_0.75_' not in x) and ('_0.95_' not in x) and ('_0.995_' not in x):
         return False
