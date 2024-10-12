@@ -63,7 +63,8 @@ class MaskPredict(nn.Module):
 # Define the training function
 def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0, 
                 beta=0.1, alpha=0.0, 
-                avg_kernel_size=(17,17),
+                avg_kernel_size=(5,5),
+                renorm=True,
                 ):
     criterion = nn.MSELoss()  # Mean Squared Error loss
     #print(list(model.parameters()))
@@ -103,7 +104,8 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
         optimizer.step()
 
         # Normalize the explanation with the given score
-        #model.normalize(score)
+        if epoch % 100 == 0 and renorm:
+            model.normalize(score)
         
         logging.debug(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
         print(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
@@ -121,11 +123,20 @@ def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs
     # Return the updated explanation parameter
     return model.explanation.detach()
 
+
+class MaskedRespData:
+    def __init__(self, baseline_score, label_score, added_score, all_masks, all_targets):
+        self.baseline_score = baseline_score
+        self.label_score = label_score
+        self.added_score = added_score
+        self.all_masks = all_masks
+        self.all_targets = all_targets
+
 class CompExpCreator:
 
-    def __init__(self, nmasks=2000, segsize=48, batch_size=32, 
-                 lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(11,11),
-                 epochs=200,
+    def __init__(self, nmasks=500, segsize=48, batch_size=32, 
+                 lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(5,5),
+                 epochs=100,
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
@@ -140,11 +151,10 @@ class CompExpCreator:
         sal = self.explain(me, inp, catidx)
         ksdesc = str("x").join(map(str, self.avg_kernel_size))
         return {
-            f"Comp_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
+            f"CompRe_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
         }
 
-    def explain(self, me, inp, catidx):
-
+    def generate_data(self, me, inp, catidx):
         mgen = MaskedRespGen(self.segsize)
         fmdl = me.narrow_model(catidx, with_softmax=True)
         logging.debug(f"generating {self.nmasks} masks and responses")
@@ -155,16 +165,29 @@ class CompExpCreator:
         baseline_score = fmdl(torch.zeros(inp.shape).to(inp.device)).detach().squeeze() * rfactor
         label_score = fmdl(inp).detach().squeeze() * rfactor
 
-        delta_score = label_score - baseline_score
+        added_score = label_score - baseline_score
         #print(label_score, baseline_score, delta_score)
     
         device = me.device
         all_masks = torch.concat(mgen.all_masks).to(device)
         all_targets = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
         all_targets.shape, baseline_score.shape
+        return MaskedRespData(
+            baseline_score = baseline_score,
+            label_score = label_score,
+            added_score = added_score,
+            all_masks = all_masks,
+            all_targets = all_targets,
+        )
 
-        sal = optimize_explanation(torch.rand(inp.shape[-2:]).to(device), all_masks, all_targets, score=delta_score, 
-                                   epochs=self.epochs, lr=self.lr)
+    def explain(self, me, inp, catidx, data=None, initial=None):
+
+        if data is None:
+            data = self.generate_data(me, inp, catidx)
+        if initial is None:
+            initial = torch.rand(inp.shape[-2:]).to(inp.device)
+        sal = optimize_explanation(initial, data.all_masks, data.all_targets, score=data.added_score, 
+                                   epochs=self.epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size)
         
         return sal
 
