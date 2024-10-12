@@ -148,7 +148,7 @@ class CompExpCreator:
                  lr = 0.05, c_mask_completeness=1.0, c_completeness=0, 
                  c_smoothness=1.0, c_selfness=0.0, 
                  avg_kernel_size=(5,5),
-                 epochs=500, desc = "CompRE",
+                 epochs=500, desc = "CompRd",
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
