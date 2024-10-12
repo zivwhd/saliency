@@ -136,7 +136,7 @@ class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=48, batch_size=32, 
                  lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(5,5),
-                 epochs=500, desc = "CompRE"
+                 epochs=500, desc = "CompRE",
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
