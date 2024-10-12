@@ -18,7 +18,8 @@ from lcpe import CompExpCreator
 
 
 def get_comp_sal_creator():
-    return CompExpCreator()
+    return CompExpCreator(avg_kernel_size=(2,2), epochs=500, beta=1, alpha=1)
+    #return CompExpCreator()
 
 def get_tre_sal_creator(limit=100):
     return TreSaliencyCreator(limit)

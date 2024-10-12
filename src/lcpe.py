@@ -64,7 +64,7 @@ class MaskPredict(nn.Module):
 def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0, 
                 beta=0.1, alpha=0.0, 
                 avg_kernel_size=(5,5),
-                renorm=True,
+                renorm=False,
                 ):
     criterion = nn.MSELoss()  # Mean Squared Error loss
     #print(list(model.parameters()))
@@ -83,22 +83,21 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
         exp = model.explanation
         comp_loss = criterion(output/exp.numel(), targets/exp.numel())
 
-        if alpha:
+        if alpha != 0:            
             explanation_sum = model.explanation.sum()
-            explanation_loss = criterion(explanation_sum/exp.numel(), score/ exp.numel()) 
+            explanation_loss = criterion(explanation_sum/exp.numel(), score/ exp.numel())             
         else:
             explanation_loss = 0
 
         
         conv_loss = 0
-        if beta:                
+        if beta != 0:                
             sexp = F.conv2d(exp.unsqueeze(0), avg_kernel.unsqueeze(0),padding="same").squeeze()
             conv_loss = criterion(exp, sexp)            
         else:
             conv_loss = 0
 
-        # Backward pass and optimization
-        explanation_loss = 0
+        # Backward pass and optimization        
         total_loss = comp_loss + beta * conv_loss + alpha * explanation_loss
         
         total_loss.backward()        
@@ -137,7 +136,7 @@ class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=48, batch_size=32, 
                  lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(5,5),
-                 epochs=500,
+                 epochs=500, desc = "CompRE"
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
@@ -147,12 +146,13 @@ class CompExpCreator:
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
+        self.desc = desc
 
     def __call__(self, me, inp, catidx):
         sal = self.explain(me, inp, catidx)
         ksdesc = str("x").join(map(str, self.avg_kernel_size))
         return {
-            f"CompRe_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
+            f"{self.desc}_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
         }
 
     def generate_data(self, me, inp, catidx):
