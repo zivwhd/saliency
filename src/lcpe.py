@@ -62,14 +62,14 @@ class MaskPredict(nn.Module):
 
 # Define the training function
 def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0, 
-                beta=0.1, alpha=0.0, 
+                c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,
                 avg_kernel_size=(5,5),
                 renorm=False,
                 ):
     criterion = nn.MSELoss()  # Mean Squared Error loss
     #print(list(model.parameters()))
-    logging.debug(f"### lr={lr}; alpha={alpha}; beta={beta}; avg_kernel_size={avg_kernel_size}")
-    print(f"### lr={lr}; alpha={alpha}; beta={beta}; avg_kernel_size={avg_kernel_size}")
+    logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
+    print(f"### lr={lr}; c_completeness={c_completeness}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
     optimizer = optim.Adam(model.parameters(), lr=lr)
     model.normalize(score)
     model.train()
@@ -83,7 +83,7 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
         exp = model.explanation
         comp_loss = criterion(output/exp.numel(), targets/exp.numel())
 
-        if alpha != 0:            
+        if c_completeness != 0:            
             explanation_sum = model.explanation.sum()
             explanation_loss = criterion(explanation_sum/exp.numel(), score/ exp.numel())             
         else:
@@ -91,14 +91,24 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
 
         
         conv_loss = 0
-        if beta != 0:                
+        if c_smoothness != 0:                
             sexp = F.conv2d(exp.unsqueeze(0), avg_kernel.unsqueeze(0),padding="same").squeeze()
             conv_loss = criterion(exp, sexp)            
         else:
             conv_loss = 0
 
+        ## tar loss
+        if c_selfness != 0:
+            mask_size = data.flatten(start_dim=1).sum(dim=1)
+            exp_val = data * targets.unsqueeze(1).unsqueeze(1) / mask_size.unsqueeze(1).unsqueeze(1)
+            act_val = data * exp.unsqueeze(0)
+            tar_loss = criterion(exp_val, act_val)
+        else:
+            tar_loss = 0
+
         # Backward pass and optimization        
-        total_loss = comp_loss + beta * conv_loss + alpha * explanation_loss
+        total_loss = (c_mask_completeness * comp_loss + c_smoothness * conv_loss + 
+                      c_completeness * explanation_loss + c_selfness * tar_loss)
         
         total_loss.backward()        
         optimizer.step()
@@ -108,7 +118,7 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
             model.normalize(score)
         
         logging.debug(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
-        print(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
+        print(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; tar_loss={tar_loss}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
 
 
 def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs):
@@ -135,14 +145,18 @@ class MaskedRespData:
 class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=48, batch_size=32, 
-                 lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(5,5),
+                 lr = 0.05, c_mask_completeness=1.0, c_completeness=0, 
+                 c_smoothness=1.0, c_selfness=0.0, 
+                 avg_kernel_size=(5,5),
                  epochs=500, desc = "CompRE",
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
         self.batch_size = batch_size
-        self.alpha = alpha
-        self.beta = beta  
+        self.c_completeness = c_completeness
+        self.c_smoothness = c_smoothness  
+        self.c_selfness = c_selfness
+        self.c_mask_completeness = c_mask_completeness
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
@@ -189,7 +203,8 @@ class CompExpCreator:
             initial = torch.rand(inp.shape[-2:]).to(inp.device)
         sal = optimize_explanation(initial, data.all_masks, data.all_pred, score=data.added_score, 
                                    epochs=self.epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
-                                   alpha=self.alpha, beta=self.beta)
+                                   c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, c_selfness=self.c_selfness,
+                                   c_mask_completeness=self.c_mask_completeness)
         
         return sal
 
