@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import logging
 from cpe import SqMaskGen
 
 tqdm = lambda x: x
@@ -66,7 +67,7 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
                 ):
     criterion = nn.MSELoss()  # Mean Squared Error loss
     #print(list(model.parameters()))
-    print(f"### lr={lr}; alpha={alpha}; beta={beta};")
+    logging.debug(f"### lr={lr}; alpha={alpha}; beta={beta};")
     optimizer = optim.Adam(model.parameters(), lr=lr)
     model.normalize(score)
     model.train()
@@ -104,7 +105,7 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
         # Normalize the explanation with the given score
         #model.normalize(score)
         
-        print(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
+        logging.debug(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
 
 
 def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs):
@@ -145,16 +146,16 @@ class CompExpCreator:
 
         mgen = MaskedRespGen(self.segsize)
         fmdl = me.narrow_model(catidx, with_softmax=True)
-        print(f"generating {self.nmasks} masks and responses")
+        logging.debug(f"generating {self.nmasks} masks and responses")
         mgen.gen(fmdl, inp, self.nmasks, batch_size=self.batch_size)
-        print("Done generating masks")
+        logging.debug("Done generating masks")
 
         rfactor = inp.numel()
         baseline_score = fmdl(torch.zeros(inp.shape).to(inp.device)).detach().squeeze() * rfactor
         label_score = fmdl(inp).detach().squeeze() * rfactor
 
         delta_score = label_score - baseline_score
-        print(label_score, baseline_score, delta_score)
+        #print(label_score, baseline_score, delta_score)
     
         device = me.device
         all_masks = torch.concat(mgen.all_masks).to(device)
