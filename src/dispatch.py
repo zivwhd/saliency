@@ -18,6 +18,12 @@ from lcpe import CompExpCreator
 
 
 def get_comp_sal_creator():
+    return CompExpCreator(segsize=48, avg_kernel_size=(17,17), epochs=700, 
+                      c_mask_completeness=1, c_completeness=0.1, c_smoothness=0.5,
+                      c_selfness=0,
+                      )
+    
+    ## 9.228502593248116,54.224837325563946
     return CompExpCreator(
         segsize=48, avg_kernel_size=(21,21), epochs=500, nmasks=500,
         c_mask_completeness=15, c_completeness=1, c_smoothness=2,
