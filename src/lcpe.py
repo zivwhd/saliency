@@ -68,7 +68,8 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
                 ):
     criterion = nn.MSELoss()  # Mean Squared Error loss
     #print(list(model.parameters()))
-    logging.debug(f"### lr={lr}; alpha={alpha}; beta={beta};")
+    logging.debug(f"### lr={lr}; alpha={alpha}; beta={beta}; avg_kernel_size={avg_kernel_size}")
+    print(f"### lr={lr}; alpha={alpha}; beta={beta}; avg_kernel_size={avg_kernel_size}")
     optimizer = optim.Adam(model.parameters(), lr=lr)
     model.normalize(score)
     model.train()
@@ -125,18 +126,18 @@ def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs
 
 
 class MaskedRespData:
-    def __init__(self, baseline_score, label_score, added_score, all_masks, all_targets):
+    def __init__(self, baseline_score, label_score, added_score, all_masks, all_pred):
         self.baseline_score = baseline_score
         self.label_score = label_score
         self.added_score = added_score
         self.all_masks = all_masks
-        self.all_targets = all_targets
+        self.all_pred = all_pred
 
 class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=48, batch_size=32, 
                  lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(5,5),
-                 epochs=100,
+                 epochs=500,
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
@@ -170,14 +171,14 @@ class CompExpCreator:
     
         device = me.device
         all_masks = torch.concat(mgen.all_masks).to(device)
-        all_targets = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
-        all_targets.shape, baseline_score.shape
+        all_pred = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
+        all_pred.shape, baseline_score.shape
         return MaskedRespData(
             baseline_score = baseline_score,
             label_score = label_score,
             added_score = added_score,
             all_masks = all_masks,
-            all_targets = all_targets,
+            all_pred = all_pred,
         )
 
     def explain(self, me, inp, catidx, data=None, initial=None):
@@ -186,8 +187,9 @@ class CompExpCreator:
             data = self.generate_data(me, inp, catidx)
         if initial is None:
             initial = torch.rand(inp.shape[-2:]).to(inp.device)
-        sal = optimize_explanation(initial, data.all_masks, data.all_targets, score=data.added_score, 
-                                   epochs=self.epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size)
+        sal = optimize_explanation(initial, data.all_masks, data.all_pred, score=data.added_score, 
+                                   epochs=self.epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
+                                   alpha=self.alpha, beta=self.beta)
         
         return sal
 
