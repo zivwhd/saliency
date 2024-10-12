@@ -13,8 +13,12 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
+from lcpe import CompExpCreator
 
 
+
+def get_comp_sal_creator():
+    return CompExpCreator()
 
 def get_tre_sal_creator(limit=100):
     return TreSaliencyCreator(limit)

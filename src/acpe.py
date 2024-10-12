@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import torch
 import copy
 import logging
+import torchvision.transforms as T
 
 @dataclass
 class AreaNode:
@@ -22,7 +23,7 @@ class AreaNode:
 
 class TreGen:
 
-    def __init__(self, me, inp, label, baseline=None):
+    def __init__(self, me, inp, label, baseline=None, with_blur=True):
         self.me = me
         self.inp = inp
         self.label = label
@@ -34,21 +35,35 @@ class TreGen:
         else:
             self.baseline = baseline.to(inp.device)
         self.root = None
-    
+        if with_blur:
+            self.blur = T.GaussianBlur(kernel_size=17, sigma=2)
+        else:
+            self.blur = lambda x: x.int()
+
+        self.agg_weights = torch.zeros(self.shape)
+        self.agg_resp = torch.zeros(self.shape)
+
+
+
     def split_area(self, area, parts):
             
         base = area[0]
         arm = (area[1]-area[0])/parts
         res = []
+        pad = arm*0.4     #torch.tensor([20.0,20.0])
         for yidx in range(parts):
             for xidx in range(parts):
                 pos = torch.tensor((yidx*arm[0], xidx*arm[1]))
                 topleft = base + pos
-                res.append(torch.stack((topleft, topleft + arm )))
+                res.append(torch.stack((topleft-pad, topleft + arm +pad)))
                 
         return res
     
-    def traverse(self, limit = 4, area_limit=16*16):
+    def traverse(self, *args, **kargs):
+        with torch.no_grad():
+            return self.traverse_i(*args, **kargs)
+        
+    def traverse_i(self, limit = 4, area_limit=16*16):
                 
         self.root = self.probe([torch.tensor(((0.0,0.0), self.shape))] )[0]
         pqueue = [self.root]
@@ -73,8 +88,13 @@ class TreGen:
                 curr.partitions.append(anodes[base:base+len(prt)])
                 base += len(prt)
 
-            pqueue += anodes
-            pqueue.sort(key=lambda x: (-x.get_area()*0, -x.logit))
+            pqueue += anodes            
+            sal = self.agg_resp  / self.agg_weights        
+            def bla(area): 
+                pad = 20
+                mask = ((self.yidx >= area[0][0]-pad) & (self.yidx < area[1][0]+pad) & (self.xidx >= area[0][1]-pad) & (self.xidx < area[1][1]+pad))
+                return (sal * mask.cpu()).mean()
+            pqueue.sort(key=lambda x: -bla(x.area))
 
 
     def probe(self, area_list, batch_size=32):
@@ -85,25 +105,46 @@ class TreGen:
         inp = self.inp
         device = inp.device        
         buff = []
+        mask_buff = []
+
         left_area_list = list(area_list)
         for idx, area in enumerate(area_list):
             mask = ((yidx >= area[0][0]) & (yidx < area[1][0]) & (xidx >= area[0][1]) & (xidx < area[1][1]))
-            masked_image = mask * inp + (~mask) * self.baseline          
-            buff.append(masked_image)            
+            if self.blur:
+                mask =  self.blur(mask.unsqueeze(0).float())
+
+            masked_image = mask * inp + (1-mask) * self.baseline
+            buff.append(masked_image)
+            mask_buff.append(mask.detach())
             if len(buff) >= batch_size or idx == len(area_list)-1:                                
                 batch = torch.concat(buff)
-                logits = self.me.model(batch)
+                logits = self.me.model(batch).detach()
                 probs = torch.softmax(logits, dim=1)
                 #print(batch.shape, logits.shape, probs.shape)
-                for aidx in range(len(buff)):                    
-                    tnodes.append(AreaNode(
+                added_tnodes = []
+                for aidx in range(len(buff)):
+                     
+                    added_tnodes.append(AreaNode(
                         logit=logits[aidx, self.label].item(),
                         prob=probs[aidx, self.label].item(),
                         area=left_area_list.pop(0)))                    
-                buff.clear()        
+                tnodes += added_tnodes
+
+                bmasks = torch.concat(mask_buff)                                        
+                areats = torch.tensor([x.get_area() for x in added_tnodes])
+                #print(bmasks.shape, areats.shape)
+                emasks = (bmasks.cpu() / areats.unsqueeze(1).unsqueeze(1))
+                self.agg_weights += emasks.sum(dim=0).cpu()
+                self.agg_resp += (emasks * probs[:,self.label].cpu().unsqueeze(1).unsqueeze(1)).sum(dim=0).cpu()
+                    
+                buff.clear()
+                mask_buff.clear()
         assert not buff
         return tnodes
     
+    def create_aggsal(self):
+        return self.agg_resp  / self.agg_weights        
+
     def create_sal(self, mode="logit"):
         yidx = torch.arange(self.shape[0]).unsqueeze(1)
         xidx = torch.arange(self.shape[1]).unsqueeze(0)

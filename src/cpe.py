@@ -383,7 +383,7 @@ class SimpGen:
         ate_var = treatment_var + ctrl_var
 
         return ate, ate_var
-
+    
     def get_ate_sal(self):
         return self.get_ate_sal_i()[0]
 
@@ -484,3 +484,8 @@ class RelIpwGen(SimpGen):
             ((control_sal / control_prob).sum(dim=0) / (p_control_weights / control_prob).sum(dim=0)) ).unsqueeze(0)            
 
         return ipw
+
+
+
+
+        
