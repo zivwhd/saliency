@@ -106,6 +106,7 @@ def optimize_explanation_i(model, data, targets, epochs=10, lr=0.001, score=1.0,
         #model.normalize(score)
         
         logging.debug(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
+        print(f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={model.explanation.sum()}; comp_loss={comp_loss}; exp_loss={explanation_loss}; conv_loss={conv_loss}")
 
 
 def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs):
@@ -122,9 +123,9 @@ def optimize_explanation(initial_explanation, data, targets, score=1.0, **kwargs
 
 class CompExpCreator:
 
-    def __init__(self, nmasks=1000, segsize=48, batch_size=32, 
+    def __init__(self, nmasks=500, segsize=48, batch_size=32, 
                  lr = 0.05, alpha=0, beta=1.0, avg_kernel_size=(11,11),
-                 epochs=500,
+                 epochs=200,
                  **kwargs):
         self.segsize = segsize
         self.nmasks = nmasks
@@ -139,7 +140,7 @@ class CompExpCreator:
         sal = self.explain(me, inp, catidx)
         ksdesc = str("x").join(map(str, self.avg_kernel_size))
         return {
-            f"Comp_{self.nmasks}_{self.segsize}_{ksdesc}" : sal.cpu().unsqueeze(0)
+            f"Comp_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
         }
 
     def explain(self, me, inp, catidx):
