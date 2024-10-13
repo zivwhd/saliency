@@ -166,7 +166,7 @@ class CompExpCreator:
         sal = self.explain(me, inp, catidx)
         ksdesc = str("x").join(map(str, self.avg_kernel_size))
         return {
-            f"{self.desc}_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}" : sal.cpu().unsqueeze(0)
+            f"{self.desc}_{self.nmasks}_{self.segsize}_{ksdesc}_{self.epochs}_{self.c_completeness}_{self.c_smoothness}" : sal.cpu().unsqueeze(0)
         }
 
     def generate_data(self, me, inp, catidx):
