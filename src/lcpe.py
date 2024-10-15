@@ -221,8 +221,8 @@ class CompExpCreator:
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_concentration=0,
                  avg_kernel_size=(5,5),
-                 epochs=400, 
-                 model_epochs=400, c_model=0,
+                 epochs=200, 
+                 model_epochs=200, c_model=0,
                  mgen=None,
                  desc = "MComp",                 
                  **kwargs):

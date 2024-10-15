@@ -18,7 +18,7 @@ from lcpe import CompExpCreator, MultiCompExpCreator
 
 
 def get_mcomp_sal_creator():
-    return MultiCompExpCreator(segsize=64, nmasks=500, groups=[
+    return MultiCompExpCreator(segsize=48, nmasks=500, groups=[
         dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=1, c_model=0),
         dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.5, c_model=0),
         dict(c_mask_completeness=1.0, c_completeness=0.5, c_tv=1, c_model=0),
