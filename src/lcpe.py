@@ -256,7 +256,7 @@ class CompExpCreator:
         if self.c_smoothness != 0:
             desc += f"_krn{self.c_smoothness}_" + str("x").join(map(str, self.avg_kernel_size))
 
-        if self.c_mask_completeness
+        if self.c_mask_completeness:
             desc += f"_msk{self.c_mask_completeness}"
 
         if self.c_completeness:
