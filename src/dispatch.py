@@ -13,16 +13,27 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator
+from lcpe import CompExpCreator, MultiCompExpCreator
 
 
+
+def get_mcomp_sal_creator():
+    return MultiCompExpCreator(segsize=64, nmasks=500, groups=[
+        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=1, c_model=0),
+        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.5, c_model=0),
+        dict(c_mask_completeness=1.0, c_completeness=0.5, c_tv=1, c_model=0),
+        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=1, c_model=0.05),
+        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.5, c_model=0.05),
+        dict(c_mask_completeness=1.0, c_completeness=0.5, c_tv=1, c_model=0.05),
+    ])
+    
 
 def get_comp_sal_creator():
 
     return CompExpCreator(
         segsize=64, avg_kernel_size=(17,17), 
         nmasks=1000, epochs=150, 
-        c_mask_completeness=1, c_completeness=0.1, c_smoothness=0.5,
+        c_mask_completeness=1, c_completeness=0.1, c_smoothness=0.5,        
         c_selfness=0,
                       )    
 
