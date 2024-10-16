@@ -37,6 +37,18 @@ def show_sal_scores(img, scores_dict, sals_dict):
     plt.subplots_adjust(hspace=0.5)   
     plt.show()
 
+
+def toquant(sal):
+    shape = sal.shape
+    sal = sal.flatten()
+    sorted_indices = torch.argsort(sal)
+    # Get the ranks of the original tensor elements
+    ranks = torch.empty_like(sorted_indices)
+    ranks[sorted_indices] = torch.arange(len(sal))
+    # Normalize the ranks to get quantiles (between 0 and 1)    
+    quantiles = ranks.float() / (sal.numel() - 1)
+    return quantiles.reshape(shape)
+
 def showsal(sal, img, caption="", quantile=0.9):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)

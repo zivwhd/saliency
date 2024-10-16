@@ -145,7 +145,7 @@ def optimize_explanation_i(
         if c_concentration != 0:
             #norm_explanation = (explanation / torch.sqrt(explanation*explanation))
             norm_explanation = (explanation / explanation.sum())
-            concentration_loss = -(norm_explanation * norm_explanation).mean()
+            concentration_loss = - ((norm_explanation ** 2).sum())
         else:
             concentration_loss = 0
 
