@@ -45,7 +45,7 @@ def median_blur(input_tensor, kernel_size):
     return median_filtered
 
 
-class IEMPert:
+class IEMPertSaliencyCreator:
     def __init__(self):
         pass
 
