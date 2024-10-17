@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import torchvision.transforms as T
 import logging, time, pickle
 from cpe import SqMaskGen
 
@@ -21,9 +22,10 @@ class LoadMaskGen:
         return rv
 
 
+
 class MaskedRespGen:
     def __init__(self, segsize=48, ishape = (224,224),
-                 mgen=None):
+                 mgen=None, baseline=None):
 
         self.segsize = segsize
         self.ishape = ishape
@@ -32,6 +34,11 @@ class MaskedRespGen:
         else:
             self.mgen = mgen
 
+        if baseline is None:
+            self.baseline = torch.zeros(ishape)
+        else:
+            self.baseline = baseline
+
         self.all_masks = []
         self.all_pred = []
 
@@ -39,17 +46,20 @@ class MaskedRespGen:
         
         h = self.ishape[0]
         w = self.ishape[1]
+        
+        baseline = self.baseline.to(inp.device)
 
-
-        for idx in tqdm(range(itr)):
+        for idx in tqdm(range(itr)):            
             masks = self.mgen.gen_masks(batch_size)
-            dmasks = masks.to(inp.device)    
+            dmasks = masks.to(inp.device).float()
 
-            out = model(inp * dmasks.unsqueeze(1)) ## CHNG
+            pert_inp = inp * dmasks.unsqueeze(1) + baseline * (1.0-dmasks.unsqueeze(1))
+            out = model(pert_inp) ## CHNG
             mout = out.unsqueeze(-1).unsqueeze(-1)
             
             self.all_masks.append(masks.cpu())
             self.all_pred.append(mout.cpu())
+
 
     def gen(self, model, inp, nmasks, batch_size=32, **kwargs):        
         with torch.no_grad():
@@ -96,9 +106,13 @@ def optimize_explanation_i(
         c_concentration=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
-        renorm=False):
+        renorm=False, baseline=None):
     mse = nn.MSELoss()  # Mean Squared Error loss
     tv = TotalVariationLoss()
+
+    if baseline is None:
+        assert False ## no default
+        baseline = torch.zeros(inp.shape).to(inp.device)
 
     #print(list(model.parameters()))
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
@@ -136,7 +150,7 @@ def optimize_explanation_i(
 
         if c_model:
             explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())
-            masked_inp = explanation_mask * inp
+            masked_inp = explanation_mask * inp + (1-explanation_mask) * baseline
             prob = fmdl(masked_inp)
             model_loss = -torch.log(prob)
         else:
@@ -207,12 +221,52 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
 
 
 class MaskedRespData:
-    def __init__(self, baseline_score, label_score, added_score, all_masks, all_pred):
+    def __init__(self, baseline_score, label_score, added_score, all_masks, all_pred, baseline):
         self.baseline_score = baseline_score
         self.label_score = label_score
         self.added_score = added_score
         self.all_masks = all_masks
         self.all_pred = all_pred
+        self.baseline = baseline
+
+
+class ZeroBaseline:
+
+    def __init__(self):
+        pass
+
+    def __call__(self, inp):
+        return torch.zeros(inp.shape).to(inp.device)
+    
+    @property
+    def desc(self):
+        return "Zr"
+    
+class RandBaseline:
+
+    def __init__(self):
+        pass
+
+    def __call__(self, inp):
+        return torch.normal(0.5, 0.25, size=inp.shape).to(inp.device)    
+    
+    @property
+    def desc(self):
+        return "Rnd"
+
+class BlurBaseline:
+
+    def __init__(self, ksize=31, sigma=17.0):
+        self.ksize = ksize
+        self.sigma = sigma
+        self.gaussian_blur = T.GaussianBlur(kernel_size=(ksize, ksize), sigma=sigma)        
+
+    def __call__(self, inp):
+        return self.gaussian_blur(inp)
+            
+    @property
+    def desc(self):
+        return "Blr{self.ksize}x{self.sigma}"
 
 class CompExpCreator:
 
@@ -224,8 +278,10 @@ class CompExpCreator:
                  epochs=200, 
                  model_epochs=200, c_model=0,
                  mgen=None,
-                 desc = "MComp",                 
+                 desc = "MComp",
+                 baseline_gen = ZeroBaseline(),                 
                  **kwargs):
+        
         self.segsize = segsize
         self.nmasks = nmasks
         self.batch_size = batch_size
@@ -242,6 +298,7 @@ class CompExpCreator:
         self.model_epochs = model_epochs
         self.desc = desc
         self.mgen = mgen
+        self.baseline_gen = baseline_gen
         if self.model_epochs == 0 or self.c_model == 0:
             self.model_epochs = 0
             self.c_model = 0
@@ -283,15 +340,16 @@ class CompExpCreator:
         #    f"{self.desc}_{self.nmasks}_{self.segsize}{ksdesc}_{self.epochs}_{self.c_completeness}_{self.c_smoothness}" : sal.cpu().unsqueeze(0)
         #}
 
-    def generate_data(self, me, inp, catidx):        
-        mgen = MaskedRespGen(self.segsize, mgen=self.mgen)
+    def generate_data(self, me, inp, catidx):
+        baseline = self.baseline_gen(inp)
+        mgen = MaskedRespGen(self.segsize, mgen=self.mgen, baseline=baseline)
         fmdl = me.narrow_model(catidx, with_softmax=True)
         logging.debug(f"generating {self.nmasks} masks and responses")
-        mgen.gen(fmdl, inp, self.nmasks, batch_size=self.batch_size)
+        mgen.gen(fmdl, inp, self.nmasks, batch_size=self.batch_size,)        
         logging.debug("Done generating masks")
 
-        rfactor = inp.numel()
-        baseline_score = fmdl(torch.zeros(inp.shape).to(inp.device)).detach().squeeze() * rfactor
+        rfactor = inp.numel()        
+        baseline_score = fmdl(baseline).detach().squeeze() * rfactor
         label_score = fmdl(inp).detach().squeeze() * rfactor
 
         added_score = label_score - baseline_score
@@ -307,6 +365,7 @@ class CompExpCreator:
             added_score = added_score,
             all_masks = all_masks,
             all_pred = all_pred,
+            baseline = baseline
         )
 
     def explain(self, me, inp, catidx, data=None, initial=None):
@@ -325,7 +384,8 @@ class CompExpCreator:
                                    c_tv=self.c_tv, c_selfness=self.c_selfness,
                                    c_mask_completeness=self.c_mask_completeness,
                                    c_model=self.c_model,
-                                   c_concentration=self.c_concentration)
+                                   c_concentration=self.c_concentration,
+                                   baseline=data.baseline)
         
         return sal
 
@@ -333,19 +393,27 @@ class CompExpCreator:
 
 class MultiCompExpCreator:
 
-    def __init__(self, nmasks=500, segsize=64, batch_size=32, groups=[]):
+    def __init__(self, nmasks=500, segsize=64, batch_size=32, baselines=[ZeroBaseline()],
+                 groups=[]):
         self.nmasks = nmasks
         self.segsize=segsize
         self.batch_size = batch_size
+        self.baselines = baselines
         self.groups = groups
 
     def __call__(self, me, inp, catidx):
-        dc = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size)
-        data = dc.generate_data(me, inp, catidx)
         all_sals = {}
-        for kwargs in self.groups:
-            algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size, **kwargs)
-            res = algo(me, inp, catidx, data=data)
-            all_sals.update(res)
+        for bgen in self.baselines:
+            desc = "MComp" + bgen.desc
+            dc = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size,
+                                baseline_gen=bgen
+                                )
+            data = dc.generate_data(me, inp, catidx)
+            
+            for kwargs in self.groups:
+                algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size, 
+                                      desc=desc, **kwargs)
+                res = algo(me, inp, catidx, data=data)
+                all_sals.update(res)
         return all_sals
 
