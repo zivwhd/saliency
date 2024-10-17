@@ -415,5 +415,6 @@ class MultiCompExpCreator:
                                       desc=desc, **kwargs)
                 res = algo(me, inp, catidx, data=data)
                 all_sals.update(res)
+        logging.info(f"generated: {list(all_sals.keys())}")
         return all_sals
 
