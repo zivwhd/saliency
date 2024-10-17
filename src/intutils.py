@@ -52,7 +52,7 @@ def toquant(sal):
 def showsal(sal, img, caption="", quantile=0.9):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
-    
+    mask = (sal - sal.min()) / (sal.max()-sal.min())
     plt.subplot(1, 4, 1)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
@@ -74,7 +74,7 @@ def showsal(sal, img, caption="", quantile=0.9):
     plt.yticks([])
 
     plt.subplot(1, 4, 4)
-    mask = (sal - sal.min()) / (sal.max()-sal.min())
+    
     masked_img = (mask.unsqueeze(-1).numpy() *img).astype(int)
     plt.imshow(masked_img)
     plt.xticks([])  

@@ -103,11 +103,12 @@ class MaskedExplanationSum(nn.Module):
 def optimize_explanation_i(
         fmdl, inp, mexp, data, targets, epochs=10, lr=0.001, score=1.0, 
         c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,
-        c_concentration=0,
+        c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
         renorm=False, baseline=None):
     mse = nn.MSELoss()  # Mean Squared Error loss
+    bce = nn.BCELoss(reduction="mean")
     tv = TotalVariationLoss()
 
     if baseline is None:
@@ -116,12 +117,13 @@ def optimize_explanation_i(
 
     #print(list(model.parameters()))
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
-    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_concentration={c_concentration}; avg_kernel_size={avg_kernel_size}")
+    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}")
     optimizer = optim.Adam(mexp.parameters(), lr=lr)
     mexp.normalize(score)
     mexp.train()
     avg_kernel = torch.ones((1,) + avg_kernel_size).to(data.device)
     avg_kernel = avg_kernel / avg_kernel.numel()
+    
     for epoch in range(epochs):
                 
         # Forward pass
@@ -150,18 +152,18 @@ def optimize_explanation_i(
 
         if c_model:
             explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())
-            masked_inp = explanation_mask * inp + (1-explanation_mask) * baseline
-            prob = fmdl(masked_inp)
+            masked_inp = explanation_mask * inp + (1-explanation_mask) * baseline            
+            prob = fmdl(masked_inp)            
             model_loss = -torch.log(prob)
         else:
             model_loss = 0
 
-        if c_concentration != 0:
-            #norm_explanation = (explanation / torch.sqrt(explanation*explanation))
-            norm_explanation = (explanation / explanation.sum())
-            concentration_loss = - ((norm_explanation ** 2).sum())
+        if c_magnitude != 0:            
+            explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
+            flat_mask = explanation_mask.flatten()
+            magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device)) # explanation_mask.abs().mean()
         else:
-            concentration_loss = 0
+            magnitude_loss = 0
 
         ## tar loss
         if c_selfness != 0:
@@ -180,21 +182,23 @@ def optimize_explanation_i(
             c_tv * tv_loss +
             c_selfness * tar_loss +
             c_model * model_loss + 
-            c_concentration * concentration_loss
+            c_magnitude * magnitude_loss
             )
         
         total_loss.backward()        
         optimizer.step()
 
+
         # Normalize the explanation with the given score
         if epoch % 100 == 0 and renorm:
             mexp.normalize(score)
         
-        pdesc = (f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={explanation.sum()}; comp_loss={comp_loss}; "
-                f"exp_loss={explanation_loss}; conv_loss={conv_loss}; tv_loss={tv_loss}; model_loss={model_loss};"
-                f"concentration_loss={concentration_loss}")
-        logging.debug(pdesc)
-        print(pdesc)
+        if epoch % 10 == 0:
+            pdesc = (f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={explanation.sum()}; comp_loss={comp_loss}; "
+                    f"exp_loss={explanation_loss}; conv_loss={conv_loss}; tv_loss={tv_loss}; model_loss={model_loss};"
+                    f"magnitude_loss={magnitude_loss}")
+            logging.debug(pdesc)
+            print(pdesc)
 
 
 def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.0, 
@@ -212,7 +216,7 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
     print(f"Optimization I: {mid_time -start_time}")    
     if model_epochs:
         optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, c_model=c_model, epochs=model_epochs, **kwargs)
-    end_time = time.time()
+    end_time = time.time()    
     logging.info(f"Optimization Done: ({mid_time - start_time}) , ({end_time - start_time})")    
     print(f"Optimization Done: ({mid_time - start_time}) , ({end_time - start_time})")    
     mexp.normalize(score)
@@ -273,7 +277,7 @@ class CompExpCreator:
     def __init__(self, nmasks=500, segsize=64, batch_size=32, 
                  lr = 0.05, c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
-                 c_concentration=0,
+                 c_magnitude=0,
                  avg_kernel_size=(5,5),
                  epochs=200, 
                  model_epochs=200, c_model=0,
@@ -291,7 +295,7 @@ class CompExpCreator:
         self.c_selfness = c_selfness
         self.c_mask_completeness = c_mask_completeness
         self.c_model = c_model
-        self.c_concentration = c_concentration
+        self.c_magnitude = c_magnitude
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
@@ -384,7 +388,7 @@ class CompExpCreator:
                                    c_tv=self.c_tv, c_selfness=self.c_selfness,
                                    c_mask_completeness=self.c_mask_completeness,
                                    c_model=self.c_model,
-                                   c_concentration=self.c_concentration,
+                                   c_magnitude=self.c_magnitude,
                                    baseline=data.baseline)
         
         return sal
@@ -394,17 +398,19 @@ class CompExpCreator:
 class MultiCompExpCreator:
 
     def __init__(self, nmasks=500, segsize=64, batch_size=32, baselines=[ZeroBaseline()],
+                 desc="MComp",
                  groups=[]):
         self.nmasks = nmasks
         self.segsize=segsize
         self.batch_size = batch_size
         self.baselines = baselines
         self.groups = groups
+        self.desc = desc
 
     def __call__(self, me, inp, catidx):
         all_sals = {}
         for bgen in self.baselines:
-            desc = "MComp" + bgen.desc
+            desc = self.desc + bgen.desc
             dc = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size,
                                 baseline_gen=bgen
                                 )

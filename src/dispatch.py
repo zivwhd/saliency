@@ -20,7 +20,7 @@ def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
 
 def get_mcomp_sal_creator():
-    baselines = [ZeroBaseline(), RandBaseline(), BlurBaseline()]
+    baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         segsize=48, nmasks=500, 
         baselines = baselines,
@@ -29,6 +29,16 @@ def get_mcomp_sal_creator():
             dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0.05),        
     ])
     
+def get_emask_sal_creator():
+    baselines = [ZeroBaseline()]
+    return MultiCompExpCreator(
+        desc="EMask",
+        segsize=48, nmasks=500, 
+        baselines = baselines,
+        groups=[        
+            dict(c_mask_completeness=0, c_completeness=0.1, c_model=0.5, c_tv=2, c_magnitude=2),
+            dict(c_mask_completeness=0.1, c_completeness=0.1, c_model=0.5, c_tv=2, c_magnitude=2),
+    ])
 
 def get_comp_sal_creator():
 
