@@ -21,9 +21,12 @@ def get_mpert_sal_creator():
 
 def get_mcomp_sal_creator():
     baselines = [ZeroBaseline(), RandBaseline(), BlurBaseline()]
-    return MultiCompExpCreator(segsize=48, nmasks=500, groups=[        
-        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0),                
-        dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0.05),        
+    return MultiCompExpCreator(
+        segsize=48, nmasks=500, 
+        baselines = baselines,
+        groups=[        
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0),                
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0.05),        
     ])
     
 
