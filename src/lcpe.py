@@ -266,7 +266,7 @@ class BlurBaseline:
             
     @property
     def desc(self):
-        return "Blr{self.ksize}x{self.sigma}"
+        return f"Blr{self.ksize}x{self.sigma}"
 
 class CompExpCreator:
 
