@@ -134,9 +134,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print("### START", file=sys.stderr)
-    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)        
+    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG, stream=sys.stderr)
     logging.info(f"args: {args}")
-    
+
     EXPLAINEE_MODEL_NAME, EXPLAINER_MODEL_NAME = MODEL_ALIAS_MAPPING[args.explainee_model_name], \
                                                  MODEL_ALIAS_MAPPING[args.explainer_model_name]
 
