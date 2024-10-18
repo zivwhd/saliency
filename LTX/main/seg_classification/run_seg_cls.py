@@ -50,6 +50,11 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 gc.collect()
 
 def init_logger():
+    logging.basicConfig(
+        level=logging.DEBUG,  # Set the logging level globally
+        stream=sys.stderr,   # Direct all logs to stderr
+        format='%(asctime)s - %(levelname)s - %(message)s'  # Log format
+    )    
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)  # Set the logging level
 
