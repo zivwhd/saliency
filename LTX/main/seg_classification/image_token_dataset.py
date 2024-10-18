@@ -111,7 +111,7 @@ class ImageSegDataset(Dataset):
         with open(include_set_path,"rt") as incf:
             include_set = set([f"{x}.JPEG" for  x in incf.read().split()])
             sdf = df[df['img_name'].isin(include_set)]
-            logging.info("reduced image data set {df.shape} => {sdf.shape}")
+            logging.info(f"reduced image data set {df.shape} => {sdf.shape}")
             df = sdf
 
         images_name = df.img_name.values.tolist()
