@@ -1,5 +1,12 @@
 import sys, os, logging
 
+logging.basicConfig(
+    level=logging.DEBUG,  # Set the logging level globally
+    stream=sys.stderr,   # Direct all logs to stderr
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Log format
+    )    
+logging.info("AAAAAAAAA")
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 targets = [ os.path.dirname(os.path.dirname(current_dir))  ]
 for path in targets:
