@@ -106,10 +106,9 @@ class ImageSegDataset(Dataset):
         
         df = pd.read_csv(images_csv_path)
 
-
         assert include_set_path
         with open(include_set_path,"rt") as incf:
-            include_set = set([f"{x}.JPEG" for  x in incf.read().split()])
+            include_set = set(incf.read().split())
             logging.info(f"include set size: {len(include_set)}")
             sdf = df[df['img_name'].isin(include_set)]
             logging.info(f"reduced image data set {df.shape} => {sdf.shape}")
