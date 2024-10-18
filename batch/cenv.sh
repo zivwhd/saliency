@@ -73,6 +73,7 @@ pip3 install torchray
 pip3 install quantus
 
 pip3 install wandb
+pip3 install pytorch-lightning
 
 # Verify the installation
 echo verifying ...

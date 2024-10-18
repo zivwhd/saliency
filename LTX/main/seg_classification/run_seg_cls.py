@@ -1,3 +1,12 @@
+import sys, os, logging
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+targets = [ os.path.dirname(os.path.dirname(current_dir))  ]
+for path in targets:
+    if path not in sys.path:
+        logging.info(f"adding {path}")
+        sys.path.append(path)
+
 import argparse
 import os
 from distutils.util import strtobool
