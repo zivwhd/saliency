@@ -10,6 +10,7 @@ from models.modeling_vit_patch_classification import ViTForMaskGeneration
 from vit_loader.load_vit import load_vit_pretrained_for_explanier, load_vit_pretrained_for_explaniee
 
 CONVNET_MODELS_BY_NAME = {"resnet": models.resnet101(pretrained=True),
+                          "resnet50": models.resnet50(pretrained=True),
                           "densenet": models.densenet201(pretrained=True),
                           }
 

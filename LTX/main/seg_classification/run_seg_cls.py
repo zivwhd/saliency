@@ -67,8 +67,8 @@ if __name__ == '__main__':
     params_config = get_params_from_config(config_vit=config["resnet50"])
 
     parser = argparse.ArgumentParser(description='Train pEEA model')
-    parser.add_argument('--explainer-model-name', type=str, default="resnet", choices=MODEL_OPTIONS)
-    parser.add_argument('--explainee-model-name', type=str, default="resnet", choices=MODEL_OPTIONS)
+    parser.add_argument('--explainer-model-name', type=str, default=params_config["explainer_model_name"], choices=MODEL_OPTIONS)
+    parser.add_argument('--explainee-model-name', type=str, default=params_config["explainee_model_name"], choices=MODEL_OPTIONS)
     parser.add_argument("--train-model-by-target-gt-class",
                         type=lambda x: bool(strtobool(x)),
                         nargs='?',

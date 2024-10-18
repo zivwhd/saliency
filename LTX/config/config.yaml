@@ -58,11 +58,11 @@ resnet50:
   is_clamp_between_0_to_1: True
   train_model_by_target_gt_class: False
   optimize_by_pos: True
-  explainer_model_name: resnet
+  explainer_model_name: resnet50
 #  explainer_model_name: google/vit-base-patch16-224
 #  explainer_model_name: WinKawaks/vit-small-patch16-224
 #  explainee_model_name: google/vit-base-patch16-224
-  explainee_model_name: resnet # densenet
+  explainee_model_name: resnet50 # densenet
   is_competitive_method_transforms: False
   img_size: 224
   patch_size: 16
