@@ -72,6 +72,8 @@ pip3 install torchshow
 pip3 install torchray
 pip3 install quantus
 
+pip3 install wandb
+
 # Verify the installation
 echo verifying ...
 srun nvcc --version
