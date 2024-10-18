@@ -239,7 +239,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         #    outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
         #)
         epoch_auc = -1
-        if self.current_epoch >= self.start_epoch_to_evaluate:
+        if self.current_epoch >= self.start_epoch_to_evaluate and False:
             epoch_auc = run_perturbation_test(
                 model=self.vit_for_classification_image,
                 outputs=outputs,
