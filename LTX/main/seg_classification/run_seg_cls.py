@@ -249,7 +249,7 @@ if __name__ == '__main__':
         callbacks=callbacks,
         logger=[],
         accelerator='gpu',
-        auto_select_gpus=True,
+        #auto_select_gpus=True,        
         max_epochs=args.n_epochs,
         gpus=1,
         progress_bar_refresh_rate=30,
