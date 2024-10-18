@@ -18,6 +18,7 @@ class ImageSegDataModule(pl.LightningDataModule):
             train_n_label_sample: int,
             val_n_label_sample: int,
             feature_extractor: ViTFeatureExtractor = None,
+            include_set_path: str = "",
     ):
         super().__init__()
         self.batch_size = batch_size
@@ -30,6 +31,7 @@ class ImageSegDataModule(pl.LightningDataModule):
         self.train_n_label_sample = train_n_label_sample
         self.val_n_label_sample = val_n_label_sample
         self.feature_extractor = feature_extractor
+        self.include_set_path = include_set_path
 
     def setup(self, stage=None):
         dataset = ImageSegDataset(
@@ -48,6 +50,7 @@ class ImageSegDataModule(pl.LightningDataModule):
                                            is_explaniee_convnet=self.is_explaniee_convnet,
                                            is_competitive_method_transforms=self.is_competitive_method_transforms,
                                            feature_extractor=self.feature_extractor,
+                                           include_set_path=self.include_set_path
                                            )
 
         self.val_dataset = ImagesDataset(images_path=self.val_images_path,
@@ -56,6 +59,7 @@ class ImageSegDataModule(pl.LightningDataModule):
                                          is_explaniee_convnet=self.is_explaniee_convnet,
                                          is_competitive_method_transforms=self.is_competitive_method_transforms,
                                          feature_extractor=self.feature_extractor,
+                                         include_set_path=self.include_set_path
                                          )
 
     def train_dataloader(self):

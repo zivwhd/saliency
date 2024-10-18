@@ -6,6 +6,7 @@ cuda = torch.cuda.is_available()
 ROOT_DIR: Path = Path(__file__).parent.parent
 DATA_PATH: Path = Path(ROOT_DIR, 'data')
 
+TRAINING_SET_INCLUDE_PATH = ""
 IMAGENET_VAL_IMAGES_FOLDER_PATH = "" # TODO - insert imagenet data path
 SEGMENTATION_DATASET_PARENT_FOLDER = "" # TODO - insert gtsegs_ijcv.mat path
 IMAGENET_SEG_PATH = Path(SEGMENTATION_DATASET_PARENT_FOLDER, "gtsegs_ijcv.mat")

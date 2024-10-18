@@ -35,6 +35,7 @@ import pytorch_lightning as pl
 from utils.consts import (
     IMAGENET_VAL_IMAGES_FOLDER_PATH,
     EXPERIMENTS_FOLDER_PATH, MODEL_OPTIONS, MODEL_ALIAS_MAPPING,
+    TRAINING_SET_INCLUDE_PATH,
 )
 from utils.vit_utils import (
     get_warmup_steps_and_total_training_steps,
@@ -187,7 +188,9 @@ if __name__ == '__main__':
         is_sampled_val_data_uniformly=args.is_sampled_val_data_uniformly,
         is_competitive_method_transforms=args.is_competitive_method_transforms,
         train_n_label_sample=args.train_n_label_sample,
-        val_n_label_sample=args.val_n_label_sample
+        val_n_label_sample=args.val_n_label_sample,
+        include_set_path=TRAINING_SET_INCLUDE_PATH,
+
     )
 
     warmup_steps, total_training_steps = get_warmup_steps_and_total_training_steps(
