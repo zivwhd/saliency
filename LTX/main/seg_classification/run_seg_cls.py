@@ -74,7 +74,7 @@ if __name__ == '__main__':
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class True --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_target.out &
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class False --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_predicted.out &
     """
-
+    init_logger()
     params_config = get_params_from_config(config_vit=config["vit"])
 
     parser = argparse.ArgumentParser(description='Train pEEA model')
