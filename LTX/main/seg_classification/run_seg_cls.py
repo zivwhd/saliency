@@ -49,6 +49,26 @@ seed_everything(config["general"]["seed"])
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 gc.collect()
 
+def init_logger():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)  # Set the logging level
+
+    # Create a StreamHandler that logs to stderr
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(logging.DEBUG)  # Set the handler's logging level
+
+    # Create a formatter and set it for the handler
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    stderr_handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(stderr_handler)
+
+    # Now you can log to stderr
+    print("### init logger", file=sys.stderr)
+    logger.info("This message will be logged to stderr")
+    logging.info("ok")
+
 if __name__ == '__main__':    
     """
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class True --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_target.out &
