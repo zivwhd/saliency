@@ -75,6 +75,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.verbose = verbose
         self.outputs = []
         self.val_outputs = []
+        self.epoch_count = 0
 
     def normalize_mask_values(self, mask, is_clamp_between_0_to_1: bool):
         if is_clamp_between_0_to_1:
@@ -158,8 +159,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         resized_and_normalized_image = batch["resized_and_normalized_image"]
         image_resized = batch["image"]
         target_class = batch["target_class"]
-        output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)
-        
+        output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)        
         # images_mask = self.mask_patches_to_image_scores(output.tokens_mask) # [1, 1, 224, 224]
         images_mask = output.interpolated_mask
         rv =  {
@@ -208,13 +208,13 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         mask_loss = torch.mean(torch.stack([output["mask_loss"] for output in outputs]))
         pred_loss_mul = torch.mean(torch.stack([output["pred_loss_mul"] for output in outputs]))
         mask_loss_mul = torch.mean(torch.stack([output["mask_loss_mul"] for output in outputs]))
-
-        logging.info("on_train_epoch_end")
-        self.log("train/loss", loss, prog_bar=True, logger=True)
-        self.log("train/prediction_loss", pred_loss, prog_bar=True, logger=True)
-        self.log("train/mask_loss", mask_loss, prog_bar=True, logger=True)
-        self.log("train/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
-        self.log("train/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
+        self.epoch_count += 1
+        logging.info(f"[{self.epoch_count}] on_train_epoch_end: loss={loss}; pred_loss={pred_loss}; mask_loss={mask_loss}; pred_loss_mul={pred_loss_mul}; mask_loss_mul={mask_loss_mul}")
+        #self.log("train/loss", loss, prog_bar=True, logger=True)
+        ##self.log("train/prediction_loss", pred_loss, prog_bar=True, logger=True)
+        #self.log("train/mask_loss", mask_loss, prog_bar=True, logger=True)
+        #self.log("train/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
+        #self.log("train/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
         #self._visualize_outputs(
         #    outputs, stage="train", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
         #)
@@ -228,12 +228,13 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         mask_loss = torch.mean(torch.stack([output["mask_loss"] for output in outputs]))
         pred_loss_mul = torch.mean(torch.stack([output["pred_loss_mul"] for output in outputs]))
         mask_loss_mul = torch.mean(torch.stack([output["mask_loss_mul"] for output in outputs]))
-
-        self.log("val/loss", loss, prog_bar=True, logger=True)
-        self.log("val/prediction_loss", pred_loss, prog_bar=True, logger=True)
-        self.log("val/mask_loss", mask_loss, prog_bar=True, logger=True)
-        self.log("val/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
-        self.log("val/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
+        
+        logging.info(f"on_validation_epoch_end loss={loss}; pred_loss={pred_loss}; mask_loss={mask_loss}; pred_loss_mul={pred_loss_mul}; mask_loss_mul={mask_loss_mul}")
+        #self.log("val/loss", loss, prog_bar=True, logger=True)
+        #self.log("val/prediction_loss", pred_loss, prog_bar=True, logger=True)
+        #self.log("val/mask_loss", mask_loss, prog_bar=True, logger=True)
+        #self.log("val/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
+        #self.log("val/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
 
         #self._visualize_outputs(
         #    outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
