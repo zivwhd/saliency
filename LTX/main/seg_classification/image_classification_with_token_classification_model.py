@@ -72,6 +72,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.n_batches_to_visualize = n_batches_to_visualize
         self.start_epoch_to_evaluate = start_epoch_to_evaluate
         self.verbose = verbose
+        self.outputs = []
+        self.val_outputs = []
 
     def normalize_mask_values(self, mask, is_clamp_between_0_to_1: bool):
         if is_clamp_between_0_to_1:
@@ -156,7 +158,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         image_resized = batch["image"]
         target_class = batch["target_class"]
         output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)
-
+        self.outputs.append(output)
         # images_mask = self.mask_patches_to_image_scores(output.tokens_mask) # [1, 1, 224, 224]
         images_mask = output.interpolated_mask
         return {
@@ -178,6 +180,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         image_resized = batch["image"]
         target_class = batch["target_class"]
         output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)
+        self.val_outputs.append(output)
         images_mask = output.interpolated_mask
 
         return {
