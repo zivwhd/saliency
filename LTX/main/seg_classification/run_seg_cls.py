@@ -50,6 +50,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 gc.collect()
 
 if __name__ == '__main__':
+    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)        
     """
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class True --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_target.out &
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class False --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_predicted.out &
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('--val-n-label-sample', type=int, default=params_config["val_n_label_sample"])
 
     args = parser.parse_args()
-
+    logging.info(f"args: {args}")
     EXPLAINEE_MODEL_NAME, EXPLAINER_MODEL_NAME = MODEL_ALIAS_MAPPING[args.explainee_model_name], \
                                                  MODEL_ALIAS_MAPPING[args.explainer_model_name]
 
@@ -236,9 +237,8 @@ if __name__ == '__main__':
             ModelCheckpoint(monitor="val/epoch_auc", mode="min", dirpath=checkpoints_default_root_dir, verbose=True,
                             filename="{epoch}_{val/epoch_auc:.3f}", save_top_k=args.n_epochs)
         )
-
-    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)    
-    logger = logging.getLogger(__name__)
+    
+    #logger = logging.getLogger(__name__)
 
     #WANDB_PROJECT = config["general"]["wandb_project"]
     #ic(WANDB_PROJECT, config["general"]["wandb_entity"], wandb.config)
