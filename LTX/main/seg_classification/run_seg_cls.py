@@ -54,7 +54,7 @@ if __name__ == '__main__':
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class True --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_target.out &
     CUDA_VISIBLE_DEVICES=0 PYTHONPATH=./:$PYTHONPATH nohup python main/seg_classification/run_seg_cls.py --enable-checkpointing True --explainer-model-name resnet --explainee-model-name resnet --mask-loss-mul 50 --train-model-by-target-gt-class False --n-epochs 30 --train-n-label-sample 6 &> nohups_logs/journal/resnet_6000_bs32_ml50_predicted.out &
     """
-    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)        
+
     params_config = get_params_from_config(config_vit=config["vit"])
 
     parser = argparse.ArgumentParser(description='Train pEEA model')
@@ -134,7 +134,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     print("### START", file=sys.stderr)
+    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)        
     logging.info(f"args: {args}")
+    
     EXPLAINEE_MODEL_NAME, EXPLAINER_MODEL_NAME = MODEL_ALIAS_MAPPING[args.explainee_model_name], \
                                                  MODEL_ALIAS_MAPPING[args.explainer_model_name]
 
