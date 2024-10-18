@@ -76,6 +76,7 @@ class ImageSegDataset(Dataset):
             val_n_label_sample: int,
             is_sampled_train_data_uniformly: bool = True,
             is_sampled_val_data_uniformly: bool = True,
+            include_set_path: str = "",
     ):
         self.feature_extractor = feature_extractor
         self.images_path = images_path
@@ -86,11 +87,13 @@ class ImageSegDataset(Dataset):
                                               train_n_samples=train_n_samples,
                                               val_n_samples=val_n_samples,
                                               is_sampled_train_data_uniformly=is_sampled_train_data_uniformly,
-                                              is_sampled_val_data_uniformly=is_sampled_val_data_uniformly)
+                                              is_sampled_val_data_uniformly=is_sampled_val_data_uniformly,
+                                              include_set_path=include_set_path
+                                            )
         self.train_set = datasets["train_set"]
         self.train_gt_classes = datasets["train_gt_classes"]
         self.val_set = datasets["val_set"]
-        self.val_gt_classes = datasets["val_gt_classes"]
+        self.val_gt_classes = datasets["val_gt_classes"]        
 
     def sample_train_val_data(self,
                               images_csv_path: str,

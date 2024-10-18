@@ -41,6 +41,7 @@ class ImageSegDataModule(pl.LightningDataModule):
             is_sampled_val_data_uniformly=self.is_sampled_val_data_uniformly,
             train_n_label_sample=self.train_n_label_sample,
             val_n_label_sample=self.val_n_label_sample,
+            include_set_path=self.include_set_path
         )
         logging.info("### ImageSegDataModule setup")        
         
@@ -50,7 +51,7 @@ class ImageSegDataModule(pl.LightningDataModule):
                                            is_explaniee_convnet=self.is_explaniee_convnet,
                                            is_competitive_method_transforms=self.is_competitive_method_transforms,
                                            feature_extractor=self.feature_extractor,
-                                           include_set_path=self.include_set_path
+                                           include_set_path=self.include_set_path                                           
                                            )
 
         self.val_dataset = ImagesDataset(images_path=self.val_images_path,

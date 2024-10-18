@@ -177,7 +177,7 @@ if __name__ == '__main__':
         img_size=args.img_size,
     )
 
-    logging.info(f"imagenet data path: {IMAGENET_VAL_IMAGES_FOLDER_PATH}")
+    logging.info(f"imagenet data path: {IMAGENET_VAL_IMAGES_FOLDER_PATH} {TRAINING_SET_INCLUDE_PATH}")
     data_module = ImageSegDataModule(
         feature_extractor=feature_extractor,
         is_explaniee_convnet=IS_EXPLANIEE_CONVNET,
