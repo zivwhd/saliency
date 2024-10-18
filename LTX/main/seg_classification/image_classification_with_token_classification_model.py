@@ -193,7 +193,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             "patches_mask": output.tokens_mask,
         }
 
-    def training_epoch_end(self, outputs):
+    def on_train_epoch_end(self):
+        outputs = self.outputs
         loss = torch.mean(torch.stack([output["loss"] for output in outputs]))
         pred_loss = torch.mean(torch.stack([output["pred_loss"] for output in outputs]))
         mask_loss = torch.mean(torch.stack([output["mask_loss"] for output in outputs]))
@@ -205,9 +206,10 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.log("train/mask_loss", mask_loss, prog_bar=True, logger=True)
         self.log("train/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
         self.log("train/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
-        self._visualize_outputs(
-            outputs, stage="train", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
-        )
+        #self._visualize_outputs(
+        #    outputs, stage="train", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
+        #)
+        self.outputs.clear() 
 
     def validation_epoch_end(self, outputs):
         loss = torch.mean(torch.stack([output["loss"] for output in outputs]))
