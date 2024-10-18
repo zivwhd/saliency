@@ -1,6 +1,6 @@
 import torch
 import os
-import random
+import random, logging
 from typing import Union, List, Dict, Tuple
 import pandas as pd
 from pytorch_lightning import seed_everything
@@ -35,6 +35,7 @@ class ImagesDataset(Dataset):
         self.targets = targets
         self.is_competitive_method_transforms = is_competitive_method_transforms
         self.is_explaniee_convnet = is_explaniee_convnet
+        logging.info("### Initializing ImageDataset")
 
     def __len__(self):
         return len(self.images_name)
