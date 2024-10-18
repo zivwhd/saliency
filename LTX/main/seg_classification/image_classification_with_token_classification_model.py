@@ -211,7 +211,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         #)
         self.outputs.clear() 
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self):
+        outputs = self.val_outputs
         loss = torch.mean(torch.stack([output["loss"] for output in outputs]))
         pred_loss = torch.mean(torch.stack([output["pred_loss"] for output in outputs]))
         mask_loss = torch.mean(torch.stack([output["mask_loss"] for output in outputs]))
@@ -224,9 +225,9 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.log("val/prediction_loss_mul", pred_loss_mul, prog_bar=True, logger=True)
         self.log("val/mask_loss_mul", mask_loss_mul, prog_bar=True, logger=True)
 
-        self._visualize_outputs(
-            outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
-        )
+        #self._visualize_outputs(
+        #    outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
+        #)
         epoch_auc = -1
         if self.current_epoch >= self.start_epoch_to_evaluate:
             epoch_auc = run_perturbation_test(
@@ -241,6 +242,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             )
 
         self.log("val/epoch_auc", epoch_auc, prog_bar=True, logger=True)
+        self.val_outputs.clear()
         return {"loss": loss}
 
     def configure_optimizers(self):
