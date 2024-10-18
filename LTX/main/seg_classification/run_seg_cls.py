@@ -143,6 +143,7 @@ if __name__ == '__main__':
                                             mask_loss_mul=args.mask_loss_mul,
                                             prediction_loss_mul=args.prediction_loss_mul,
                                             )
+    ic(args.default_root_dir)
     os.makedirs(args.default_root_dir, exist_ok=True)
     ic(args.verbose)
     ic(args.batch_size)

@@ -74,10 +74,13 @@ pip3 install quantus
 
 pip3 install wandb
 pip3 install pytorch-lightning
+pip3 install transformers
+pip3 install icecream
 
 # Verify the installation
 echo verifying ...
 srun nvcc --version
+
 
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
