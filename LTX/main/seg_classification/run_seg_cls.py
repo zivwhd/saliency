@@ -237,14 +237,17 @@ if __name__ == '__main__':
                             filename="{epoch}_{val/epoch_auc:.3f}", save_top_k=args.n_epochs)
         )
 
-    WANDB_PROJECT = config["general"]["wandb_project"]
-    ic(WANDB_PROJECT, config["general"]["wandb_entity"], wandb.config)
-    run = wandb.init(project=WANDB_PROJECT, entity=config["general"]["wandb_entity"], config=wandb.config)
-    wandb_logger = WandbLogger(name=f"{exp_name}", project=WANDB_PROJECT)
+    logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d] %(message)s', level=logging.DEBUG)    
+    logger = logging.getLogger(__name__)
+
+    #WANDB_PROJECT = config["general"]["wandb_project"]
+    #ic(WANDB_PROJECT, config["general"]["wandb_entity"], wandb.config)
+    #run = wandb.init(project=WANDB_PROJECT, entity=config["general"]["wandb_entity"], config=wandb.config)
+    #wandb_logger = WandbLogger(name=f"{exp_name}", project=WANDB_PROJECT)
 
     trainer = pl.Trainer(
         callbacks=callbacks,
-        logger=[wandb_logger],
+        logger=[],
         accelerator='gpu',
         auto_select_gpus=True,
         max_epochs=args.n_epochs,
