@@ -25,7 +25,7 @@ vit:
   is_freezing_explaniee_model: True
   freeze_classification_head: False
   batch_size: 32
-  default_root_dir:
+  default_root_dir: "/home/weziv5/work/ltx"
   plot_path: ""
   experiments_path: ""
   enable_checkpointing: False
