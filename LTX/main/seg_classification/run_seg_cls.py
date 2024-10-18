@@ -251,7 +251,7 @@ if __name__ == '__main__':
         accelerator='gpu',
         #auto_select_gpus=True,        
         max_epochs=args.n_epochs,
-        gpus=1,
+        devices=1,
         progress_bar_refresh_rate=30,
         num_sanity_val_steps=0,
         default_root_dir=checkpoints_default_root_dir,
