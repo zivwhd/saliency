@@ -238,6 +238,7 @@ if __name__ == '__main__':
         )
 
     WANDB_PROJECT = config["general"]["wandb_project"]
+    ic(WANDB_PROJECT, config["general"]["wandb_entity"], wandb.config)
     run = wandb.init(project=WANDB_PROJECT, entity=config["general"]["wandb_entity"], config=wandb.config)
     wandb_logger = WandbLogger(name=f"{exp_name}", project=WANDB_PROJECT)
 
