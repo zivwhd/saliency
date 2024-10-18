@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Union
 import pytorch_lightning as pl
 import torch
+import logging
 from torch.optim import AdamW
 from torchvision.models import DenseNet, ResNet
 from transformers import get_linear_schedule_with_warmup
@@ -158,10 +159,10 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         image_resized = batch["image"]
         target_class = batch["target_class"]
         output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)
-        self.outputs.append(output)
+        
         # images_mask = self.mask_patches_to_image_scores(output.tokens_mask) # [1, 1, 224, 224]
         images_mask = output.interpolated_mask
-        return {
+        rv =  {
             "loss": output.lossloss_output.loss,
             "pred_loss": output.lossloss_output.pred_loss,
             "pred_loss_mul": output.lossloss_output.prediction_loss_multiplied,
@@ -173,6 +174,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             "image_resized": image_resized,
             "patches_mask": output.tokens_mask,
         }
+        self.outputs.append(rv)
+        return rv
 
     def validation_step(self, batch, batch_idx):
         inputs = batch["pixel_values"].squeeze(1)
@@ -180,10 +183,10 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         image_resized = batch["image"]
         target_class = batch["target_class"]
         output = self.forward(inputs=inputs, image_resized=image_resized, target_class=target_class)
-        self.val_outputs.append(output)
+        
         images_mask = output.interpolated_mask
 
-        return {
+        rv =  {
             "loss": output.lossloss_output.loss,
             "pred_loss": output.lossloss_output.pred_loss,
             "pred_loss_mul": output.lossloss_output.prediction_loss_multiplied,
@@ -195,6 +198,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             "image_resized": image_resized,
             "patches_mask": output.tokens_mask,
         }
+        self.val_outputs.append(rv)
+        return rv
 
     def on_train_epoch_end(self):
         outputs = self.outputs
@@ -204,6 +209,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         pred_loss_mul = torch.mean(torch.stack([output["pred_loss_mul"] for output in outputs]))
         mask_loss_mul = torch.mean(torch.stack([output["mask_loss_mul"] for output in outputs]))
 
+        logging.info("on_train_epoch_end")
         self.log("train/loss", loss, prog_bar=True, logger=True)
         self.log("train/prediction_loss", pred_loss, prog_bar=True, logger=True)
         self.log("train/mask_loss", mask_loss, prog_bar=True, logger=True)
@@ -215,6 +221,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.outputs.clear() 
 
     def on_validation_epoch_end(self):
+        logging.info("on_validation_epoch_end")
         outputs = self.val_outputs
         loss = torch.mean(torch.stack([output["loss"] for output in outputs]))
         pred_loss = torch.mean(torch.stack([output["pred_loss"] for output in outputs]))
