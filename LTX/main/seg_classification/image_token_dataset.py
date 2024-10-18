@@ -96,9 +96,12 @@ class ImageSegDataset(Dataset):
                               images_csv_path: str,
                               is_sampled_train_data_uniformly: bool,
                               is_sampled_val_data_uniformly: bool,
-                              train_n_samples: int,
-                              val_n_samples: int) -> Dict[str, List[str]]:
+                              train_n_samples: int,                              
+                              val_n_samples: int,
+                              include_set_path = ""
+                              ) -> Dict[str, List[str]]:
         df = pd.read_csv(images_csv_path)
+        assert include_set_path
         images_name = df.img_name.values.tolist()
         val_set, val_gt_classes = self.sample_val(df=df,
                                                   images_name=images_name,

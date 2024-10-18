@@ -41,7 +41,7 @@ class ImageSegDataModule(pl.LightningDataModule):
             val_n_label_sample=self.val_n_label_sample,
         )
         logging.info("### ImageSegDataModule setup")        
-        raise Exception("AAAA")
+        
         self.train_dataset = ImagesDataset(images_path=self.train_images_path,
                                            images_name=dataset.train_set,
                                            targets=dataset.train_gt_classes,
