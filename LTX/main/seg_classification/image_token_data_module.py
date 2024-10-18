@@ -50,8 +50,7 @@ class ImageSegDataModule(pl.LightningDataModule):
                                            targets=dataset.train_gt_classes,
                                            is_explaniee_convnet=self.is_explaniee_convnet,
                                            is_competitive_method_transforms=self.is_competitive_method_transforms,
-                                           feature_extractor=self.feature_extractor,
-                                           include_set_path=self.include_set_path                                           
+                                           feature_extractor=self.feature_extractor,                                           
                                            )
 
         self.val_dataset = ImagesDataset(images_path=self.val_images_path,
@@ -59,8 +58,7 @@ class ImageSegDataModule(pl.LightningDataModule):
                                          targets=dataset.val_gt_classes,
                                          is_explaniee_convnet=self.is_explaniee_convnet,
                                          is_competitive_method_transforms=self.is_competitive_method_transforms,
-                                         feature_extractor=self.feature_extractor,
-                                         include_set_path=self.include_set_path
+                                         feature_extractor=self.feature_extractor,                                         
                                          )
 
     def train_dataloader(self):
