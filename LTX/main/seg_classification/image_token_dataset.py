@@ -100,8 +100,17 @@ class ImageSegDataset(Dataset):
                               val_n_samples: int,
                               include_set_path = ""
                               ) -> Dict[str, List[str]]:
+        
         df = pd.read_csv(images_csv_path)
+
+
         assert include_set_path
+        with open(include_set_path,"rt") as incf:
+            include_set = set([f"{x}.JPEG" for  x in incf.read().split()])
+            sdf = df[df['img_name'].isin(include_set)]
+            logging.info("reduced image data set {df.shape} => {sdf.shape}")
+            df = sdf
+
         images_name = df.img_name.values.tolist()
         val_set, val_gt_classes = self.sample_val(df=df,
                                                   images_name=images_name,
