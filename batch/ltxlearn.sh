@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=16g
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=SAL1000
+#SBATCH --job-name=LTXL
 #SBATCH --error=/home/weziv5/work/logs/%x-%j-%4t.err
 #SBATCH --output=/home/weziv5/work/logs/%x-%j-%4t.out
 
