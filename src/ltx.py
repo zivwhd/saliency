@@ -1,4 +1,4 @@
-import sys, os, logging
+import sys, os, logging, time
 import torch
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -25,6 +25,7 @@ class LTXSaliencyCreator:
             ImageClassificationWithTokenClassificationModel,
         )
         
+        load_start_time = time.time()
         model_name = me.arch
         
         args = get_params_from_config(config_vit=config[model_name])
@@ -75,11 +76,12 @@ class LTXSaliencyCreator:
         model.eval()
         mask_model = model.vit_for_patch_classification.to(inp.device)
         #mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
-        
+        load_end_time = time.time()        
+        logging.info(f"load time (sec): {load_end_time-load_start_time}")
         device = inp.device
         with torch.no_grad():
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             sal = interpolated_mask
-        sssss
+        
         return {"pLTX" : sal.cpu()}
