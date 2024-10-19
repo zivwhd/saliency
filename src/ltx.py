@@ -1,5 +1,5 @@
 import sys, os, logging
-
+import torch
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     targets = [ os.path.join(os.path.dirname(current_dir),"LTX")  ]
@@ -28,9 +28,14 @@ class LTXSaliencyCreator:
         )
 
         checkpoint_path = os.path.join(self.checkpoint_base_path, f"{model_name}_{self.variant}.ckpt")
-        mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
+        checkpoint = torch.load(checkpoint_path)
+        model_for_mask_generation.load_state_dict(checkpoint['state_dict'])
+        model_for_mask_generation.eval()
+        #mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
+        mask_model = model_for_mask_generation
         device = inp.device
-        sal = mask_model.to(inp)
+        with torch.no_grad():
+            sal = mask_model.to(inp)
         
         logging.info(f"sal shape: {sal.shape}")
         sssss
