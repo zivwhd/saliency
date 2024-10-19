@@ -245,8 +245,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             logging.info("eval metrics")
             del_score, ins_score = get_pert_score(
                 model=self.vit_for_classification_image, 
-                outputs=outputs,
-                is_neg=True)
+                outputs=outputs)
             logging.info(f"epoch scores: {del_score}, {ins_score}")
 
             if False:
