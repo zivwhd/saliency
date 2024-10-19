@@ -162,7 +162,9 @@ def move_to_device_data_vis_and_target(data, target=None, vis=None):
 
 
 def update_results_df(results_df: pd.DataFrame, vis_type: str, auc: float):
-    return results_df.append({'vis_type': vis_type, 'auc': auc}, ignore_index=True)
+    rdf = pd.DataFrame([{'vis_type': vis_type, 'auc': auc}])
+    return pd.concat([results_df, rdf])
+    #return results_df.append({'vis_type': vis_type, 'auc': auc}, ignore_index=True)
 
 
 import pickle
