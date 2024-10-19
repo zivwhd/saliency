@@ -46,7 +46,7 @@ def pert_metrics(model, inp, saliency, target, is_neg=False, nsteps=10):
         perturbation_size = int((vis.numel() * part).tolist())        
         if perturbation_size:
             _, idx = torch.topk(vis, perturbation_size, dim=-1)  # get top k pixels        
-            idx = idx.unsqueeze(1).repeat(1, org_shape[1], 1)
+            idx = idx.unsqueeze(1).repeat(1, org_shape[1], 1).to(_data.device)
             _data = _data.reshape(org_shape[0], org_shape[1], -1)                
             _data = _data.scatter_(-1, idx, 0)
             _data = _data.reshape(*org_shape)
