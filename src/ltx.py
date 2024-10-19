@@ -28,7 +28,8 @@ class LTXSaliencyCreator:
         model_name = me.arch
         
         args = get_params_from_config(config_vit=config[model_name])
-        img_size = tuple(inp.shape[-2:])
+        img_size = tuple([int(x) for x in inp.shape[-2:]])
+        logging.info(f"img_size={img_size}; {type(img_size[0])}")
 
         model_for_classification_image, model_for_mask_generation, feature_extractor = load_explainer_explaniee_models_and_feature_extractor(
             explainee_model_name=model_name,
