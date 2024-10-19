@@ -78,8 +78,8 @@ class LTXSaliencyCreator:
         
         device = inp.device
         with torch.no_grad():
-            sal = mask_model(inp)
-        
-        logging.info(f"sal shape: {sal.shape}")
+            interpolated_mask, tokens_mask = mask_model(inp)
+            logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
+            sal = interpolated_mask
         sssss
         return {"pLTX" : sal.cpu()}
