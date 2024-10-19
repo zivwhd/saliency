@@ -297,3 +297,4 @@ def plot_image(image) -> None:  # [1,3,224,224] or [3,224,224]
     image = image if len(image.shape) == 3 else image.squeeze(0)
     plt.imshow(image.cpu().detach().permute(1, 2, 0))
     plt.show();
+

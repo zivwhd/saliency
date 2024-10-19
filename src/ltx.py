@@ -19,12 +19,47 @@ class LTXSaliencyCreator:
 
     def __call__(self, me, inp, catidx):    
         from main.seg_classification.model_types_loading import load_explainer_explaniee_models_and_feature_extractor
+        from config import config
+        from utils.vit_utils import get_params_from_config
+        from main.seg_classification.image_classification_with_token_classification_model import (
+            ImageClassificationWithTokenClassificationModel,
+        )
+        
         model_name = me.arch
+        
+        args = get_params_from_config(config_vit=config[model_name])
+
         model_for_classification_image, model_for_mask_generation, feature_extractor = load_explainer_explaniee_models_and_feature_extractor(
             explainee_model_name=model_name,
             explainer_model_name=model_name,
             activation_function=self.activation_function,
             img_size=inp.shape[-2:],
+        )
+
+        is_convnet = ()"vit" not in model_name)
+        model = ImageClassificationWithTokenClassificationModel(
+            model_for_classification_image=model_for_classification_image,
+            model_for_mask_generation=model_for_mask_generation,
+            is_clamp_between_0_to_1=args.is_clamp_between_0_to_1,
+            plot_path=None,##plot_path,
+            warmup_steps=0, ##warmup_steps,
+            total_training_steps=0,##total_training_steps,
+            experiment_path=None,##experiment_perturbation_results_path,
+            is_explainer_convnet=is_convnet,
+            is_explainee_convnet=is_convnet,
+            lr=args.lr,
+            start_epoch_to_evaluate=args.start_epoch_to_evaluate,
+            n_batches_to_visualize=args.n_batches_to_visualize,
+            mask_loss=args.mask_loss,
+            mask_loss_mul=args.mask_loss_mul,
+            prediction_loss_mul=args.prediction_loss_mul,
+            activation_function=args.activation_function,
+            train_model_by_target_gt_class=args.train_model_by_target_gt_class,
+            use_logits_only=args.use_logits_only,
+            img_size=args.img_size,
+            patch_size=args.patch_size,
+            is_ce_neg=args.is_ce_neg,
+            verbose=args.verbose,
         )
 
         logging.info(f"loaded {type(model_for_classification_image)} {type(model_for_mask_generation)} {feature_extractor is None}")
@@ -34,13 +69,14 @@ class LTXSaliencyCreator:
         logging.info("#########################################")
         logging.info(checkpoint['state_dict'].keys())
         logging.info("#########################################")
-        model_for_mask_generation.load_state_dict(checkpoint['state_dict'])
-        model_for_mask_generation.eval()
+        model.load_state_dict(checkpoint['state_dict'])
+        model.eval()
+        mask_model = model.vit_for_patch_classification.to(inp.device)
         #mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
-        mask_model = model_for_mask_generation
+        
         device = inp.device
         with torch.no_grad():
-            sal = mask_model.to(inp)
+            sal = mask_model(inp)
         
         logging.info(f"sal shape: {sal.shape}")
         sssss
