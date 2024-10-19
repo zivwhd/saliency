@@ -240,14 +240,14 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         #    outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
         #)
         epoch_auc = -1
-
+        del_score, ins_score = -1, -1
         if True or self.current_epoch >= self.start_epoch_to_evaluate:
             logging.info("eval metrics")
-            epoch_auc = get_pert_score(
+            del_score, ins_score = get_pert_score(
                 model=self.vit_for_classification_image, 
                 outputs=outputs,
                 is_neg=True)
-            logging.info(f"epoch_auc {epoch_auc}")
+            logging.info(f"epoch scores: {del_score}, {ins_score}")
 
             if False:
                 epoch_auc = run_perturbation_test(
@@ -260,8 +260,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
                     verbose=self.verbose,
                     img_size=self.img_size,
                 )
-
-        self.log("val/ins", epoch_auc, prog_bar=True, logger=True)
+        logging.info(f"epoch scores: loss={loss}; del={del_score}; ins={ins_score}")
+        self.log("val/ins", ins_score, prog_bar=True, logger=True)
         self.val_outputs.clear()
         return {"loss": loss}
 

@@ -62,15 +62,19 @@ def pert_metrics(model, inp, saliency, target, is_neg=False, nsteps=10):
     prob_auc = auc(perturbation_steps, probs) * 100
     return prob_auc
     
-def get_pert_score(model, outputs: List[Dict], is_neg=False):
-    aucs = []
+def get_pert_score(model, outputs: List[Dict]):
+    ins_list, del_list = [], []
     for batch in outputs:
         for data, vis, target in zip(batch["image_resized"], batch["image_mask"], batch["target_class"]):
-            logging.info(f"pert: {data.shape}-{data.device} {vis.shape}-{vis.device} {target} {is_neg}")
-            pauc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=is_neg)
-            aucs.append(pauc)
-    score = torch.tensor(aucs).mean().item()
-    return score
+            #logging.info(f"pert: {data.shape}-{data.device} {vis.shape}-{vis.device} {target} {is_neg}")
+            ins_auc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=True)
+            ins_list.append(ins_auc)
+            del_auc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=False)
+            del_list.append(del_auc)
+
+    ins_score = torch.tensor(ins_list).mean().item()
+    del_score = torch.tensor(del_list).mean().item()
+    return del_score, ins_score
 
 def eval_perturbation_test(experiment_dir: Path,
                            model,
