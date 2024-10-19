@@ -248,8 +248,8 @@ if __name__ == '__main__':
     callbacks = []
     if args.enable_checkpointing:
         callbacks.append(
-            ModelCheckpoint(monitor="val/epoch_auc", mode="min", dirpath=checkpoints_default_root_dir, verbose=True,
-                            filename="{epoch}_{val/epoch_auc:.3f}", save_top_k=args.n_epochs)
+            ModelCheckpoint(monitor="val/ins", mode="max", dirpath=checkpoints_default_root_dir, verbose=True,
+                            filename="{epoch}_{val/ins:.3f}", save_top_k=args.n_epochs)
         )
     
     #logger = logging.getLogger(__name__)

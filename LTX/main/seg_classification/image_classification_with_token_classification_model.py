@@ -9,7 +9,7 @@ from transformers import get_linear_schedule_with_warmup
 
 from config import config
 from evaluation.perturbation_tests.seg_cls_perturbation_tests import (
-    run_perturbation_test,
+    run_perturbation_test, get_pert_score
 )
 from main.seg_classification.cnns.cnn_utils import CONVNET_NORMALIZATION_STD, CONVENT_NORMALIZATION_MEAN
 from main.seg_classification.output_dataclasses.image_classification_with_token_classification_model_output import \
@@ -229,7 +229,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         pred_loss_mul = torch.mean(torch.stack([output["pred_loss_mul"] for output in outputs]))
         mask_loss_mul = torch.mean(torch.stack([output["mask_loss_mul"] for output in outputs]))
         
-        logging.info(f"on_validation_epoch_end loss={loss}; pred_loss={pred_loss}; mask_loss={mask_loss}; pred_loss_mul={pred_loss_mul}; mask_loss_mul={mask_loss_mul}")
+        logging.info(f"[{self.current_epoch}] on_validation_epoch_end loss={loss}; pred_loss={pred_loss}; mask_loss={mask_loss}; pred_loss_mul={pred_loss_mul}; mask_loss_mul={mask_loss_mul} ({self.start_epoch_to_evaluate})")
         #self.log("val/loss", loss, prog_bar=True, logger=True)
         #self.log("val/prediction_loss", pred_loss, prog_bar=True, logger=True)
         #self.log("val/mask_loss", mask_loss, prog_bar=True, logger=True)
@@ -240,19 +240,28 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         #    outputs, stage="val", n_batches=self.n_batches_to_visualize, epoch_idx=self.current_epoch
         #)
         epoch_auc = -1
-        if True or self.current_epoch >= self.start_epoch_to_evaluate:
-            epoch_auc = run_perturbation_test(
-                model=self.vit_for_classification_image,
-                outputs=outputs,
-                stage="val",
-                epoch_idx=self.current_epoch,
-                experiment_path=self.experiment_path,
-                is_convnet=self.is_explainee_convnet,
-                verbose=self.verbose,
-                img_size=self.img_size,
-            )
 
-        self.log("val/epoch_auc", epoch_auc, prog_bar=True, logger=True)
+        if True or self.current_epoch >= self.start_epoch_to_evaluate:
+            logging.info("eval metrics")
+            epoch_auc = get_pert_score(
+                model=self.vit_for_classification_image, 
+                outputs=outputs,
+                is_neg=True)
+            logging.info(f"epoch_auc {epoch_auc}")
+
+            if False:
+                epoch_auc = run_perturbation_test(
+                    model=self.vit_for_classification_image,
+                    outputs=outputs,
+                    stage="val",
+                    epoch_idx=self.current_epoch,
+                    experiment_path=self.experiment_path,
+                    is_convnet=self.is_explainee_convnet,
+                    verbose=self.verbose,
+                    img_size=self.img_size,
+                )
+
+        self.log("val/ins", epoch_auc, prog_bar=True, logger=True)
         self.val_outputs.clear()
         return {"loss": loss}
 

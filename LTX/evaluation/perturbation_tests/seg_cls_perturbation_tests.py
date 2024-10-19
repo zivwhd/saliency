@@ -10,6 +10,7 @@ from torch import Tensor
 import numpy as np
 from config import config
 from main.seg_classification.cnns.cnn_utils import CONVENT_NORMALIZATION_MEAN, CONVNET_NORMALIZATION_STD
+from sklearn.metrics import auc
 
 vit_config = config['vit']
 EXPERIMENTS_FOLDER_PATH = vit_config["experiments_path"]
@@ -25,6 +26,50 @@ def normalize(tensor, mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
     tensor.sub_(mean[None, :, None, None]).div_(std[None, :, None, None])
     return tensor
 
+
+def pert_metrics(model, inp, saliency, target, is_neg=False, nsteps=10):
+    org_shape = inp.shape
+    data = inp.clone().cpu()
+    vis = saliency
+    if is_neg:
+        vis = -vis
+    
+    finish = 0
+    vis = vis.reshape(org_shape[0], -1)
+
+    accuracy = []
+    probs = []
+    perturbation_steps =  torch.arange(nsteps+1, dtype=torch.float32)  / nsteps
+        
+    for idx, part in enumerate(perturbation_steps):
+        _data = data.clone()        
+        perturbation_size = int((vis.numel() * part).tolist())        
+        if perturbation_size:
+            _, idx = torch.topk(vis, perturbation_size, dim=-1)  # get top k pixels        
+            idx = idx.unsqueeze(1).repeat(1, org_shape[1], 1)
+            _data = _data.reshape(org_shape[0], org_shape[1], -1)                
+            _data = _data.scatter_(-1, idx, 0)
+            _data = _data.reshape(*org_shape)
+
+        norm_data = _data            
+        out = model(norm_data.to(inp.device))
+        target_class = out.max(1, keepdim=True)[1].squeeze(1)
+        correct = float((target == target_class))
+        probs_pertub = torch.softmax(out, dim=1)
+        
+        probs.append(float(probs_pertub[0,target]))
+        
+    prob_auc = auc(perturbation_steps, probs) * 100
+    return prob_auc
+    
+def get_pert_score(model, outputs: List[Dict], is_neg=False):
+    aucs = []
+    for batch in outputs:
+        for data, vis, target in zip(batch["image_resized"], batch["image_mask"], batch["target_class"]):
+            pauc = pert_metrics(model, data, vis, target, is_neg=is_neg)
+            aucs.append(pauc)
+    score = torch.tensor(aucs).mean().item()
+    return score
 
 def eval_perturbation_test(experiment_dir: Path,
                            model,
