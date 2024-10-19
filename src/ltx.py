@@ -35,7 +35,7 @@ class LTXSaliencyCreator:
             explainee_model_name=model_name,
             explainer_model_name=model_name,
             activation_function=self.activation_function,
-            img_size=img_size
+            img_size=(224,224) ##img_size
         )
 
         is_convnet = ("vit" not in model_name)
