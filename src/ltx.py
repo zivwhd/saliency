@@ -11,10 +11,11 @@ def setup_path():
     
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
 class LTXSaliencyCreator:
-    def __init__(self, checkpoint_path, activation_function="sigmoid", variant="vnl"):
+    def __init__(self, activation_function="sigmoid", variant="vnl", checkpoint_base_path=CHECKPOINT_BASE_PATH):
         setup_path()
         self.activation_function = activation_function       
         self.variant=variant 
+        self.checkpoint_base_path = checkpoint_base_path
 
     def __call__(self, me, inp, catidx):    
         from main.seg_classification.model_types_loading import load_explainer_explaniee_models_and_feature_extractor
@@ -26,10 +27,11 @@ class LTXSaliencyCreator:
             img_size=inp.shape[-2:],
         )
 
-        checkpoint_path = os.path.join(CHECKPOINT_BASE_PATH, f"{model_name}_{self.variant}.ckpt")
+        checkpoint_path = os.path.join(self.checkpoint_base_path, f"{model_name}_{self.variant}.ckpt")
         mask_model = model_for_mask_generation.load_from_checkpoint(checkpoint_path)
         device = inp.device
         sal = mask_model.to(inp)
         
         logging.info(f"sal shape: {sal.shape}")
-        return {"pLTX" : sal}
+        sssss
+        return {"pLTX" : sal.cpu()}
