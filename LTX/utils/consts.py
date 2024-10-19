@@ -29,6 +29,7 @@ SEGMENTATION_DATASET_OPTIONS = ["imagenet", "coco", "voc"]
 
 MODEL_ALIAS_MAPPING = {"vit_base_224": "google/vit-base-patch16-224",
                        "vit_small_224": "WinKawaks/vit-small-patch16-224",
+                       "resnet": "resnet50",
                        "resnet": "resnet",
                        "densenet": "densenet",
                        }
