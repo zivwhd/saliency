@@ -66,7 +66,7 @@ def get_pert_score(model, outputs: List[Dict], is_neg=False):
     aucs = []
     for batch in outputs:
         for data, vis, target in zip(batch["image_resized"], batch["image_mask"], batch["target_class"]):
-            logging.info(f"pert: {data.shape} {vis.shape} {target}")
+            logging.info(f"pert: {data.shape}-{data.device} {vis.shape}-{vis.device} {target}")
             pauc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=is_neg)
             aucs.append(pauc)
     score = torch.tensor(aucs).mean().item()
