@@ -22,7 +22,7 @@ class LTXSaliencyCreator:
         model_for_classification_image, model_for_mask_generation, feature_extractor = load_explainer_explaniee_models_and_feature_extractor(
             explainee_model_name=model_name,
             explainer_model_name=model_name,
-            activation_function=self.activation_function
+            activation_function=self.activation_function,
             img_size=inp.shape[-2:],
         )
 
