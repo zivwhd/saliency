@@ -28,7 +28,7 @@ class LTXSaliencyCreator:
         )
 
         checkpoint_path = os.path.join(self.checkpoint_base_path, f"{model_name}_{self.variant}.ckpt")
-        mask_model = model_for_mask_generation.load_from_checkpoint(checkpoint_path)
+        mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
         device = inp.device
         sal = mask_model.to(inp)
         
