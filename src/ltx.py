@@ -36,7 +36,7 @@ class LTXSaliencyCreator:
             img_size=inp.shape[-2:],
         )
 
-        is_convnet = ()"vit" not in model_name)
+        is_convnet = ("vit" not in model_name)
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
