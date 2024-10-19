@@ -69,11 +69,11 @@ def get_pert_score(model, outputs: List[Dict]):
             #logging.info(f"pert: {data.shape}-{data.device} {vis.shape}-{vis.device} {target} {is_neg}")
             ins_auc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=True)
             ins_list.append(ins_auc)
-            del_auc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=False)
-            del_list.append(del_auc)
+            #del_auc = pert_metrics(model, data.unsqueeze(0), vis[0], target, is_neg=False)
+            #del_list.append(del_auc)
 
     ins_score = torch.tensor(ins_list).mean().item()
-    del_score = torch.tensor(del_list).mean().item()
+    del_score = 0 ## torch.tensor(del_list).mean().item()
     return del_score, ins_score
 
 def eval_perturbation_test(experiment_dir: Path,
