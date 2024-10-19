@@ -84,4 +84,4 @@ class LTXSaliencyCreator:
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             sal = interpolated_mask
         
-        return {"pLTX" : sal.cpu()}
+        return {"pLTX" : sal.cpu()[0]}
