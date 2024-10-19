@@ -4,7 +4,7 @@ from evaluation.evaluation_utils import normalize, calculate_auc
 from pathlib import Path
 from matplotlib import pyplot as plt
 import torch
-import os
+import os, logging
 from transformers.modeling_outputs import ImageClassifierOutput
 from torch import Tensor
 import numpy as np
