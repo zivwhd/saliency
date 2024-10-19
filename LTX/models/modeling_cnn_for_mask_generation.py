@@ -3,11 +3,12 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import nn
 from torchvision.models import DenseNet, ResNet
-
+import logging
 
 class CNNForMaskGeneration(LightningModule):
     def __init__(self, cnn_model, activation_function: str = "sigmoid", img_size: int = 224):
         super().__init__()
+        logging.info(f"CNNForMaskGeneration: img_size={img_size}; activation={activation_function}")
         self.img_size = img_size
         self.activation_function = activation_function
         backbone_children = list(cnn_model.children())
