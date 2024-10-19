@@ -15,9 +15,13 @@ from benchmark import *
 from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
 from mpert import IEMPertSaliencyCreator 
+from ltx import LTXSaliencyCreator
 
 def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
+
+def get_ltx_sal_creator():
+    return LTXSaliencyCreator()
 
 def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
