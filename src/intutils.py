@@ -49,10 +49,12 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0.9):
+def showsal(sal, img, caption="", quantile=0.9, mag=True):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
     mask = (sal - sal.min()) / (sal.max()-sal.min())
+    if mag:
+        sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
     plt.subplot(1, 4, 1)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
