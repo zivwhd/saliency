@@ -28,7 +28,11 @@ class LTXSaliencyCreator:
         )
 
         checkpoint_path = os.path.join(self.checkpoint_base_path, f"{model_name}_{self.variant}.ckpt")
+        logging.info("checkpoint_path: {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path)
+        logging.info("#########################################")
+        logging.info(checkpoint['state_dict'].keys())
+        logging.info("#########################################")
         model_for_mask_generation.load_state_dict(checkpoint['state_dict'])
         model_for_mask_generation.eval()
         #mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
