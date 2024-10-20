@@ -234,7 +234,8 @@ if __name__ == '__main__':
     if args.snapshot:
         checkpoint = torch.load(args.snapshot)
         model.load_state_dict(checkpoint['state_dict'])
-        
+        logging.info("loaded state dict")
+
     remove_old_results_dfs(experiment_path=experiment_perturbation_results_path)
     model = freeze_multitask_model(
         model=model,

@@ -37,6 +37,9 @@ def pert_metrics(model, inp, saliency, target, is_neg=False, nsteps=10):
     finish = 0
     vis = vis.reshape(org_shape[0], -1)
 
+    orig_out = model(inp)
+    target = orig_out.max(1, keepdim=True)[1].squeeze(1)
+
     accuracy = []
     probs = []
     perturbation_steps =  torch.arange(nsteps+1, dtype=torch.float32)  / nsteps
