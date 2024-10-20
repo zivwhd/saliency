@@ -140,6 +140,7 @@ if __name__ == '__main__':
                         default=params_config["evaluation_experiment_folder_name"])
     parser.add_argument('--train-n-label-sample', type=int, default=params_config["train_n_label_sample"])
     parser.add_argument('--val-n-label-sample', type=int, default=params_config["val_n_label_sample"])
+    parser.add_argument('--snapshot', type=str, default=None)
 
     args = parser.parse_args()
     print("### start", file=sys.stderr)    
@@ -230,6 +231,10 @@ if __name__ == '__main__':
         verbose=args.verbose,
     )
 
+    if args.snapshot:
+        checkpoint = torch.load(args.snapshot)
+        model.load_state_dict(checkpoint['state_dict'])
+        
     remove_old_results_dfs(experiment_path=experiment_perturbation_results_path)
     model = freeze_multitask_model(
         model=model,
