@@ -76,12 +76,12 @@ resnet50:
   enable_checkpointing: True
   start_epoch_to_evaluate: 1
   n_batches_to_visualize: 1
-  n_epochs: 30 ## 500
+  n_epochs: 100 ## 500
   n_epochs_to_optimize_stage_b: 25
-  lr:  0.05 ##2.0e-3
+  lr:  0.005 ##2.0e-3
   verbose: False
   seg_cls:
-    train_n_label_sample: 6
+    train_n_label_sample: 1 ##6
     val_n_label_sample: 1
     loss:
       normalize: False
