@@ -1,8 +1,7 @@
 import sys, os, logging, time
 import torch
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader
-
+from torch.utils.data import Dataset, DataLoader
 
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +15,16 @@ def setup_path():
 
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
 
+class SimpleDataset(Dataset):
+    def __init__(self, data):
+        self.data = data  # data is a list of (tensor, target) pairs
 
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+        
 
 class LTXSaliencyCreator:
     def __init__(self, activation_function="sigmoid", variant="vnl", checkpoint_base_path=CHECKPOINT_BASE_PATH):
@@ -97,9 +105,8 @@ class LTXSaliencyCreator:
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             psal = interpolated_mask
-
-        idataset = [(inp, catidx)]
-
+        
+        idataset = SimpleDataset([(inp, catidx)])
         dl = DataLoader(idataset, batch_size=1, shuffle=False, num_workers=1, drop_last=False)
         data_module = ImageSegOptDataModuleSegmentation(
             train_data_loader=dl
