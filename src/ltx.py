@@ -107,7 +107,7 @@ class LTXSaliencyCreator:
             psal = interpolated_mask
         
         idataset = SimpleDataset([(inp, catidx)])
-        dl = DataLoader(idataset, batch_size=1, shuffle=False, num_workers=1, drop_last=False)
+        dl = DataLoader(idataset, batch_size=1)
         data_module = ImageSegOptDataModuleSegmentation(
             train_data_loader=dl
         )
