@@ -73,7 +73,7 @@ class LTXSaliencyCreator:
         )
 
         logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
-        is_convnet = ("vit" not in model_name)
+        
 
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
@@ -118,6 +118,16 @@ class LTXSaliencyCreator:
         #mask_model = type(model_for_mask_generation).load_from_checkpoint(checkpoint_path)
         load_end_time = time.time()        
         logging.info(f"load time (sec): {load_end_time-load_start_time}")
+
+        is_convnet = ("vit" not in model_name)
+
+        model = freeze_multitask_model(
+            model=model,
+            is_freezing_explaniee_model=args.is_freezing_explaniee_model,
+            explainer_model_n_first_layers_to_freeze=args.explainer_model_n_first_layers_to_freeze,
+            is_explainer_convnet=is_convnet,
+        )
+
         device = inp.device
         with torch.no_grad():
             interpolated_mask, tokens_mask = mask_model(inp)
