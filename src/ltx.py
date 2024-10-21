@@ -58,7 +58,7 @@ class LTXSaliencyCreator:
             plot_path=None,##plot_path,
             warmup_steps=0, ##warmup_steps,
             total_training_steps=0,##total_training_steps,
-            experiment_path=None,##experiment_perturbation_results_path,
+            #experiment_path=None,##experiment_perturbation_results_path,
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
             lr=args["lr"],
