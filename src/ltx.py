@@ -26,9 +26,9 @@ class SimpleDataset(Dataset):
         inp, target =  self.data[idx]
         return dict(
             image_name="finetuned_image",
-            pixel_values=None,
+            pixel_values=inp,#None,
             resized_and_normalized_image=inp,
-            image=None,
+            image=inp,
             target_class=target,
         )
         
