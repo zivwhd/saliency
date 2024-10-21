@@ -151,8 +151,8 @@ class LTXSaliencyCreator:
             
             sal = interpolated_mask
             mt = metrics.Metrics()            
-            mins = mt.pert_metrics(self, model.vit_for_classification_image, inp, sal[0], catidx, is_neg=True, nsteps=20)            
-            pins = mt.pert_metrics(self, me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
+            mins = mt.pert_metrics(model.vit_for_classification_image, inp, sal[0], catidx, is_neg=True, nsteps=20)            
+            pins = mt.pert_metrics(me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
             logging.info(f"{mins} {pins}")
         
 
