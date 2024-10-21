@@ -24,6 +24,7 @@ class SimpleDataset(Dataset):
 
     def __getitem__(self, idx):
         inp, target =  self.data[idx]
+        inp = inp[0]
         return dict(
             image_name="finetuned_image",
             pixel_values=inp,#None,
