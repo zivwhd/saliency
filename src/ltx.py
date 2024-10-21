@@ -147,11 +147,11 @@ class LTXSaliencyCreator:
             mask_model = model.vit_for_patch_classification.to(inp.device)            
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
-            logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()}")
+            logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()} {inp.device}")
             
             sal = interpolated_mask
             mt = metrics.Metrics()            
-            mins = mt.pert_metrics(model.vit_for_classification_image, inp, sal[0], catidx, is_neg=True, nsteps=20)            
+            mins = mt.pert_metrics(model.vit_for_classification_image.to(inp.device), inp, sal[0].to(inp.device), catidx, is_neg=True, nsteps=20)            
             pins = mt.pert_metrics(me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
             logging.info(f"{mins} {pins}")
         
