@@ -118,7 +118,7 @@ class LTXSaliencyCreator:
             enable_progress_bar=False,
             enable_checkpointing=False,
             default_root_dir=args["default_root_dir"],
-            weights_summary=None
+            #weights_summary=None
         )
 
         trainer.fit(model=model, datamodule=data_module)
