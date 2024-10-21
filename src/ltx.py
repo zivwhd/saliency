@@ -116,7 +116,7 @@ class LTXSaliencyCreator:
             #resume_from_checkpoint=CKPT_PATH,
             enable_progress_bar=False,
             enable_checkpointing=False,
-            default_root_dir=args.default_root_dir,
+            default_root_dir=args["default_root_dir"],
             weights_summary=None
         )
 
