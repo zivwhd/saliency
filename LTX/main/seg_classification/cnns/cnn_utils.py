@@ -30,9 +30,10 @@ convnet_resize_transform = transforms.Compose([
     transforms.Resize((224,224)),
     transforms.ToTensor(), ])
 
-
+## PTODOP
 convnet_preprocess = transforms.Compose([
     transforms.Resize((224,224)),
+    transforms.CenterCrop((224,224)),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=CONVENT_NORMALIZATION_MEAN,
