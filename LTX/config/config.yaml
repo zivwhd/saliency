@@ -82,7 +82,7 @@ resnet50:
   lr_finetune: 5.0e-6
   verbose: False
   seg_cls:
-    train_n_label_sample: 1 ##6
+    train_n_label_sample: 6
     val_n_label_sample: 1
     loss:
       normalize: False
