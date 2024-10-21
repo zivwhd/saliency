@@ -95,6 +95,7 @@ class LTXSaliencyCreator:
             patch_size=args["patch_size"],
             is_ce_neg=args["is_ce_neg"],
             verbose=True, ## args.verbose,
+            is_finetune=True
         )
 
         logging.info(f"loaded {type(model_for_classification_image)} {type(model_for_mask_generation)} {feature_extractor is None}")
@@ -143,9 +144,10 @@ class LTXSaliencyCreator:
         logging.info("finetuning")
 
         with torch.no_grad():
-            mask_model = model.vit_for_patch_classification.to(inp.device)
+            mask_model = model.vit_for_patch_classification.to(inp.device)            
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
+            logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()}")
             sal = interpolated_mask
 
         return {"pLTX" : psal.cpu()[0], "LTX" : sal.cpu()[0]}

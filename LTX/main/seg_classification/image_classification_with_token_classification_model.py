@@ -48,6 +48,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             start_epoch_to_evaluate: int = 1,
             is_clamp_between_0_to_1: bool = True,
             verbose: bool = False,
+            is_finetune = False,
     ):
         super().__init__()
         self.vit_for_classification_image = model_for_classification_image
@@ -76,6 +77,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.outputs = []
         self.val_outputs = []
         self.epoch_count = 0
+        self.is_finetune = is_finetune
 
     def normalize_mask_values(self, mask, is_clamp_between_0_to_1: bool):
         if is_clamp_between_0_to_1:
@@ -263,7 +265,11 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
                     verbose=self.verbose,
                     img_size=self.img_size,
                 )
-        logging.info(f"[{self.current_epoch}] epoch scores: loss={loss}; del={del_score}; ins={ins_score}")
+        if self.is_finetune:
+            batch = outputs[0]
+            data, vis, target = batch["image_resized"], batch["image_mask"], batch["target_class"]            
+            logging.info(f"epoch: {len(outputs)}; {data.shape} {vis.shape}, {data.sum()}, {vis.sum()}")
+        logging.info(f"[{self.current_epoch}] epoch scores: loss={loss}; del={del_score}; ins={ins_score};;")
         self.log("val/ins", ins_score, prog_bar=True, logger=True)
         self.val_outputs.clear()
         return {"loss": loss}
