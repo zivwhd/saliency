@@ -143,7 +143,7 @@ def freeze_multitask_model(model,
     return model
 
 
-def get_image_and_inputs_and_transformed_image( ## PPPP
+def get_image_and_inputs_and_transformed_image( ## PTODOP
         feature_extractor: ViTFeatureExtractor,
         image_name: str = None,
         image=None,
@@ -221,6 +221,7 @@ def get_params_from_config(config_vit: Dict) -> Dict:
     mask_loss_mul = loss_config["mask_loss_mul"]
     prediction_loss_mul = loss_config["prediction_loss_mul"]
     lr = config_vit["lr"]
+    lr_finetune = config_vit["lr_finetune"]
     start_epoch_to_evaluate = config_vit["start_epoch_to_evaluate"]
     n_batches_to_visualize = config_vit["n_batches_to_visualize"]
     is_ce_neg = loss_config["is_ce_neg"]
@@ -253,6 +254,7 @@ def get_params_from_config(config_vit: Dict) -> Dict:
                 mask_loss_mul=mask_loss_mul,
                 prediction_loss_mul=prediction_loss_mul,
                 lr=lr,
+                lr_finetune=lr_finetune,
                 start_epoch_to_evaluate=start_epoch_to_evaluate,
                 n_batches_to_visualize=n_batches_to_visualize,
                 is_ce_neg=is_ce_neg,
