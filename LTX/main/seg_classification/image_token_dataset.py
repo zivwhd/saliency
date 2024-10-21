@@ -40,7 +40,7 @@ class ImagesDataset(Dataset):
     def __len__(self):
         return len(self.images_name)
 
-    def __getitem__(self, index: int):  ### PPPP
+    def __getitem__(self, index: int):  ### PTODOP
         image_name = os.path.basename(self.images_name[index])
         image = get_image_from_path(path=Path(self.images_path, image_name))
         image = image if image.mode == "RGB" else image.convert("RGB")  # Black & White images

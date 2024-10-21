@@ -108,7 +108,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
                                                                       )
 
         masked_image = image_resized * interpolated_mask_normalized
-        #if self.is_explainee_convnet: PPPP
+        #if self.is_explainee_convnet: PTODOP
         #    masked_image_inputs = self.normalize_image(masked_image,
         #                                               mean=CONVENT_NORMALIZATION_MEAN,
         #                                               std=CONVNET_NORMALIZATION_STD,
@@ -124,7 +124,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         if self.is_ce_neg:
             masked_neg_image = image_resized * (1 - interpolated_mask_normalized)
             masked_neg_image_inputs = masked_neg_image
-            if self.is_explainee_convnet:
+            #if self.is_explainee_convnet:
                 #masked_neg_image_inputs = self.normalize_image(masked_neg_image,
                 #                                               mean=CONVENT_NORMALIZATION_MEAN,
                 #                                               std=CONVNET_NORMALIZATION_STD)
