@@ -123,8 +123,8 @@ class LTXSaliencyCreator:
 
         model = freeze_multitask_model(
             model=model,
-            is_freezing_explaniee_model=args.is_freezing_explaniee_model,
-            explainer_model_n_first_layers_to_freeze=args.explainer_model_n_first_layers_to_freeze,
+            is_freezing_explaniee_model=args["is_freezing_explaniee_model"],
+            explainer_model_n_first_layers_to_freeze=args["explainer_model_n_first_layers_to_freeze"],
             is_explainer_convnet=is_convnet,
         )
 
