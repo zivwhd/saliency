@@ -33,7 +33,9 @@ class SimpleDataset(Dataset):
             target_class=target,
         )
         
-        
+def sum_model_weights(model):
+    total_sum = sum(param.sum() for param in model.parameters())
+    return total_sum.item()        
 
 class LTXSaliencyCreator:
     def __init__(self, activation_function="sigmoid", variant="vnl", checkpoint_base_path=CHECKPOINT_BASE_PATH):
@@ -70,6 +72,7 @@ class LTXSaliencyCreator:
             img_size=img_size
         )
 
+        logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
         is_convnet = ("vit" not in model_name)
 
         model = ImageClassificationWithTokenClassificationModel(
@@ -150,10 +153,13 @@ class LTXSaliencyCreator:
             logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()} {inp.device}")
             
             sal = interpolated_mask
-            mt = metrics.Metrics()            
-            mins = mt.pert_metrics(model.vit_for_classification_image.to(inp.device), inp, sal[0].to(inp.device), catidx, is_neg=True, nsteps=20)            
+            mt = metrics.Metrics() 
+            #model.vit_for_classification_image.to           
+            
+            mins = mt.pert_metrics(model_for_classification_image.to(inp.device), inp, sal[0].to(inp.device), catidx, is_neg=True, nsteps=20)            
             pins = mt.pert_metrics(me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
             logging.info(f"{mins} {pins}")
+            logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)} {sum_model_weights(model.vit_for_classification_image)}")
         
 
         return {"pLTX" : psal.cpu()[0], "LTX" : sal.cpu()[0]}
