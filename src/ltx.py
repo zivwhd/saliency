@@ -59,6 +59,7 @@ class LTXSaliencyCreator:
         model_name = me.arch
         
         args = get_params_from_config(config_vit=config[model_name])
+        logging.info(f"args : {args}")
         img_size = args["img_size"] ##tuple([int(x) for x in inp.shape[-2:]])
         logging.info(f"img_size={img_size}; ")
 
@@ -77,7 +78,7 @@ class LTXSaliencyCreator:
             is_clamp_between_0_to_1=args["is_clamp_between_0_to_1"],
             plot_path=None,##plot_path,
             warmup_steps=0, ##warmup_steps,
-            total_training_steps=30,##total_training_steps,
+            total_training_steps=1,##total_training_steps,
             experiment_path=None,##experiment_perturbation_results_path,
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
