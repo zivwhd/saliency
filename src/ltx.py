@@ -119,10 +119,10 @@ class LTXSaliencyCreator:
         trainer.fit(model=model, datamodule=data_module)
 
         logging.info("finetuning")
-        
+
         with torch.no_grad():
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             sal = interpolated_mask
 
-        return {"pLTX" : psal.cpu()[0], "pLTX" : psal.cpu()[0]}
+        return {"pLTX" : psal.cpu()[0], "LTX" : sal.cpu()[0]}
