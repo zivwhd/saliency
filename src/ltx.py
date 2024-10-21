@@ -1,5 +1,7 @@
 import sys, os, logging, time
 import torch
+from torch.utils.data import DataLoader
+
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     targets = [ os.path.join(os.path.dirname(current_dir),"LTX")  ]
@@ -8,8 +10,12 @@ def setup_path():
             logging.info(f"adding {path}")
             sys.path.append(path)
 
-    
+
+
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
+
+
+
 class LTXSaliencyCreator:
     def __init__(self, activation_function="sigmoid", variant="vnl", checkpoint_base_path=CHECKPOINT_BASE_PATH):
         setup_path()
@@ -23,7 +29,10 @@ class LTXSaliencyCreator:
         from utils.vit_utils import get_params_from_config
         from main.seg_classification.image_classification_with_token_classification_model import (
             ImageClassificationWithTokenClassificationModel,
-        )
+        )        
+        from main.segmentation_eval.segmentation_model_opt import OptImageClassificationWithTokenClassificationModel
+        from main.seg_classification.image_token_data_module_opt_segmentation import ImageSegOptDataModuleSegmentation
+        
         
         load_start_time = time.time()
         model_name = me.arch
@@ -40,7 +49,8 @@ class LTXSaliencyCreator:
         )
 
         is_convnet = ("vit" not in model_name)
-        model = ImageClassificationWithTokenClassificationModel(
+
+        model = OptImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
             is_clamp_between_0_to_1=args["is_clamp_between_0_to_1"],
@@ -82,6 +92,37 @@ class LTXSaliencyCreator:
         with torch.no_grad():
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
-            sal = interpolated_mask
+            psal = interpolated_mask
+
+        idataset = [(inp, catidx)]
+
+        dl = DataLoader(idataset, batch_size=1, shuffle=False, num_workers=1, drop_last=False)
+        data_module = ImageSegOptDataModuleSegmentation(
+            train_data_loader=dl
+        )
+
+        trainer = pl.Trainer(
+            logger=[],
+            accelerator='gpu',
+            gpus=1,
+            devices=[1, 2],
+            num_sanity_val_steps=0,
+            check_val_every_n_epoch=300,
+            max_epochs=args.n_epochs_to_optimize_stage_b,
+            #resume_from_checkpoint=CKPT_PATH,
+            enable_progress_bar=False,
+            enable_checkpointing=False,
+            default_root_dir=args.default_root_dir,
+            weights_summary=None
+        )
+
+        trainer.fit(model=model, datamodule=data_module)
+
+        logging.info("finetuning")
         
-        return {"pLTX" : sal.cpu()[0]}
+        with torch.no_grad():
+            interpolated_mask, tokens_mask = mask_model(inp)
+            logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
+            sal = interpolated_mask
+
+        return {"pLTX" : psal.cpu()[0], "pLTX" : psal.cpu()[0]}
