@@ -74,7 +74,7 @@ class LTXSaliencyCreator:
 
         logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
         
-
+        is_convnet = ("vit" not in model_name)
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
@@ -119,7 +119,7 @@ class LTXSaliencyCreator:
         load_end_time = time.time()        
         logging.info(f"load time (sec): {load_end_time-load_start_time}")
 
-        is_convnet = ("vit" not in model_name)
+        
 
         model = freeze_multitask_model(
             model=model,
