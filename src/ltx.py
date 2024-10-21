@@ -130,7 +130,7 @@ class LTXSaliencyCreator:
             #devices=[1, 2],
             num_sanity_val_steps=0,
             #check_val_every_n_epoch=300,
-            max_epochs=30, #args.n_epochs_to_optimize_stage_b,
+            max_epochs=30 #args.n_epochs_to_optimize_stage_b,
             #resume_from_checkpoint=CKPT_PATH,
             enable_progress_bar=False,
             enable_checkpointing=False,
