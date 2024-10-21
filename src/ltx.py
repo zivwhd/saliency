@@ -30,7 +30,8 @@ class LTXSaliencyCreator:
         from main.seg_classification.image_classification_with_token_classification_model import (
             ImageClassificationWithTokenClassificationModel,
         )        
-        from main.segmentation_eval.segmentation_model_opt import OptImageClassificationWithTokenClassificationModel
+        from main.seg_classification.image_classification_with_token_classification_model_opt import OptImageClassificationWithTokenClassificationModel
+        from main.segmentation_eval.segmentation_model import OptImageClassificationWithTokenClassificationModel
         from main.seg_classification.image_token_data_module_opt_segmentation import ImageSegOptDataModuleSegmentation
         
         
