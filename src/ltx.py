@@ -11,7 +11,7 @@ def setup_path():
             logging.info(f"adding {path}")
             sys.path.append(path)
 
-
+import metrics
 
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
 
@@ -148,6 +148,12 @@ class LTXSaliencyCreator:
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()}")
+            
             sal = interpolated_mask
+            mt = metrics.Metrics()            
+            mins = mt.pert_metrics(self, model.vit_for_classification_image, inp, sal[0], catidx, is_neg=True, nsteps=20)            
+            pins = mt.pert_metrics(self, me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
+            logging.info(f"{mins} {pins}")
+        
 
         return {"pLTX" : psal.cpu()[0], "LTX" : sal.cpu()[0]}
