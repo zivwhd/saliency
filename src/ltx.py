@@ -82,7 +82,7 @@ class LTXSaliencyCreator:
             experiment_path=None,##experiment_perturbation_results_path,
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
-            lr=args["lr"],
+            lr=args["lr"] / 1000,
             start_epoch_to_evaluate=args["start_epoch_to_evaluate"],
             n_batches_to_visualize=args["n_batches_to_visualize"],
             mask_loss=args["mask_loss"],
