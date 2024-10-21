@@ -31,6 +31,7 @@ class LTXSaliencyCreator:
             ImageClassificationWithTokenClassificationModel,
         )        
         from main.seg_classification.image_classification_with_token_classification_model_opt import OptImageClassificationWithTokenClassificationModel
+        from main.seg_classification.image_classification_with_token_classification_model import ImageClassificationWithTokenClassificationModel
         #from main.segmentation_eval.segmentation_model import OptImageClassificationWithTokenClassificationModel
         from main.seg_classification.image_token_data_module_opt_segmentation import ImageSegOptDataModuleSegmentation
         
@@ -51,14 +52,14 @@ class LTXSaliencyCreator:
 
         is_convnet = ("vit" not in model_name)
 
-        model = OptImageClassificationWithTokenClassificationModel(
+        model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
             is_clamp_between_0_to_1=args["is_clamp_between_0_to_1"],
             plot_path=None,##plot_path,
             warmup_steps=0, ##warmup_steps,
-            total_training_steps=0,##total_training_steps,
-            #experiment_path=None,##experiment_perturbation_results_path,
+            total_training_steps=30,##total_training_steps,
+            experiment_path=None,##experiment_perturbation_results_path,
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
             lr=args["lr"],
