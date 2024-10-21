@@ -142,6 +142,7 @@ class LTXSaliencyCreator:
         logging.info("finetuning")
 
         with torch.no_grad():
+            mask_model = model.vit_for_patch_classification.to(inp.device)
             interpolated_mask, tokens_mask = mask_model(inp)
             logging.info(f"interpolated: {interpolated_mask.shape}; tokens_mask: {tokens_mask.shape}")
             sal = interpolated_mask
