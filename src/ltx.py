@@ -23,7 +23,15 @@ class SimpleDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx]
+        inp, target =  self.data[idx]
+        return dict(
+            image_name="finetuned_image",
+            pixel_values=None,
+            resized_and_normalized_image=inp,
+            image=None,
+            target_class=target,
+        )
+        
         
 
 class LTXSaliencyCreator:
