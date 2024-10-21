@@ -40,7 +40,7 @@ class ImagesDataset(Dataset):
     def __len__(self):
         return len(self.images_name)
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int):  ### PPPP
         image_name = os.path.basename(self.images_name[index])
         image = get_image_from_path(path=Path(self.images_path, image_name))
         image = image if image.mode == "RGB" else image.convert("RGB")  # Black & White images
@@ -54,8 +54,8 @@ class ImagesDataset(Dataset):
             inputs = inputs["pixel_values"]
         else:
             inputs = convnet_preprocess(image)
-            resized_and_normalized_image = convnet_preprocess(image)
-            image_resized = convnet_resize_transform(image)
+            resized_and_normalized_image = inputs ##convnet_preprocess(image)
+            image_resized = inputs ## convnet_resize_transform(image)
         target_class = torch.tensor(self.targets[index])
 
         return dict(

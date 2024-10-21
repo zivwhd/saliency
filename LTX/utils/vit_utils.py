@@ -143,7 +143,7 @@ def freeze_multitask_model(model,
     return model
 
 
-def get_image_and_inputs_and_transformed_image(
+def get_image_and_inputs_and_transformed_image( ## PPPP
         feature_extractor: ViTFeatureExtractor,
         image_name: str = None,
         image=None,
