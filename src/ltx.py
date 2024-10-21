@@ -47,7 +47,7 @@ class LTXSaliencyCreator:
     def __call__(self, me, inp, catidx):    
         from main.seg_classification.model_types_loading import load_explainer_explaniee_models_and_feature_extractor
         from config import config
-        from utils.vit_utils import get_params_from_config
+        from utils.vit_utils import get_params_from_config, freeze_multitask_model
         from main.seg_classification.image_classification_with_token_classification_model import (
             ImageClassificationWithTokenClassificationModel,
         )        
