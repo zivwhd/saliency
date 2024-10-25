@@ -86,7 +86,7 @@ class LTXSaliencyCreator:
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
             lr=args["lr_finetune"],
-            start_epoch_to_evaluate=args["start_epoch_to_evaluate"],
+            start_epoch_to_evaluate=0,
             n_batches_to_visualize=args["n_batches_to_visualize"],
             mask_loss=args["mask_loss"],
             mask_loss_mul=args["mask_loss_mul"],
@@ -97,8 +97,7 @@ class LTXSaliencyCreator:
             img_size=img_size,
             patch_size=args["patch_size"],
             is_ce_neg=args["is_ce_neg"],
-            verbose=True, ## args.verbose,
-            start_epoch_to_evaluate=0,
+            verbose=True, ## args.verbose,            
             is_finetune=True
         )
 
