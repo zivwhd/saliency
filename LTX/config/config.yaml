@@ -87,8 +87,8 @@ resnet50:
     loss:
       normalize: False
       mask_loss: bce #choose l1, bce, entropy_softmax
-      prediction_loss_mul: 1
-      mask_loss_mul: 50
+      prediction_loss_mul: 5
+      mask_loss_mul: 2
       is_ce_neg: False
       use_logits_only: False
   evaluation:
@@ -134,8 +134,8 @@ vit_base_patch16_224:
     loss:
       normalize: False
       mask_loss: bce #choose l1, bce, entropy_softmax
-      prediction_loss_mul: 2
-      mask_loss_mul: 20
+      prediction_loss_mul: 5
+      mask_loss_mul: 2
       is_ce_neg: False
       use_logits_only: False
   evaluation:
