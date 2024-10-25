@@ -274,7 +274,12 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             #logging.info(f"epoch: {len(outputs)}; {data.shape} {vis.shape}, {data.sum()}, {vis.sum()}")
             mask_score = ins_score - 0.2 * del_score
             if self.selection is None or (mask_score > self.selection[0]):
-                self.selection = (mask_score, self.vit_for_classification_image.clone().detach())
+                assert len(outputs) == 1
+                assert len(outputs[0]["image_mask"]) == 1
+                sal =  outputs[0]["image_mask"][0]
+                logging.info(f"selected sal shape: {sal.shape}")
+                self.selection = (mask_score, sal.clone().detach())
+
         logging.info(f"[{self.current_epoch}] epoch scores: loss={loss}; del={del_score}; ins={ins_score};;")
         self.log("val/ins", ins_score, prog_bar=True, logger=True)
         self.val_outputs.clear()
