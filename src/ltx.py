@@ -175,5 +175,7 @@ class LTXSaliencyCreator:
             logging.info(f"{mins} {pins}")
             logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)} {sum_model_weights(model.vit_for_classification_image)}")
         
+        mask_loss_mul=args["mask_loss_mul"]
+        prediction_loss_mul=args["prediction_loss_mul"]
 
-        return {"pLTX" : psal.cpu()[0], "LTX" : sal.cpu()[0]}
+        return {"pLTX" : psal.cpu()[0], f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0]}
