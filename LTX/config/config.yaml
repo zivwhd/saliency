@@ -76,7 +76,7 @@ resnet50:
   enable_checkpointing: True
   start_epoch_to_evaluate: 1
   n_batches_to_visualize: 1
-  n_epochs: 10 ## 500
+  n_epochs: 15 ## 500
   n_epochs_to_optimize_stage_b: 25
   lr:  0.005 ##2.0e-3
   lr_finetune: 5.0e-6
