@@ -31,6 +31,8 @@ class CNNForMaskGeneration(LightningModule):
         mask = self.bottleneck(enc_rep)
         if self.activation_function == 'sigmoid':
             tokens_mask = torch.sigmoid(mask)
+        else:
+            tokens_mask = mask
 
         interpolated_mask = torch.nn.functional.interpolate(tokens_mask,
                                                             scale_factor=int(inputs.shape[-1] / mask.shape[-1]),
