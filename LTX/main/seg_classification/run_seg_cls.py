@@ -82,8 +82,8 @@ if __name__ == '__main__':
                         const=True,
                         default=params_config["enable_checkpointing"])
 
-    parser.add_argument('--mask-loss-mul', type=int, default=params_config["mask_loss_mul"])
-    parser.add_argument('--prediction-loss-mul', type=int, default=params_config["prediction_loss_mul"])
+    parser.add_argument('--mask-loss-mul', type=float, default=params_config["mask_loss_mul"])
+    parser.add_argument('--prediction-loss-mul', type=float, default=params_config["prediction_loss_mul"])
     parser.add_argument('--n-epochs', type=int, default=params_config["n_epochs"])
     parser.add_argument('--batch-size', type=int, default=params_config["batch_size"])
     parser.add_argument("--verbose",
