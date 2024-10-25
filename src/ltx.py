@@ -98,6 +98,7 @@ class LTXSaliencyCreator:
             patch_size=args["patch_size"],
             is_ce_neg=args["is_ce_neg"],
             verbose=True, ## args.verbose,
+            start_epoch_to_evaluate=0,
             is_finetune=True
         )
 
@@ -153,7 +154,7 @@ class LTXSaliencyCreator:
             enable_progress_bar=False,
             enable_checkpointing=False,
             default_root_dir=args["default_root_dir"],
-            #weights_summary=None
+            #weights_summary=None            
         )
 
         trainer.fit(model=model, datamodule=data_module)
@@ -167,15 +168,24 @@ class LTXSaliencyCreator:
             logging.info(f"inp/mask: {inp.sum()}, {interpolated_mask.sum()} {inp.device}")
             
             sal = interpolated_mask
-            mt = metrics.Metrics() 
+
+            mask_model = model.selection[1].to(inp.device)            
+            interpolated_mask, tokens_mask = mask_model(inp)
+            sel_sal = interpolated_mask
+
+            #mt = metrics.Metrics() 
             #model.vit_for_classification_image.to           
             
-            mins = mt.pert_metrics(model_for_classification_image.to(inp.device), inp, sal[0].to(inp.device), catidx, is_neg=True, nsteps=20)            
-            pins = mt.pert_metrics(me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
-            logging.info(f"{mins} {pins}")
-            logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)} {sum_model_weights(model.vit_for_classification_image)}")
+            #mins = mt.pert_metrics(model_for_classification_image.to(inp.device), inp, sal[0].to(inp.device), catidx, is_neg=True, nsteps=20)            
+            #pins = mt.pert_metrics(me.model, inp, sal[0], catidx, is_neg=True, nsteps=20)
+            #logging.info(f"{mins} {pins}")
+            #logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)} {sum_model_weights(model.vit_for_classification_image)}")
+
+
         
         mask_loss_mul=args["mask_loss_mul"]
         prediction_loss_mul=args["prediction_loss_mul"]
 
-        return {"pLTX" : psal.cpu()[0], f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0]}
+        return {"pLTX" : psal.cpu()[0], 
+                f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0],
+                f"sLTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0]}
