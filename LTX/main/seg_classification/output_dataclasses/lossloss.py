@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from main.seg_classification.output_dataclasses.lossloss_output import LossLossOutput
 import torch
+import logging
 from torch import Tensor
 from main.seg_classification.seg_cls_utils import encourage_token_mask_to_prior_loss, l1_loss, prediction_loss
 from utils.vit_utils import get_loss_multipliers
@@ -19,6 +20,7 @@ class LossLoss:
         self.prediction_loss_mul = loss_multipliers["prediction_loss_mul"]
         self.mask_loss_mul = loss_multipliers["mask_loss_mul"]
         print(f"loss multipliers: {self.mask_loss_mul}; {self.prediction_loss_mul}")
+        logging.info(f"loss multipliers: {self.mask_loss_mul}; {self.prediction_loss_mul}")
 
     def __call__(self, output: Tensor,
                  target: Tensor,
