@@ -78,6 +78,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.val_outputs = []
         self.epoch_count = 0
         self.is_finetune = is_finetune
+        logging.info(f"ICC: logits={self.use_logits_only}; lr={self.lr}; cneg={self.is_ce_neg}; finetuen={self.is_finetune}; convnet={self.is_explainer_convnet}")
 
     def normalize_mask_values(self, mask, is_clamp_between_0_to_1: bool):
         if is_clamp_between_0_to_1:

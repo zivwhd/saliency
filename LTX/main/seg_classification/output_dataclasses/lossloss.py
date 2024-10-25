@@ -20,7 +20,7 @@ class LossLoss:
         self.prediction_loss_mul = loss_multipliers["prediction_loss_mul"]
         self.mask_loss_mul = loss_multipliers["mask_loss_mul"]
         print(f"loss multipliers: {self.mask_loss_mul}; {self.prediction_loss_mul}")
-        logging.info(f"loss multipliers: {self.mask_loss_mul}; {self.prediction_loss_mul}")
+        logging.info(f"loss multipliers: {self.mask_loss_mul}; {self.prediction_loss_mul}; {self.mask_loss}")
 
     def __call__(self, output: Tensor,
                  target: Tensor,
