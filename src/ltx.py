@@ -168,9 +168,7 @@ class LTXSaliencyCreator:
             
             sal = interpolated_mask
 
-            mask_model = model.selection[1].to(inp.device)            
-            interpolated_mask, tokens_mask = mask_model(inp)
-            sel_sal = interpolated_mask
+            sel_sal = model.selection[1].to(inp.device)            
 
             #mt = metrics.Metrics() 
             #model.vit_for_classification_image.to           
@@ -187,4 +185,4 @@ class LTXSaliencyCreator:
 
         return {"pLTX" : psal.cpu()[0], 
                 f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0],
-                f"sLTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0]}
+                f"sLTX_{mask_loss_mul}_{prediction_loss_mul}" : sel_sal.cpu()[0]}
