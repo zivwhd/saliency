@@ -183,6 +183,10 @@ class LTXSaliencyCreator:
         mask_loss_mul=args["mask_loss_mul"]
         prediction_loss_mul=args["prediction_loss_mul"]
 
-        return {"pLTX" : psal.cpu()[0], 
-                f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0],
-                f"sLTX_{mask_loss_mul}_{prediction_loss_mul}" : sel_sal.cpu()[0]}
+        rv = {
+            "pLTX" : psal.cpu()[0], 
+            f"LTX_{mask_loss_mul}_{prediction_loss_mul}" : sal.cpu()[0],
+            f"sLTX_{mask_loss_mul}_{prediction_loss_mul}" : sel_sal.cpu()}
+        
+        logging.info(f"sal shapes {[x.shape for x in rv.values()]}")
+        return rv
