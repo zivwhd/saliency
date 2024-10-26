@@ -51,6 +51,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             is_finetune = False,
             ins_weight=1.0,
             del_weight=1.0,
+            cp_loss_mul=1.0,
+            cp_data=None,
     ):
         super().__init__()
         self.vit_for_classification_image = model_for_classification_image
@@ -58,6 +60,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.criterion = LossLoss(mask_loss=mask_loss,
                                   mask_loss_mul=mask_loss_mul,
                                   prediction_loss_mul=prediction_loss_mul,
+                                  cp_data=cp_data,
+                                  cp_loss_mul=cp_loss_mul
                                   )
         self.n_warmup_steps = warmup_steps
         self.n_training_steps = total_training_steps

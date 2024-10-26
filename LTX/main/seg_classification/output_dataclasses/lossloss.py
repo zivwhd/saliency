@@ -2,16 +2,23 @@ from dataclasses import dataclass
 from main.seg_classification.output_dataclasses.lossloss_output import LossLossOutput
 import torch
 import logging
-from torch import Tensor
+from torch import Tensor, nn
 from main.seg_classification.seg_cls_utils import encourage_token_mask_to_prior_loss, l1_loss, prediction_loss
 from utils.vit_utils import get_loss_multipliers
 import numpy as np
 
 @dataclass
 class LossLoss:
-    mask_loss: str
-    prediction_loss_mul: int
-    mask_loss_mul: int
+
+    def __init__(self, mask_loss, prediction_loss_mul, mask_loss_mul, 
+                 cp_loss_mul=0, cp_data=None)
+        self.mask_loss = mask_loss
+        self.prediction_loss_mul = prediction_loss_mul
+        self.mask_loss_mul = mask_loss_mul
+        self.cp_data = cp_data
+        self.cp_loss_mul = cp_loss_mul
+        self.mse = nn.MSELoss()  # Mean Squared Error loss
+
 
     def __post_init__(self):
         loss_multipliers = get_loss_multipliers(normalize=False,
@@ -56,9 +63,17 @@ class LossLoss:
                                                  use_logits_only=use_logits_only)
             pred_loss = (pred_pos_loss + pred_neg_loss) / 2
 
+        if self.cp_data and self.cp_loss_mul:
+            explanation = output * self.cp_data.added_score / output.sum() 
+            exp_pred =  (self.cp_data.all_masks * explanation).flatten(start_dim=1).sum(dim=1)            
+            comp_loss = self.mse(exp_pred/explanation.numel(), self.cp_data.all_pred/explanation.numel())
+        else:
+            comp_loss = 0.0                        
+
         prediction_loss_multiplied = self.prediction_loss_mul * pred_loss
         mask_loss_multiplied = self.mask_loss_mul * mask_loss
-        loss = prediction_loss_multiplied + mask_loss_multiplied
+        comp_loss_multiplied = self.cp_loss_mul * comp_loss
+        loss = prediction_loss_multiplied + mask_loss_multiplied + comp_loss_multiplied
         return LossLossOutput(
             loss=loss,
             prediction_loss_multiplied=prediction_loss_multiplied,

@@ -38,11 +38,15 @@ def sum_model_weights(model):
     return total_sum.item()        
 
 class LTXSaliencyCreator:
-    def __init__(self, activation_function="sigmoid", variant="vnl", checkpoint_base_path=CHECKPOINT_BASE_PATH):
+    def __init__(self, activation_function="sigmoid", 
+                 variant="vnl", 
+                 checkpoint_base_path=CHECKPOINT_BASE_PATH,
+                 cp_gen=None):
         setup_path()
         self.activation_function = activation_function       
         self.variant=variant 
         self.checkpoint_base_path = checkpoint_base_path
+        self.cp_gen = cp_gen
 
     def __call__(self, me, inp, catidx):    
         from main.seg_classification.model_types_loading import load_explainer_explaniee_models_and_feature_extractor
@@ -78,7 +82,14 @@ class LTXSaliencyCreator:
         ins_weight=args["ins_weight_finetune"]
         del_weight=args["del_weight_finetune"]
         prediction_loss_mul = args["prediction_loss_mul_finetune"]
+        cp_loss_mul=args["cp_loss_mul"]
         is_convnet = ("vit" not in model_name)
+
+        if self.cp_gen:
+            cp_data = self.cp_gen.generate_data(me, inp, catidx)
+        else:
+            cp_data = None
+
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
@@ -94,6 +105,7 @@ class LTXSaliencyCreator:
             n_batches_to_visualize=args["n_batches_to_visualize"],
             mask_loss=args["mask_loss"],
             mask_loss_mul=args["mask_loss_mul"],
+            cp_loss_mul=cp_loss_mul,
             prediction_loss_mul=prediction_loss_mul,
             activation_function=args["activation_function"],
             train_model_by_target_gt_class=args["train_model_by_target_gt_class"],
@@ -104,7 +116,8 @@ class LTXSaliencyCreator:
             verbose=True, ## args.verbose,            
             is_finetune=True,
             ins_weight=ins_weight,
-            del_weight=del_weight
+            del_weight=del_weight,
+            cp_data=cp_data
         )
 
         logging.info(f"loaded {type(model_for_classification_image)} {type(model_for_mask_generation)} {feature_extractor is None}")
@@ -188,10 +201,13 @@ class LTXSaliencyCreator:
         
         mask_loss_mul=args["mask_loss_mul"]        
         lr = args["lr_finetune"]
+        adesc = f'{mask_loss_mul}_{prediction_loss_mul}_{lr}'
+        if cp_data:
+            adesc += f'_cp{cp_loss_mul}'
         rv = {
-            "pLTXb" : psal.cpu()[0], 
-            f"LTXb_{mask_loss_mul}_{prediction_loss_mul}_{lr}" : sal.cpu()[0],
-            f"sLTXb_{mask_loss_mul}_{prediction_loss_mul}_{lr}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
+            "pLTXc" : psal.cpu()[0], 
+            f"LTXc_{adesc}" : sal.cpu()[0],
+            f"sLTXc_{adesc}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
         
         logging.info(f"sal shapes {[x.shape for x in rv.values()]}")
         return rv

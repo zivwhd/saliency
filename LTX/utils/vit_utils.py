@@ -219,6 +219,7 @@ def get_params_from_config(config_vit: Dict) -> Dict:
     default_root_dir = config_vit["default_root_dir"]
     mask_loss = loss_config["mask_loss"]
     mask_loss_mul = loss_config["mask_loss_mul"]
+    cp_loss_mul = loss_config["cp_loss_mul"]
     prediction_loss_mul = loss_config["prediction_loss_mul"]
     prediction_loss_mul_finetune = loss_config["prediction_loss_mul_finetune"]
     lr = config_vit["lr"]    
@@ -255,6 +256,7 @@ def get_params_from_config(config_vit: Dict) -> Dict:
                 default_root_dir=default_root_dir,
                 mask_loss=mask_loss,
                 mask_loss_mul=mask_loss_mul,
+                cp_loss_mul=cp_loss_mul,
                 prediction_loss_mul=prediction_loss_mul,
                 prediction_loss_mul_finetune=prediction_loss_mul_finetune,
                 lr=lr,
