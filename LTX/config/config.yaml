@@ -81,7 +81,7 @@ resnet50:
   lr:  0.005 ##2.0e-3
   lr_finetune:  2.0e-4 ##20.0e-6
   del_weight_finetune: 1.0
-  ins_weight_finetune: 0.5
+  ins_weight_finetune: 0.1
   verbose: False
   seg_cls:
     train_n_label_sample: 1
