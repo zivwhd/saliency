@@ -205,9 +205,9 @@ class LTXSaliencyCreator:
         if cp_data:
             adesc += f'_cp{cp_loss_mul}'
         rv = {
-            "pLTXc" : psal.cpu()[0], 
-            f"LTXc_{adesc}" : sal.cpu()[0],
-            f"sLTXc_{adesc}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
-         
+            "pLTXd" : psal.cpu()[0], 
+            f"LTXd_{adesc}" : sal.cpu()[0],
+            f"sLTXd_{adesc}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
+
         logging.info(f"sal shapes {[x.shape for x in rv.values()]}")
         return rv
