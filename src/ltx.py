@@ -75,7 +75,8 @@ class LTXSaliencyCreator:
         logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
         warmup_steps = 0
         training_steps = 30
-
+        ins_weight=args["ins_weight"]
+        del_weight=args["del_weight"]
         is_convnet = ("vit" not in model_name)
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
@@ -100,7 +101,9 @@ class LTXSaliencyCreator:
             patch_size=args["patch_size"],
             is_ce_neg=args["is_ce_neg"],
             verbose=True, ## args.verbose,            
-            is_finetune=True
+            is_finetune=True,
+            ins_weight=ins_weight,
+            del_weight=del_weight
         )
 
         logging.info(f"loaded {type(model_for_classification_image)} {type(model_for_mask_generation)} {feature_extractor is None}")
@@ -188,7 +191,7 @@ class LTXSaliencyCreator:
         rv = {
             "pLTX" : psal.cpu()[0], 
             f"LTX_{mask_loss_mul}_{prediction_loss_mul}_{lr}" : sal.cpu()[0],
-            f"sLTX_{mask_loss_mul}_{prediction_loss_mul}_{lr}" : sel_sal.cpu()}
+            f"sLTX_{mask_loss_mul}_{prediction_loss_mul}_{lr}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
         
         logging.info(f"sal shapes {[x.shape for x in rv.values()]}")
         return rv

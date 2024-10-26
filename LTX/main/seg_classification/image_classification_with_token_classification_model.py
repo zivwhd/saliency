@@ -49,6 +49,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             is_clamp_between_0_to_1: bool = True,
             verbose: bool = False,
             is_finetune = False,
+            ins_weight=1.0,
+            del_weight=1.0,
     ):
         super().__init__()
         self.vit_for_classification_image = model_for_classification_image
@@ -78,6 +80,8 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         self.val_outputs = []
         self.epoch_count = 0
         self.is_finetune = is_finetune
+        self.ins_weight=ins_weight
+        self.del_weight=del_weight
         self.selection = None
 
         logging.info(f"ICC: logits={self.use_logits_only}; lr={self.lr}; cneg={self.is_ce_neg}; finetuen={self.is_finetune}; convnet={self.is_explainer_convnet}")
@@ -272,7 +276,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             #batch = outputs[0]
             #data, vis, target = batch["image_resized"], batch["image_mask"], batch["target_class"]            
             #logging.info(f"epoch: {len(outputs)}; {data.shape} {vis.shape}, {data.sum()}, {vis.sum()}")
-            mask_score = ins_score -  0.5 * del_score
+            mask_score = self.ins_weight * ins_score -  self.del_weight * del_score
             if self.selection is None or (mask_score > self.selection[0]):
                 assert len(outputs) == 1
                 assert len(outputs[0]["image_mask"]) == 1

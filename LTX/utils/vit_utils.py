@@ -220,8 +220,11 @@ def get_params_from_config(config_vit: Dict) -> Dict:
     mask_loss = loss_config["mask_loss"]
     mask_loss_mul = loss_config["mask_loss_mul"]
     prediction_loss_mul = loss_config["prediction_loss_mul"]
-    lr = config_vit["lr"]
+    prediction_loss_mul_finetune = loss_config["prediction_loss_mul_finetune"]
+    lr = config_vit["lr"]    
     lr_finetune = config_vit["lr_finetune"]
+    del_weight_finetune = config_vit["del_weight_finetune"]
+    ins_weigth_finetune = config_vit["ins_weight_finetune"]
     start_epoch_to_evaluate = config_vit["start_epoch_to_evaluate"]
     n_batches_to_visualize = config_vit["n_batches_to_visualize"]
     is_ce_neg = loss_config["is_ce_neg"]
@@ -253,8 +256,11 @@ def get_params_from_config(config_vit: Dict) -> Dict:
                 mask_loss=mask_loss,
                 mask_loss_mul=mask_loss_mul,
                 prediction_loss_mul=prediction_loss_mul,
+                prediction_loss_mul_finetune=prediction_loss_mul_finetune,
                 lr=lr,
                 lr_finetune=lr_finetune,
+                del_weight_finetune=del_weight_finetune,
+                ins_weigth_finetune=ins_weigth_finetune,
                 start_epoch_to_evaluate=start_epoch_to_evaluate,
                 n_batches_to_visualize=n_batches_to_visualize,
                 is_ce_neg=is_ce_neg,
