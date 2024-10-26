@@ -208,6 +208,6 @@ class LTXSaliencyCreator:
             "pLTXc" : psal.cpu()[0], 
             f"LTXc_{adesc}" : sal.cpu()[0],
             f"sLTXc_{adesc}_{del_weight}_{ins_weight}" : sel_sal.cpu()}
-        
+         
         logging.info(f"sal shapes {[x.shape for x in rv.values()]}")
         return rv
