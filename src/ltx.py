@@ -73,15 +73,17 @@ class LTXSaliencyCreator:
         )
 
         logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
-        
+        warmup_steps = 0
+        training_steps = 30
+
         is_convnet = ("vit" not in model_name)
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
             model_for_mask_generation=model_for_mask_generation,
             is_clamp_between_0_to_1=args["is_clamp_between_0_to_1"],
             plot_path=None,##plot_path,
-            warmup_steps=0, ##warmup_steps,
-            total_training_steps=30,##total_training_steps,
+            warmup_steps=warmup_steps, ##warmup_steps,
+            total_training_steps=training_steps,##total_training_steps,
             experiment_path=None,##experiment_perturbation_results_path,
             is_explainer_convnet=is_convnet,
             is_explainee_convnet=is_convnet,
@@ -148,7 +150,7 @@ class LTXSaliencyCreator:
             #devices=[1, 2],
             num_sanity_val_steps=0,
             #check_val_every_n_epoch=300,
-            max_epochs=30, #args.n_epochs_to_optimize_stage_b,
+            max_epochs=training_steps, #args.n_epochs_to_optimize_stage_b,
             #resume_from_checkpoint=CKPT_PATH,
             enable_progress_bar=False,
             enable_checkpointing=False,

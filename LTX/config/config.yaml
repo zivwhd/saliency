@@ -79,7 +79,7 @@ resnet50:
   n_epochs: 15 ## 500
   n_epochs_to_optimize_stage_b: 25
   lr:  0.005 ##2.0e-3
-  lr_finetune: 20.0e-6
+  lr_finetune:  2.0e-4 ##20.0e-6
   verbose: False
   seg_cls:
     train_n_label_sample: 1
