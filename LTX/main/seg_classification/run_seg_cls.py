@@ -65,7 +65,7 @@ if __name__ == '__main__':
     """
     model_name = sys.argv.pop(1)
     logging.info(f"model_name: {model_name}")
-    params_config = get_params_from_config(config_vit=config["model_name"])
+    params_config = get_params_from_config(config_vit=config[model_name])
     #params_config = get_params_from_config(config_vit=config["vit_base_patch16_224"])
 
     parser = argparse.ArgumentParser(description='Train pEEA model')
