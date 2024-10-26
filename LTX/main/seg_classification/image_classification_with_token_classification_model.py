@@ -153,6 +153,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             neg_output=vit_masked_neg_output_logits,
             target=vit_cls_output_logits,
             tokens_mask=tokens_mask,
+            interpolated_mask = interpolated_mask_normalized,
             target_class=target_class,
             train_model_by_target_gt_class=self.train_model_by_target_gt_class,
             use_logits_only=self.use_logits_only,

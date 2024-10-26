@@ -32,6 +32,7 @@ class LossLoss:
     def __call__(self, output: Tensor,
                  target: Tensor,
                  tokens_mask: Tensor,
+                 interpolated_mask: Tensor,
                  target_class: Tensor,
                  activation_function: str,
                  train_model_by_target_gt_class: bool,
@@ -64,7 +65,7 @@ class LossLoss:
             pred_loss = (pred_pos_loss + pred_neg_loss) / 2
 
         if self.cp_data and self.cp_loss_mul:            
-            explanation = tokens_mask * self.cp_data.added_score / tokens_mask.sum() 
+            explanation = (interpolated_mask * self.cp_data.added_score / interpolated_mask.sum()).squeeze(0)
             logging.info(f"cp loss: {self.cp_data.all_masks.shape} {explanation.shape} {self.cp_data.all_pred.shape} {self.cp_loss_mul}")
             exp_pred =  (self.cp_data.all_masks * explanation).flatten(start_dim=1).sum(dim=1)            
             comp_loss = self.mse(exp_pred/explanation.numel(), self.cp_data.all_pred/explanation.numel())
