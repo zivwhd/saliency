@@ -75,8 +75,9 @@ class LTXSaliencyCreator:
         logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)}")
         warmup_steps = 0
         training_steps = 30
-        ins_weight=args["ins_weight"]
-        del_weight=args["del_weight"]
+        ins_weight=args["ins_weight_finetune"]
+        del_weight=args["del_weight_finetune"]
+        prediction_loss_mul = args["prediction_loss_mul_finetune"]
         is_convnet = ("vit" not in model_name)
         model = ImageClassificationWithTokenClassificationModel(
             model_for_classification_image=model_for_classification_image,
@@ -93,7 +94,7 @@ class LTXSaliencyCreator:
             n_batches_to_visualize=args["n_batches_to_visualize"],
             mask_loss=args["mask_loss"],
             mask_loss_mul=args["mask_loss_mul"],
-            prediction_loss_mul=args["prediction_loss_mul"],
+            prediction_loss_mul=prediction_loss_mul,
             activation_function=args["activation_function"],
             train_model_by_target_gt_class=args["train_model_by_target_gt_class"],
             use_logits_only=args["use_logits_only"],
@@ -185,8 +186,7 @@ class LTXSaliencyCreator:
 
 
         
-        mask_loss_mul=args["mask_loss_mul"]
-        prediction_loss_mul=args["prediction_loss_mul"]
+        mask_loss_mul=args["mask_loss_mul"]        
         lr = args["lr_finetune"]
         rv = {
             "pLTX" : psal.cpu()[0], 
