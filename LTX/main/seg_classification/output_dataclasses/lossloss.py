@@ -11,7 +11,7 @@ import numpy as np
 class LossLoss:
 
     def __init__(self, mask_loss, prediction_loss_mul, mask_loss_mul, 
-                 cp_loss_mul=0, cp_data=None)
+                 cp_loss_mul=0, cp_data=None):
         self.mask_loss = mask_loss
         self.prediction_loss_mul = prediction_loss_mul
         self.mask_loss_mul = mask_loss_mul
