@@ -272,7 +272,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             #batch = outputs[0]
             #data, vis, target = batch["image_resized"], batch["image_mask"], batch["target_class"]            
             #logging.info(f"epoch: {len(outputs)}; {data.shape} {vis.shape}, {data.sum()}, {vis.sum()}")
-            mask_score = ins_score -  0.1 * del_score
+            mask_score = ins_score -  0.5 * del_score
             if self.selection is None or (mask_score > self.selection[0]):
                 assert len(outputs) == 1
                 assert len(outputs[0]["image_mask"]) == 1
