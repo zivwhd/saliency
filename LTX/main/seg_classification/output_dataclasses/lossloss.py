@@ -63,9 +63,9 @@ class LossLoss:
                                                  use_logits_only=use_logits_only)
             pred_loss = (pred_pos_loss + pred_neg_loss) / 2
 
-        if self.cp_data and self.cp_loss_mul:
-            logging.info(f"cp loss: {self.cp_data.all_masks.shape} {explanation.shape} {self.cp_loss_mul}")
+        if self.cp_data and self.cp_loss_mul:            
             explanation = output * self.cp_data.added_score / output.sum() 
+            logging.info(f"cp loss: {self.cp_data.all_masks.shape} {explanation.shape} {self.cp_data.all_pred.shape} {self.cp_loss_mul}")
             exp_pred =  (self.cp_data.all_masks * explanation).flatten(start_dim=1).sum(dim=1)            
             comp_loss = self.mse(exp_pred/explanation.numel(), self.cp_data.all_pred/explanation.numel())
         else:
