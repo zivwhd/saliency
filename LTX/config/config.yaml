@@ -127,9 +127,9 @@ vit_small_patch16_224:
   enable_checkpointing: True
   start_epoch_to_evaluate: 1
   n_batches_to_visualize: 1
-  n_epochs: 15 ## 500
+  n_epochs: 30 ## 500
   n_epochs_to_optimize_stage_b: 25
-  lr:  0.005 ##2.0e-3
+  lr:  0.002 ##2.0e-3
   lr_finetune:  5.0e-5 ##20.0e-6
   del_weight_finetune: 1.0
   ins_weight_finetune: 0.5
