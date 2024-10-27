@@ -8,6 +8,9 @@ from feature_extractor import ViTFeatureExtractor
 from models.modeling_cnn_for_mask_generation import CNNForMaskGeneration
 from models.modeling_vit_patch_classification import ViTForMaskGeneration
 from vit_loader.load_vit import load_vit_pretrained_for_explanier, load_vit_pretrained_for_explaniee
+import timm
+
+
 
 CONVNET_MODELS_BY_NAME = {"resnet": models.resnet101(pretrained=True),
                           "resnet50": models.resnet50(pretrained=True),
@@ -19,16 +22,15 @@ def load_vit_type_models(model_name: str, is_explanier_model: bool) -> Union[
     ViTForImageClassification, ViTForMaskGeneration]:
     if is_explanier_model:
         if model_name in ["google/vit-base-patch16-224"]:
-            model_for_classification_image = load_vit_pretrained_for_explanier(model_name=model_name)
+            return load_vit_pretrained_for_explanier(model_name=model_name)
         else:
-            model_for_classification_image = ViTForImageClassification.from_pretrained(model_name)
-        return model_for_classification_image
+            return ViTForMaskGeneration.from_pretrained(model_name)            
     else:
         if model_name in ["google/vit-base-patch16-224",]:
-            model_for_mask_generation = load_vit_pretrained_for_explaniee(model_name=model_name)
+            return load_vit_pretrained_for_explaniee(model_name=model_name)
         else:
-            model_for_mask_generation = ViTForMaskGeneration.from_pretrained(model_name)
-        return model_for_mask_generation
+            return ViTForImageClassification.from_pretrained(model_name)                    
+        
 
 
 def load_convnet_type_models(model_name: str,
