@@ -33,7 +33,7 @@ def load_vit_type_models(model_name: str, is_explanier_model: bool) -> Union[
         if model_name in ["google/vit-base-patch16-224",]:
             return load_vit_pretrained_for_explaniee(model_name=model_name)
         else:
-            return ViTForImageClassification.from_pretrained(VIT_MODEL_REF[model_name])                    
+            return timm.create_model(model_name, pretrained=True) ##ViTForImageClassification.from_pretrained(VIT_MODEL_REF[model_name])                    
         
 
 
