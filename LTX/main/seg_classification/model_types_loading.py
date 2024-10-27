@@ -19,6 +19,7 @@ CONVNET_MODELS_BY_NAME = {"resnet": models.resnet101(pretrained=True),
 
 VIT_MODEL_REF = {
     "vit_small_patch16_224":"google/vit-small-patch16-224"
+    "vit_base_patch16_224":"google/vit-base-patch16-224"
 }
 
 def load_vit_type_models(model_name: str, is_explanier_model: bool) -> Union[
@@ -32,7 +33,7 @@ def load_vit_type_models(model_name: str, is_explanier_model: bool) -> Union[
         if model_name in ["google/vit-base-patch16-224",]:
             return load_vit_pretrained_for_explaniee(model_name=model_name)
         else:
-            return ViTForImageClassification.from_pretrained(model_name)                    
+            return ViTForImageClassification.from_pretrained(VIT_MODEL_REF[model_name])                    
         
 
 
