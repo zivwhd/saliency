@@ -133,9 +133,15 @@ def freeze_multitask_model(model,
         print(print_number_of_trainable_and_not_trainable_params(model))
         """
     else:
-        modules = [model.vit_for_patch_classification.vit.embeddings,
-                   model.vit_for_patch_classification.vit.encoder.layer[
-                   :explainer_model_n_first_layers_to_freeze]]
+        #modules = [model.vit_for_patch_classification.vit.embeddings,
+        #           model.vit_for_patch_classification.vit.encoder.layer[
+        #           :explainer_model_n_first_layers_to_freeze]]
+        vit = model.vit_for_patch_classification.vit 
+        modules = [
+            vit.patch_embed,
+            vit.pos_embed,
+            vit.blocks[:explainer_model_n_first_layers_to_freeze]
+        ]
         for module in modules:
             for param in module.parameters():
                 param.requires_grad = False
