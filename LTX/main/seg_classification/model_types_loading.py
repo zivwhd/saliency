@@ -63,16 +63,20 @@ def load_model_by_name(model_name: str, is_explanier_model: bool, activation_fun
     return model
 
 
+class NoneFeatExtractor:
+    pass
+
 def load_feature_extractor(explainee_model_name: str, explainer_model_name: str) -> Union[ViTFeatureExtractor, None]:
     """
     If both of models are convnet, return None as feature extractor, else return feature extractor by the explanier / explaniee
-    """
-    return None ### 
+    """    
     if explainee_model_name in CONVNET_MODELS_BY_NAME.keys() and explainer_model_name in CONVNET_MODELS_BY_NAME.keys():
         return None
     if explainee_model_name not in CONVNET_MODELS_BY_NAME.keys():
+        return NoneFeatExtractor()
         return ViTFeatureExtractor.from_pretrained(explainee_model_name)
     if explainer_model_name not in CONVNET_MODELS_BY_NAME.keys():
+        return NoneFeatExtractor()
         return ViTFeatureExtractor.from_pretrained(explainer_model_name)
 
 
