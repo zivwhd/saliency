@@ -6,7 +6,7 @@ from transformers import ViTForImageClassification
 from feature_extractor import ViTFeatureExtractor
 from main.seg_classification.backbone_to_details import EXPLAINER_EXPLAINEE_BACKBONE_DETAILS
 from models.modeling_vit import ViTBasicForForImageClassification
-import cv2
+import cv2, logging
 import matplotlib.pyplot as plt
 from typing import Dict, Tuple, NewType
 from pathlib import Path
@@ -143,6 +143,7 @@ def freeze_multitask_model(model,
             vit.blocks[:explainer_model_n_first_layers_to_freeze]
         ]
         for module in modules:
+            logging.info(f"freezing {type(module)}")
             for param in module.parameters():
                 param.requires_grad = False
 
