@@ -36,7 +36,13 @@ def get_mcomp_sal_creator():
         baselines = baselines,
         groups=[        
             dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0.05),        
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0.05),
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0),                
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0.05),        
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0),                
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0.05),
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.1, c_model=0),                
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.1, c_model=0.05),
     ])
     
 def get_emask_sal_creator():
