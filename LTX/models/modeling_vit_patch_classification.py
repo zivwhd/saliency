@@ -8,14 +8,63 @@ from transformers.modeling_outputs import SequenceClassifierOutput
 from transformers.models.vit import ViTPreTrainedModel, ViTModel
 from transformers.modeling_outputs import BaseModelOutputWithPooling
 from transformers.models.vit.modeling_vit import ViTEncoder
-
+import timm
 from config import config
 
 vit_config = config["vit"]
 EPSILON = 0.05
 
 
-class ViTForMaskGeneration(ViTPreTrainedModel):
+class ViTForMaskGeneration(nn.Module):
+    def __init__(self, model_name):
+        super().__init__()
+        self.vit = timm.create_model(model_name, pretrained=True)
+        proj_shape = self.vit.patch_embed.proj.weight.shape
+        self.hidden_size = proj_shape[0]
+        self.patch_size = proj_shape[2]        
+
+        self.patch_pooler = nn.Linear(config.hidden_size, config.hidden_size)
+        self.activation = nn.Tanh()
+        # self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.patch_classifier = nn.Linear(config.hidden_size, 1)  # regression to one number
+
+    @staticmethod
+    def from_pretrained(model_name):
+        return ViTForMaskGeneration(model_name)
+    
+    def forward(self, x):
+        patch_embeddings = None
+
+        def hook_fn(module, input, output):
+            nonlocal patch_embeddings
+            patch_embeddings = output
+
+        hook = self.vit.blocks[-1].register_forward_hook(hook_fn)
+        try:
+            self.vit(x)
+        finally:
+            hook.remove()
+
+        tokens_output = patch_embeddings[:, 1:, :]
+        batch_size = tokens_output.shape[0]
+        hidden_size = tokens_output.shape[2]
+        
+        tokens_output_reshaped = tokens_output.reshape(-1, hidden_size)
+        print(tokens_output_reshaped.shape)
+
+        tokens_output_reshaped = self.patch_pooler(tokens_output_reshaped)
+        tokens_output_reshaped = self.activation(tokens_output_reshaped)
+
+        logits = self.patch_classifier(tokens_output_reshaped)
+        mask = logits.view(batch_size, -1, 1)  # logits - [batch_size, tokens_count]
+
+        mask = mask.view(batch_size,1,int(224/self.patch_size),int(224/self.patch_size))
+        interpolated_mask = torch.nn.functional.interpolate(mask, scale_factor=self.patch_size, mode='bilinear')
+        return interpolated_mask, mask
+        
+
+
+class ViTForMaskGenerationOrig(ViTPreTrainedModel):
     vit: ViTModel
     patch_classifier: nn.Linear
 
