@@ -132,7 +132,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
         masked_image_inputs = masked_image
 
         vit_masked_output = self.vit_for_classification_image(masked_image_inputs)
-        vit_masked_output_logits = vit_masked_output.logits if not self.is_explainee_convnet else vit_masked_output
+        vit_masked_output_logits = vit_masked_output #vit_masked_output.logits if not self.is_explainee_convnet else vit_masked_output
 
         if self.is_ce_neg:
             masked_neg_image = image_resized * (1 - interpolated_mask_normalized)
@@ -144,7 +144,7 @@ class ImageClassificationWithTokenClassificationModel(pl.LightningModule):
             #else:
             #    masked_neg_image_inputs = self.normalize_image(masked_neg_image)
             vit_masked_neg_output = self.vit_for_classification_image(masked_neg_image_inputs)
-            vit_masked_output_logits = vit_masked_neg_output.logits if not self.is_explainee_convnet else vit_masked_neg_output
+            vit_masked_output_logits = vit_masked_neg_output ## vit_masked_neg_output.logits if not self.is_explainee_convnet else vit_masked_neg_output
 
         vit_masked_neg_output_logits = None if not self.is_ce_neg else vit_masked_neg_output
 
