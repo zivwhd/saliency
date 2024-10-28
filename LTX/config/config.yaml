@@ -132,7 +132,7 @@ vit_small_patch16_224:
   lr:  0.002 ##2.0e-3
   lr_finetune:  5.0e-5 ##20.0e-6
   del_weight_finetune: 1.0
-  ins_weight_finetune: 0.05
+  ins_weight_finetune: 0.1
   verbose: False
   seg_cls:
     train_n_label_sample: 1
@@ -141,7 +141,7 @@ vit_small_patch16_224:
       normalize: False
       mask_loss: bce #choose l1, bce, entropy_softmax      
       prediction_loss_mul: 1
-      prediction_loss_mul_finetune: 5
+      prediction_loss_mul_finetune: 10
       cp_loss_mul: 1
       mask_loss_mul: 50
       is_ce_neg: False
