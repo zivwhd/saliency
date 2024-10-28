@@ -9,6 +9,7 @@ from transformers.models.vit import ViTPreTrainedModel, ViTModel
 from transformers.modeling_outputs import BaseModelOutputWithPooling
 from transformers.models.vit.modeling_vit import ViTEncoder
 import timm
+import logging
 from config import config
 
 vit_config = config["vit"]
@@ -23,10 +24,11 @@ class ViTForMaskGeneration(nn.Module):
         self.hidden_size = proj_shape[0]
         self.patch_size = proj_shape[2]        
 
-        self.patch_pooler = nn.Linear(config.hidden_size, config.hidden_size)
+        logging.info(f"ViTForMaskGeneration: hidden_size={self.hidden_size}; patch_size={self.patch_size}")
+        self.patch_pooler = nn.Linear(self.hidden_size, self.hidden_size)
         self.activation = nn.Tanh()
         # self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.patch_classifier = nn.Linear(config.hidden_size, 1)  # regression to one number
+        self.patch_classifier = nn.Linear(self.hidden_size, 1)  # regression to one number
 
     @staticmethod
     def from_pretrained(model_name):
