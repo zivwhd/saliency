@@ -24,12 +24,14 @@ GT_VALIDATION_PATH_LABELS = Path(ROOT_DIR, "gt_data_imagenet", "val ground truth
 IMAGENET_VAL_GT_CSV_FILE_PATH = Path(ROOT_DIR, "gt_data_imagenet", "val_ground_truth_2012.csv")
 PEEA_CHECKPOINTS_PATH = Path(ROOT_DIR, 'checkpoints').resolve()
 
-MODEL_OPTIONS = ["vit_base_224", "vit_small_224", "resnet", "densenet", "resnet50","vit_small_patch16_224","vit_base_patch16_224"]
+MODEL_OPTIONS = ["vit_base_224", "vit_small_224", "resnet", "densenet", "convnext_base", "vgg16" "resnet50","vit_small_patch16_224","vit_base_patch16_224"]
 SEGMENTATION_DATASET_OPTIONS = ["imagenet", "coco", "voc"]
 
 MODEL_ALIAS_MAPPING = {"vit_base_224": "google/vit-base-patch16-224",                       
                        "vit_small_224": "WinKawaks/vit-small-patch16-224",                       
                        "resnet50": "resnet50",
+                       "vgg16": "vgg16",
+                       "convnext_base": "convnext_base",
                        "vit_small_patch16_224": "vit_small_patch16_224",
                        "vit_base_patch16_224": "vit_base_patch16_224",
                        "resnet": "resnet",

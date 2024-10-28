@@ -154,6 +154,8 @@ if __name__ == '__main__':
     IS_EXPLANIEE_CONVNET = True if EXPLAINEE_MODEL_NAME in CONVNET_MODELS_BY_NAME.keys() else False
     IS_EXPLAINER_CONVNET = True if EXPLAINER_MODEL_NAME in CONVNET_MODELS_BY_NAME.keys() else False
 
+    assert (IS_EXPLANIEE_CONVNET == ("vit" not in EXPLAINEE_MODEL_NAME))
+    
     loss_multipliers = get_loss_multipliers(normalize=False,
                                             mask_loss_mul=args.mask_loss_mul,
                                             prediction_loss_mul=args.prediction_loss_mul,

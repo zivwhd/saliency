@@ -12,15 +12,31 @@ import timm
 
 
 
-CONVNET_MODELS_BY_NAME = {"resnet": models.resnet101(pretrained=True),
-                          "resnet50": models.resnet50(pretrained=True),
-                          "densenet": models.densenet201(pretrained=True),
-                          }
+class ConvnetModels:
 
-VIT_MODEL_REF = {
-    "vit_small_patch16_224":"google/vit-small-patch16-224",
-    "vit_base_patch16_224":"google/vit-base-patch16-224"
-}
+    def get_convnet_model_by_name(self, model_name):
+
+        if model_name in ["resnet50", "resnet101", "densenet201", "vgg16"]
+            return models.__dict__[model_name](pretrained=True)  
+        if model_name in ["convnext_base"]:
+            return timm.create_model(model_name, pretrained=True)
+        assert False, f"unexpected model {model_name}"
+
+    def __getitem__(self, model_name):
+        return self.get_convnet_model_by_name(model_name)
+
+    def __contains__(self, item):
+        # This defines the behavior of "item in instance"
+        return (item in ["resnet50", "resnet101", "densenet201", "vgg16", "convnext_base"])
+    
+CONVNET_MODELS_BY_NAME = ConvnetModels()
+
+#CONVNET_MODELS_BY_NAME = {"resnet": models.resnet101(pretrained=True),
+#                          "resnet50": models.resnet50(pretrained=True),
+#                          "densenet": models.densenet201(pretrained=True),
+#                          }
+
+
 
 def load_vit_type_models(model_name: str, is_explanier_model: bool) -> Union[
     ViTForImageClassification, ViTForMaskGeneration]:

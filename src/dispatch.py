@@ -16,6 +16,8 @@ from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
 from mpert import IEMPertSaliencyCreator 
 from ltx import LTXSaliencyCreator
+import torch
+import socket
 
 def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
@@ -33,8 +35,8 @@ def get_mcomp_sal_creator():
         segsize=48, nmasks=500, 
         baselines = baselines,
         groups=[        
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0.05),        
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0),                
+            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0.05),        
     ])
     
 def get_emask_sal_creator():
@@ -204,8 +206,32 @@ def get_args():
     args = parser.parse_args()    
     return args
 
+def print_hw():
+
+    hostname = socket.gethostname()
+    print("Hostname:", hostname)
+
+    print("CPU Info:")
+    print("="* 20)
+    with open("/proc/cpuinfo", "r") as cf:
+        print(cf.read())
+
+    print("GPU Info:")
+    print("="* 20)
+    if torch.cuda.is_available():        
+        print(f"Number of GPUs: {torch.cuda.device_count()}")
+        for i in range(torch.cuda.device_count()):
+            print(f"\nGPU {i}:")
+            print(f"  Name: {torch.cuda.get_device_name(i)}")
+            print(f"  Total Memory: {torch.cuda.get_device_properties(i).total_memory / 1024 ** 3:.2f} GB")
+            print(f"  Compute Capability: {torch.cuda.get_device_properties(i).major}.{torch.cuda.get_device_properties(i).minor}")
+            print(f"  CUDA Device ID: {i}")
+    else:
+        print("No GPU available.")
+
 if __name__ == '__main__':
         
+    print_hw()
     logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
     logging.info("start")    
     args = get_args()
