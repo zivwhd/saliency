@@ -24,5 +24,5 @@ echo "Current Env:" $CONDA_DEFAULT_ENV
 python -c "import torch; print('PyTorch version:', torch.__version__)"
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-srun python LTX/main/seg_classification/run_seg_cls.py vit_small_patch16_224
+srun python LTX/main/seg_classification/run_seg_cls.py vit_base_patch16_224
 echo "DONE"
