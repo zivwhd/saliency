@@ -13,6 +13,7 @@ from pathlib import Path
 from utils.consts import IMAGES_FOLDER_PATH
 from utils.transformation import image_transformations, wolf_image_transformations
 from utils.utils_functions import get_image_from_path
+from torchvision import transforms
 
 cuda = torch.cuda.is_available()
 ce_loss = nn.CrossEntropyLoss(reduction="mean")
@@ -148,6 +149,13 @@ def freeze_multitask_model(model,
                 param.requires_grad = False
 
     return model
+
+
+vit_preprocess = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5,0.5,0.5], std=[0.5,0.5,0.5])
+    ])
 
 
 def get_image_and_inputs_and_transformed_image( ## PTODOP
