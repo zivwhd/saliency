@@ -139,7 +139,7 @@ def freeze_multitask_model(model,
         vit = model.vit_for_patch_classification.vit 
         modules = [
             vit.patch_embed,
-            vit.pos_embed,
+            #vit.pos_embed,
             vit.blocks[:explainer_model_n_first_layers_to_freeze]
         ]
         for module in modules:
