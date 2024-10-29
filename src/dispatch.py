@@ -39,15 +39,23 @@ def get_mcomp_sal_creator():
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation="sigmoid"),
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation="sigmoid"),                            
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, c_norm=True, c_activation="sigmoid"),                
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.025, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=2, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=3, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=4, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=5, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=10, c_model=0, c_norm=True, c_activation="sigmoid"),             
 
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, c_norm=True, c_activation="tanh"),            
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation="tanh"),
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation="tanh"),                            
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, c_norm=True, c_activation="tanh"),                
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0, c_norm=True, c_activation="tanh"), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.025, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=2, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=3, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=4, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=5, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=10, c_model=0, c_norm=True, c_activation="tanh"),             
+
+
     ])
     
 def get_emask_sal_creator():
