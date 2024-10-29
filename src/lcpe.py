@@ -106,6 +106,8 @@ def optimize_explanation_i(
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
+        activation=False,
+        norm_explanation=False,
         renorm=False, baseline=None):
     mse = nn.MSELoss()  # Mean Squared Error loss
     bce = nn.BCELoss(reduction="mean")
@@ -130,6 +132,16 @@ def optimize_explanation_i(
         optimizer.zero_grad()
         output = mexp(data)
         explanation = mexp.explanation
+        if activation == "sigmoid":
+            explanation = torch.sigmoid(explanation)
+        elif activation == "tanh":
+            explanation = torch.tanh(explanation)
+        elif activation:
+            assert False, f"unexpected activation {activation}"
+
+        if norm_explanation:
+            explanation = explanation * score / explanation.sum()
+
         comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
         if c_completeness != 0:            
@@ -277,7 +289,7 @@ class CompExpCreator:
     def __init__(self, nmasks=500, segsize=64, batch_size=32, 
                  lr = 0.05, c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
-                 c_magnitude=0,
+                 c_magnitude=0, norm=False, activation=False,
                  avg_kernel_size=(5,5),
                  epochs=200, 
                  model_epochs=200, c_model=0,
@@ -295,6 +307,8 @@ class CompExpCreator:
         self.c_selfness = c_selfness
         self.c_mask_completeness = c_mask_completeness
         self.c_model = c_model
+        self.norm = norm
+        self.activation = activation
         self.c_magnitude = c_magnitude
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
@@ -311,6 +325,9 @@ class CompExpCreator:
     def description(self):
         desc = f"{self.desc}_{self.nmasks}_{self.segsize}_{self.epochs}"
                                 
+        if self.norm or self.activation:
+            desc += "_" + ("n" * self.norm) + (self.activation[0] if self.activation else "")
+
         if self.model_epochs:
             desc += f":{self.model_epochs}"
 
@@ -389,6 +406,7 @@ class CompExpCreator:
                                    c_mask_completeness=self.c_mask_completeness,
                                    c_model=self.c_model,
                                    c_magnitude=self.c_magnitude,
+                                   norm_explanation=self.norm, activation=self.activation,
                                    baseline=data.baseline)
         
         return sal
@@ -397,7 +415,7 @@ class CompExpCreator:
 
 class MultiCompExpCreator:
 
-    def __init__(self, nmasks=500, segsize=64, batch_size=32, baselines=[ZeroBaseline()],
+    def __init__(self, nmasks=500, segsize=[64], batch_size=32, baselines=[ZeroBaseline()],
                  desc="MComp",
                  groups=[]):
         self.nmasks = nmasks
@@ -410,17 +428,18 @@ class MultiCompExpCreator:
     def __call__(self, me, inp, catidx):
         all_sals = {}
         for bgen in self.baselines:
-            desc = self.desc + bgen.desc
-            dc = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size,
-                                baseline_gen=bgen
-                                )
-            data = dc.generate_data(me, inp, catidx)
-            
-            for kwargs in self.groups:
-                algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, batch_size=self.batch_size, 
-                                      desc=desc, **kwargs)
-                res = algo(me, inp, catidx, data=data)
-                all_sals.update(res)
+            for segsize in self.segsize:
+                desc = self.desc + bgen.desc
+                dc = CompExpCreator(nmasks=self.nmasks, segsize=segsize, batch_size=self.batch_size,
+                                    baseline_gen=bgen
+                                    )
+                data = dc.generate_data(me, inp, catidx)
+                
+                for kwargs in self.groups:
+                    algo = CompExpCreator(nmasks=self.nmasks, segsize=segsize, batch_size=self.batch_size, 
+                                        desc=desc, **kwargs)
+                    res = algo(me, inp, catidx, data=data)
+                    all_sals.update(res)
         logging.info(f"generated: {list(all_sals.keys())}")
         return all_sals
 

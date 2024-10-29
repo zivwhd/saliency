@@ -32,24 +32,29 @@ def get_cpltx_sal_creator():
 def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
-        segsize=48, nmasks=500, 
+        segsize=[32, 40, 48, 56, 64], nmasks=500, 
         baselines = baselines,
-        groups=[        
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.01, c_model=0.05),
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.025, c_model=0.05),        
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.05, c_model=0.05),
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.1, c_model=0),                
-            dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.1, c_model=0.05),
+        groups=[
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, norm=True, activation="sigmoid"),            
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, norm=True, activation="sigmoid"),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, norm=True, activation="sigmoid"),                            
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, norm=True, activation="sigmoid"),                
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, norm=True, activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, norm=True, activation="sigmoid"), 
+
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, norm=True, activation="tanh"),            
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, norm=True, activation="tanh"),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, norm=True, activation="tanh"),                            
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, norm=True, activation="tanh"),                
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, norm=True, activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, norm=True, activation="tanh"), 
     ])
     
 def get_emask_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         desc="EMask",
-        segsize=48, nmasks=500, 
+        segsize=[48], nmasks=500, 
         baselines = baselines,
         groups=[        
             dict(c_mask_completeness=0, c_completeness=0.1, c_model=0.5, c_tv=2, c_magnitude=2),
