@@ -100,14 +100,26 @@ class MaskedExplanationSum(nn.Module):
             self.explanation *= score / self.explanation.sum()
 
 # Define the training function
+
+def normalize_explanation(explanation, score, c_norm, c_activation):
+    if c_activation == "sigmoid":
+        explanation = torch.sigmoid(explanation)
+    elif c_activation == "tanh":
+        explanation = torch.tanh(explanation)
+    elif c_activation:
+        assert False, f"unexpected activation {c_activation}"
+    if c_norm:
+        explanation = explanation * score / explanation.sum()
+    return explanation
+
 def optimize_explanation_i(
         fmdl, inp, mexp, data, targets, epochs=10, lr=0.001, score=1.0, 
         c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
-        activation=False,
-        norm_explanation=False,
+        c_activation=None,
+        c_norm=False,
         renorm=False, baseline=None):
     mse = nn.MSELoss()  # Mean Squared Error loss
     bce = nn.BCELoss(reduction="mean")
@@ -121,26 +133,20 @@ def optimize_explanation_i(
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
     print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}")
     optimizer = optim.Adam(mexp.parameters(), lr=lr)
-    mexp.normalize(score)
+
+    #if not c_activation:
+    #    mexp.normalize(score)
+
     mexp.train()
     avg_kernel = torch.ones((1,) + avg_kernel_size).to(data.device)
     avg_kernel = avg_kernel / avg_kernel.numel()
-    
+                
     for epoch in range(epochs):
                 
         # Forward pass
         optimizer.zero_grad()
         output = mexp(data)
-        explanation = mexp.explanation
-        if activation == "sigmoid":
-            explanation = torch.sigmoid(explanation)
-        elif activation == "tanh":
-            explanation = torch.tanh(explanation)
-        elif activation:
-            assert False, f"unexpected activation {activation}"
-
-        if norm_explanation:
-            explanation = explanation * score / explanation.sum()
+        explanation = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
 
         comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
@@ -211,29 +217,39 @@ def optimize_explanation_i(
                     f"magnitude_loss={magnitude_loss}")
             logging.debug(pdesc)
             print(pdesc)
+            
 
 
 def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.0, 
                          epochs=0, model_epochs=0, c_model=0,
+                         c_activation=None, c_norm=False,
                          **kwargs):
     # Initialize the model with the given initial explanation
     mexp = MaskedExplanationSum(initial_value=initial_explanation)
     mexp = mexp.to(data.device)
-    mexp.normalize(score)    
+    
+    if not c_activation:
+        mexp.normalize(score)    
     # Train the model by passing all additional arguments through kwargs
     start_time = time.time()
-    optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, c_model=0, epochs=epochs-model_epochs, **kwargs)
+    optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, 
+                           c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
     mid_time = time.time()
     logging.info(f"Optimization I: {mid_time - start_time}")    
     print(f"Optimization I: {mid_time -start_time}")    
     if model_epochs:
-        optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, c_model=c_model, epochs=model_epochs, **kwargs)
+        optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, 
+                               c_activation=c_activation, c_norm=c_norm,
+                               c_model=c_model, epochs=model_epochs, **kwargs)
+        
     end_time = time.time()    
     logging.info(f"Optimization Done: ({mid_time - start_time}) , ({end_time - start_time})")    
     print(f"Optimization Done: ({mid_time - start_time}) , ({end_time - start_time})")    
-    mexp.normalize(score)
+    
+    #mexp.normalize(score)
     # Return the updated explanation parameter
-    return mexp.explanation.detach()
+    explanation = normalize_explanation(mexp.explanation, score, c_norm=True, c_activation=c_activation)    
+    return explanation.detach()
 
 
 class MaskedRespData:
@@ -289,7 +305,7 @@ class CompExpCreator:
     def __init__(self, nmasks=500, segsize=64, batch_size=32, 
                  lr = 0.05, c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
-                 c_magnitude=0, norm=False, activation=False,
+                 c_magnitude=0, c_norm=False, c_activation=False,
                  avg_kernel_size=(5,5),
                  epochs=200, 
                  model_epochs=200, c_model=0,
@@ -307,8 +323,8 @@ class CompExpCreator:
         self.c_selfness = c_selfness
         self.c_mask_completeness = c_mask_completeness
         self.c_model = c_model
-        self.norm = norm
-        self.activation = activation
+        self.c_norm = c_norm
+        self.c_activation = c_activation
         self.c_magnitude = c_magnitude
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
@@ -325,8 +341,8 @@ class CompExpCreator:
     def description(self):
         desc = f"{self.desc}_{self.nmasks}_{self.segsize}_{self.epochs}"
                                 
-        if self.norm or self.activation:
-            desc += "_" + ("n" * self.norm) + (self.activation[0] if self.activation else "")
+        if self.c_norm or self.c_activation:
+            desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
 
         if self.model_epochs:
             desc += f":{self.model_epochs}"
@@ -406,7 +422,7 @@ class CompExpCreator:
                                    c_mask_completeness=self.c_mask_completeness,
                                    c_model=self.c_model,
                                    c_magnitude=self.c_magnitude,
-                                   norm_explanation=self.norm, activation=self.activation,
+                                   c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline)
         
         return sal
