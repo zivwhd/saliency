@@ -227,7 +227,7 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
     # Initialize the model with the given initial explanation
     mexp = MaskedExplanationSum(initial_value=initial_explanation)
     mexp = mexp.to(data.device)
-    
+
     if not c_activation:
         mexp.normalize(score)    
     # Train the model by passing all additional arguments through kwargs
@@ -411,7 +411,7 @@ class CompExpCreator:
             data = self.generate_data(me, inp, catidx)
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
-            initial = (torch.randn(224,224)*0.2+1).abs()
+            initial = (torch.randn(224,224)*0.2+3).abs()
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
 

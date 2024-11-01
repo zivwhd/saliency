@@ -32,35 +32,12 @@ def get_cpltx_sal_creator():
 def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
-        segsize=[32, 40, 48, 56, 64], nmasks=500, 
+        segsize=[32,48], nmasks=1000, 
         baselines = baselines,
         groups=[
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, c_norm=True, c_activation="sigmoid"),            
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation="sigmoid"),
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation="sigmoid"),                            
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, c_norm=True, c_activation="sigmoid"),
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, c_norm=True, c_activation=""),             
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation=""),             
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, c_norm=True, c_activation=""), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=3, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=4, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=5, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=10, c_model=0, c_norm=True, c_activation="sigmoid"),             
-
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1.5, c_model=0, c_norm=True, c_activation="tanh"),            
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation="tanh"),
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation="tanh"),                            
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.25, c_model=0, c_norm=True, c_activation="tanh"),                
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=2, c_model=0, c_norm=True, c_activation="tanh"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=3, c_model=0, c_norm=True, c_activation="tanh"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=4, c_model=0, c_norm=True, c_activation="tanh"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=5, c_model=0, c_norm=True, c_activation="tanh"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=10, c_model=0, c_norm=True, c_activation="tanh"),             
-
-
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),
     ])
     
 def get_emask_sal_creator():
