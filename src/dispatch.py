@@ -32,7 +32,8 @@ def get_cpltx_sal_creator():
 def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
-        segsize=[32,48], nmasks=1000, 
+        desc="MCompB",
+        segsize=[32,48], nmasks=500, 
         baselines = baselines,
         groups=[
             dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"), 

@@ -102,15 +102,17 @@ class MaskedExplanationSum(nn.Module):
 # Define the training function
 
 def normalize_explanation(explanation, score, c_norm, c_activation):
-    if c_activation == "sigmoid":
-        explanation = torch.sigmoid(explanation)
-    elif c_activation == "tanh":
+    if c_activation == "sigmoid":        
+        explanation = torch.sigmoid(explanation)        
+    elif c_activation == "tanh":        
         explanation = torch.tanh(explanation)
     elif c_activation:
         assert False, f"unexpected activation {c_activation}"
+
+    sig = explanation
     if c_norm:
         explanation = explanation * score / explanation.sum()
-    return explanation
+    return explanation, sig
 
 def optimize_explanation_i(
         fmdl, inp, mexp, data, targets, epochs=10, lr=0.001, score=1.0, 
@@ -146,7 +148,7 @@ def optimize_explanation_i(
         # Forward pass
         optimizer.zero_grad()
         output = mexp(data)
-        explanation = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
+        explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
 
         comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
@@ -176,8 +178,11 @@ def optimize_explanation_i(
         else:
             model_loss = 0
 
-        if c_magnitude != 0:            
-            explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
+        if c_magnitude != 0:
+            if c_activation == "sigmoid":
+                explanation_mask = sig
+            else:
+                explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
             flat_mask = explanation_mask.flatten()
             magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device)) # explanation_mask.abs().mean()
         else:
@@ -248,7 +253,7 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
     
     #mexp.normalize(score)
     # Return the updated explanation parameter
-    explanation = normalize_explanation(mexp.explanation, score, c_norm=True, c_activation=c_activation)    
+    explanation = normalize_explanation(mexp.explanation, score, c_norm=True, c_activation=c_activation)[0]
     return explanation.detach()
 
 
@@ -411,7 +416,8 @@ class CompExpCreator:
             data = self.generate_data(me, inp, catidx)
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
-            initial = (torch.randn(224,224)*0.2+3).abs()
+            #initial = (torch.randn(224,224)*0.2+1).abs()
+            initial = (torch.randn(224,224)*0.2+3)
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
 
