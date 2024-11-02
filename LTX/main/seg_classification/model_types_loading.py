@@ -29,7 +29,7 @@ class ConvnetModels:
         # This defines the behavior of "item in instance"
         return (item in self.keys())
     
-    def key(self):
+    def keys(self):
         return ["resnet50", "resnet101", "densenet201", "vgg16", "convnext_base"]
     
 CONVNET_MODELS_BY_NAME = ConvnetModels()
