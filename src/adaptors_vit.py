@@ -63,7 +63,7 @@ class DimplVitSaliencyCreator:
 
         for opr in self.methods:
             sal = self.handle_transformers(model, me.arch, opr, inp[0], catidx)
-            res[f"dimpl_{opr}"] = torch.tensor(sal).unsqueeze(0)
+            res[f"Dimpl_{opr}"] = torch.tensor(sal).unsqueeze(0)
         return res
     
 
@@ -94,7 +94,7 @@ class DimplVitSaliencyCreator:
             ## REVIEW - we'd like to run dix1
             dix_attribution1 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 1)
             dix_attribution2 = get_dix_vit(model, [], image.device, label, image.unsqueeze(0), 2)
-            dix_attribution=dix_attribution1 + dix_attribution2
+            dix_attribution=dix_attribution1 #+ dix_attribution2
             im3, score, heatmap_cv, blended_img_mask, heatmap, t = blend_transformer_heatmap(image.cpu(), dix_attribution.cpu())
             #img_dict.append({"image": im3, "title": 'DIX', 'heatmap':heatmap, "ttt":t })
             return heatmap
