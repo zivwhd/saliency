@@ -376,6 +376,9 @@ class CompExpCreator:
         if self.c_tv:
             desc += f"_tv{self.c_tv}"
 
+        if self.c_magnitude:
+            desc += f"_mg{self.c_magnitude}"
+
         if self.c_model:
             desc += f"_mdl{self.c_model}"
 
