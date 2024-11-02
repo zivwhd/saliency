@@ -37,11 +37,11 @@ def get_mcomp_sal_creator():
         baselines = baselines,
         groups=[
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitued=0.02), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitued=0.05),
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitued=0.1),
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitued=0.15),
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitued=0.2),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitude=0.02), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitude=0.05),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitude=0.1),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitude=0.15),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid", c_magnitude=0.2),
     ])
     
 def get_emask_sal_creator():
