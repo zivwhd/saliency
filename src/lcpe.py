@@ -179,7 +179,10 @@ def optimize_explanation_i(
             tv_loss = 0
 
         if c_model:
-            explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())
+            if c_activation == "sigmoid":
+                explanation_mask = sig
+            else:
+                explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())
             masked_inp = explanation_mask * inp + (1-explanation_mask) * baseline            
             prob = fmdl(masked_inp)            
             model_loss = -torch.log(prob)
@@ -187,7 +190,7 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            if c_activation == "sigmoid":
+            if c_norm:
                 #magnitude_loss = explanation.abs().sum()
                 explanation_mask = explanation
                 magnitude_loss = (explanation * explanation).mean()

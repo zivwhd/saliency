@@ -7,7 +7,7 @@ import numpy as np
 
 
 class IGSaliencyCreator:
-    def __init__(self, nsteps=100):
+    def __init__(self, nsteps=1000):
         self.nsteps = nsteps
 
     def __call__(self, me, inp, catidx):
