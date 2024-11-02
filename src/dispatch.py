@@ -33,15 +33,15 @@ def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         desc="MComp",
-        segsize=[32,48], nmasks=1500, 
+        segsize=[32,40], nmasks=1000, 
         baselines = baselines,
         groups=[
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"),
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),
             dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0, c_norm=True, c_activation="sigmoid"),
             dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0, c_norm=True, c_activation="sigmoid"),
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.4, c_model=0, c_norm=True, c_activation="sigmoid"),
     ])
     
 def get_emask_sal_creator():

@@ -188,10 +188,10 @@ def optimize_explanation_i(
 
         if c_magnitude != 0:
             if c_activation == "sigmoid":
-                magnitude_loss = explanation.abs().sum()
-                #explanation_mask = sig
-                #flat_mask = explanation_mask.flatten()
-                #magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
+                #magnitude_loss = explanation.abs().sum()
+                explanation_mask = sig
+                flat_mask = explanation_mask.flatten()
+                magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
                 #magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
             else:
                 explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
