@@ -7,7 +7,7 @@ import numpy as np
 
 
 class IGSaliencyCreator:
-    def __init__(self, nsteps=1000):
+    def __init__(self, nsteps=3000):
         self.nsteps = nsteps
 
     def __call__(self, me, inp, catidx):
@@ -48,7 +48,7 @@ class IGSaliencyCreator:
         
         integrated_gradients = saliency.IntegratedGradients()
         vanilla_integrated_gradients_mask_3d = integrated_gradients.GetMask(
-            im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, batch_size=20)
+            im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, batch_size=20)        
         ig_sal = torch.tensor(np.sum(np.abs(vanilla_integrated_gradients_mask_3d), axis=2)).unsqueeze(0).float()
 
         guided_ig = saliency.GuidedIG()
