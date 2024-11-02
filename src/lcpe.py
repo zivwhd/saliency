@@ -189,9 +189,10 @@ def optimize_explanation_i(
         if c_magnitude != 0:
             if c_activation == "sigmoid":
                 #magnitude_loss = explanation.abs().sum()
-                explanation_mask = sig
-                flat_mask = explanation_mask.flatten()
-                magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
+                explanation_mask = explanation
+                magnitude_loss = (explanation * explanation).mean()
+                #flat_mask = explanation_mask.flatten()
+                #magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
                 #magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
             else:
                 explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
@@ -377,7 +378,7 @@ class CompExpCreator:
             desc += f"_tv{self.c_tv}"
 
         if self.c_magnitude:
-            desc += f"_mg{self.c_magnitude}"
+            desc += f"_mgn{self.c_magnitude}"
 
         if self.c_model:
             desc += f"_mdl{self.c_model}"
