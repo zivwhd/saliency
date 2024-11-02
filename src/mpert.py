@@ -47,9 +47,9 @@ def median_blur(input_tensor, kernel_size):
 
 class IEMPertSaliencyCreator:
     def __init__(self):
-        self.tv_beta = 3
-        self.tv_coeff = 0.02
-        self.l1_coeff = 0.01
+        self.tv_beta = 1
+        self.tv_coeff = 0.1
+        self.l1_coeff = 0.05
         self.iterations = 300
         self.blur = False
 
