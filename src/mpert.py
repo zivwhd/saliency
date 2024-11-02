@@ -48,14 +48,14 @@ def median_blur(input_tensor, kernel_size):
 class IEMPertSaliencyCreator:
     def __init__(self):
         self.tv_beta = 1
-        self.tv_coeff = 0.1
-        self.l1_coeff = 0.05
+        self.tv_coeff = 0.2
+        self.l1_coeff = 0.005
         self.iterations = 300
         self.blur = False
 
-    def __call__(self, me, inp, catidx):    
-        sal = self.explain(me, inp, catidx)
-        desc = f"IEMPert_{self.iterations}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"
+    def __call__(self, me, inp, catidx):   
+        desc = f"IEMPert_{self.iterations}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"        
+        sal = self.explain(me, inp, catidx)        
         return {desc : sal}
     
     def explain(self, me, inp, catidx):
@@ -63,12 +63,13 @@ class IEMPertSaliencyCreator:
         #Hyper parameters. 
         #TBD: Use argparse
         tv_beta = self.tv_beta
-        learning_rate = 0.05
+        learning_rate = 0.1
         max_iterations = self.iterations #300 #500
         l1_coeff = self.l1_coeff ## 0.01
         tv_coeff = self.tv_coeff # 0.02 ##0.2        
         device = inp.device
-
+        
+        print(f"itr={self.iterations}; tv={self.tv_coeff}:{self.tv_beta}; l1={self.l1_coeff}; lr={learning_rate}")
         #model = load_model()
         #original_img = cv2.imread(sys.argv[1], 1)
         #original_img = cv2.resize(original_img, (224, 224))
@@ -93,13 +94,15 @@ class IEMPertSaliencyCreator:
         #blurred_img = (blurred_img1 + blurred_img2) / 2
         #blurred_img_numpy = blurred_img.cpu().numpy()
 
-        mask_init = np.ones((28, 28), dtype = np.float32)
+        #mask_init = np.ones((28, 28), dtype = np.float32) + torch.randn(28,28) * 0.1
+        
         
         # Convert to torch variables
         #img = preprocess_image(img)
         #blurred_img = blurred_img2 #preprocess_image(blurred_img2)
         
         mask = torch.ones((1, 1, 28, 28), dtype = torch.float32, requires_grad=True, device=inp.device)
+        #mask = torch.randn(1,1,28,28).to(inp.device) * 0.1 + 1.0
         upsample = torch.nn.UpsamplingBilinear2d(size=(224, 224)).to(inp.device)
         optimizer = torch.optim.Adam([mask], lr=learning_rate)
 
