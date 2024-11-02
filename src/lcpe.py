@@ -363,11 +363,11 @@ class CompExpCreator:
     def description(self):
         desc = f"{self.desc}_{self.nmasks}_{self.segsize}_{self.epochs}"
                                 
-        if self.c_norm or self.c_activation:
-            desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
-
         if self.model_epochs:
             desc += f":{self.model_epochs}"
+
+        if self.c_norm or self.c_activation:
+            desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
 
         if self.c_smoothness != 0:
             desc += f"_krn{self.c_smoothness}_" + str("x").join(map(str, self.avg_kernel_size))
