@@ -56,7 +56,7 @@ class RISE(nn.Module):
         p = []
         for i in range(0, N, self.gpu_batch):
             p.append(self.model(stack[i:min(i + self.gpu_batch, N)]))
-        p = t orch.cat(p)
+        p = torch.cat(p)
         # Number of classes
         CL = p.size(1)
         sal = torch.matmul(p.data.transpose(0, 1), self.masks.view(N, H * W))
