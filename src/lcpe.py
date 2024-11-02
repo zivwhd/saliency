@@ -8,6 +8,7 @@ from cpe import SqMaskGen
 
 tqdm = lambda x: x
 
+
 class LoadMaskGen:
     def __init__(self, path):
         with open(path, "rb") as mf:
@@ -133,7 +134,14 @@ def optimize_explanation_i(
 
     #print(list(model.parameters()))
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
-    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}")
+    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation} c_model={c_model}")
+
+    print("###", dict(epochs=epochs, lr=lr, score=score, 
+        c_mask_completeness=c_mask_completeness, c_smoothness=c_smoothness, c_completeness=c_completeness, c_selfness=c_selfness,
+        c_magnitude=c_magnitude,
+        c_tv=c_tv, avg_kernel_size=avg_kernel_size, c_model=c_model,
+        c_activation=c_activation, c_norm=c_norm, renorm=renorm))
+    
     optimizer = optim.Adam(mexp.parameters(), lr=lr)
 
     #if not c_activation:
@@ -180,8 +188,11 @@ def optimize_explanation_i(
 
         if c_magnitude != 0:
             if c_activation == "sigmoid":
-                explanation_mask = explanation
-                magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
+                magnitude_loss = explanation.abs().sum()
+                #explanation_mask = sig
+                #flat_mask = explanation_mask.flatten()
+                #magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
+                #magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
             else:
                 explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
                 flat_mask = explanation_mask.flatten()
@@ -388,6 +399,7 @@ class CompExpCreator:
         mgen = MaskedRespGen(self.segsize, mgen=self.mgen, baseline=baseline)
         fmdl = me.narrow_model(catidx, with_softmax=True)
         logging.debug(f"generating {self.nmasks} masks and responses")
+        print(f"generating {self.nmasks} masks and responses segsize={self.segsize}")
         mgen.gen(fmdl, inp, self.nmasks, batch_size=self.batch_size,)        
         logging.debug("Done generating masks")
 
@@ -418,6 +430,7 @@ class CompExpCreator:
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
             #initial = (torch.randn(224,224)*0.2+1).abs()
+            print("setting initial")
             initial = (torch.randn(224,224)*0.2+3)
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
@@ -447,8 +460,9 @@ class MultiCompExpCreator:
         self.baselines = baselines
         self.groups = groups
         self.desc = desc
+        self.last_data = None
 
-    def __call__(self, me, inp, catidx):
+    def __call__(self, me, inp, catidx):        
         all_sals = {}
         for bgen in self.baselines:
             for segsize in self.segsize:
@@ -457,7 +471,7 @@ class MultiCompExpCreator:
                                     baseline_gen=bgen
                                     )
                 data = dc.generate_data(me, inp, catidx)
-                
+                self.last_data = data
                 for kwargs in self.groups:
                     algo = CompExpCreator(nmasks=self.nmasks, segsize=segsize, batch_size=self.batch_size, 
                                         desc=desc, **kwargs)
