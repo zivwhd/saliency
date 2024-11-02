@@ -47,21 +47,26 @@ def median_blur(input_tensor, kernel_size):
 
 class IEMPertSaliencyCreator:
     def __init__(self):
-        pass
+        self.tv_beta = 3
+        self.tv_coeff = 0.02
+        self.l1_coeff = 0.01
+        self.iterations = 300
+        self.blur = False
 
     def __call__(self, me, inp, catidx):    
         sal = self.explain(me, inp, catidx)
-        return {"IEMPert" : sal}
+        desc = f"IEMPert_{self.iterations}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"
+        return {desc : sal}
     
     def explain(self, me, inp, catidx):
     
         #Hyper parameters. 
         #TBD: Use argparse
-        tv_beta = 3
-        learning_rate = 0.1
-        max_iterations = 300 #500
-        l1_coeff = 0.01 ## 0.01
-        tv_coeff = 0.02 ##0.2        
+        tv_beta = self.tv_beta
+        learning_rate = 0.05
+        max_iterations = self.iterations #300 #500
+        l1_coeff = self.l1_coeff ## 0.01
+        tv_coeff = self.tv_coeff # 0.02 ##0.2        
         device = inp.device
 
         #model = load_model()
@@ -74,7 +79,11 @@ class IEMPertSaliencyCreator:
         gaussian_blur = T.GaussianBlur(kernel_size=(11, 11), sigma=5.0)
         
         # Apply the Gaussian blur to the tensor
-        blurred_img = gaussian_blur(inp)
+        
+        if self.blur:
+            baseline = gaussian_blur(inp)
+        else:
+            baseline = torch.zeros(inp.shape).to(inp.device)
         #blurred_img2 = median_blur(inp, 11)
         
         #iimg = inp.cpu().squeeze(0).numpy().transpose(1,2,0)
@@ -103,7 +112,7 @@ class IEMPertSaliencyCreator:
             upsampled_mask = upsample(mask)
 
             perturbated_input = (
-                inp * upsampled_mask + blurred_img * (1-upsampled_mask))
+                inp * upsampled_mask + baseline * (1-upsampled_mask))
 
             noise = torch.normal( mean=0, std=0.2, size=inp.shape).to(inp.device)
             

@@ -192,8 +192,9 @@ def optimize_explanation_i(
         if c_magnitude != 0:
             if c_norm:
                 #magnitude_loss = explanation.abs().sum()
-                explanation_mask = explanation
-                magnitude_loss = (explanation * explanation).mean()
+                magnitude_loss = mexp.explanation.abs().mean()
+                #explanation_mask = explanation
+                #magnitude_loss = (explanation * explanation).mean()
                 #flat_mask = explanation_mask.flatten()
                 #magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
                 #magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
