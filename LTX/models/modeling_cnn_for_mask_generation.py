@@ -3,6 +3,7 @@ import torch
 from pytorch_lightning import LightningModule
 from torch import nn
 from torchvision.models import DenseNet, ResNet
+import timm
 import logging
 
 class CNNForMaskGeneration(LightningModule):
@@ -14,10 +15,13 @@ class CNNForMaskGeneration(LightningModule):
         backbone_children = list(cnn_model.children())
         if type(cnn_model) is DenseNet:
             self.encoder = nn.Sequential(list(backbone_children)[0])  # output shape: [batch_size, 1920, 7, 7]
-            input_features = list(backbone_children)[1].in_features
+            input_features = list(backbone_children)[1].in_features        
+        elif type(cnn_model) is timm.models.densenet.DenseNet:
+            self.encoder = nn.Sequential(list(backbone_children)[0])
+            input_features = list(backbone_children)[3].in_features        
         elif type(cnn_model) is ResNet:
             self.encoder = nn.Sequential(*backbone_children[:-2])  # output shape: [batch_size, 2048, 7, 7]
-            input_features = backbone_children[-1].in_features
+            input_features = backbone_children[-1].in_features            
         else:
             logging.info(f"cnn_model: {type(cnn_model)}")
             raise (NotImplementedError)
