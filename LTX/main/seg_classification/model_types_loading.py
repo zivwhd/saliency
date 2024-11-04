@@ -16,9 +16,9 @@ class ConvnetModels:
 
     def get_convnet_model_by_name(self, model_name):
 
-        if model_name in ["resnet50", "resnet101", "densenet201", "vgg16"]:
+        if model_name in ["resnet50", "resnet101", "vgg16"]:
             return models.__dict__[model_name](pretrained=True)  
-        if model_name in ["convnext_base"]:
+        if model_name in ["convnext_base"m "densenet201"]:
             return timm.create_model(model_name, pretrained=True)
         assert False, f"unexpected model {model_name}"
 
