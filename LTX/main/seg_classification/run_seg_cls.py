@@ -148,6 +148,7 @@ if __name__ == '__main__':
     print("### start", file=sys.stderr)    
     logging.info(f"args: {args}")
 
+    logging.info(f"MODEL_ALIAS_MAPPING={MODEL_ALIAS_MAPPING}")
     EXPLAINEE_MODEL_NAME, EXPLAINER_MODEL_NAME = MODEL_ALIAS_MAPPING[args.explainee_model_name], \
                                                  MODEL_ALIAS_MAPPING[args.explainer_model_name]
 
