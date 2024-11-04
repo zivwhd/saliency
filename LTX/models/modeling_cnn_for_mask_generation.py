@@ -19,7 +19,7 @@ class CNNForMaskGeneration(LightningModule):
             self.encoder = nn.Sequential(*backbone_children[:-2])  # output shape: [batch_size, 2048, 7, 7]
             input_features = backbone_children[-1].in_features
         else:
-            logging.info("cnn_model: {type(cnn_model)}")
+            logging.info(f"cnn_model: {type(cnn_model)}")
             raise (NotImplementedError)
         self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels=input_features, out_channels=1, kernel_size=1, stride=1),
