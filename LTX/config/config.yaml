@@ -337,7 +337,7 @@ vit_base_patch16_224:
   n_epochs_to_optimize_stage_b: 25
   lr:  0.002 ##2.0e-3
   lr_finetune:  5.0e-5 ##20.0e-6
-  del_weight_finetune: 0.2
+  del_weight_finetune: 0.5
   ins_weight_finetune: 1.0
   verbose: False
   seg_cls:
