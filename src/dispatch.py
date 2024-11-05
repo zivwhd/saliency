@@ -67,11 +67,16 @@ def get_mcompvit_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         desc="MComp",
-        segsize=[32], nmasks=1000, 
+        segsize=[32,40,48], nmasks=1000, 
         baselines = baselines,
         groups=[
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),             
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="tanh"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.15, c_model=0, c_norm=True, c_activation="sigmoid"),             
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.02, c_model=0, c_norm=True, c_activation="sigmoid"), 
+
     ])
 
 def get_emask_sal_creator():
