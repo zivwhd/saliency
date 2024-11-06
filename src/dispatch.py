@@ -127,7 +127,7 @@ def get_mcompvitA_sal_creator():
         segsize=[16], nmasks=1000,
         baselines = baselines,
         groups=[
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),             
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=None),             
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation=None)
             ] )
             
