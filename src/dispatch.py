@@ -33,11 +33,14 @@ def get_mcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         desc="MComp",
-        segsize=[48], nmasks=500, 
+        segsize=[32,48], nmasks=500, 
         baselines = baselines,
         groups=[
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation="sigmoid"), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
 
             #dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.3, c_model=0, c_norm=False, c_activation=None, c_magnitude=0), 
             #dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.3, c_model=0, c_norm=False, c_activation=None, c_magnitude=0), 
