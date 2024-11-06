@@ -120,6 +120,19 @@ def get_mcompvit_sal_creator():
 
     ])
 
+def get_mcompvitA_sal_creator():
+    baselines = [ZeroBaseline()]
+    return MultiCompExpCreator(
+        desc="MComp",
+        segsize=[16], nmasks=1000,
+        baselines = baselines,
+        groups=[
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation="sigmoid"),             
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation=None)
+            ] )
+            
+
+
 def get_emask_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
