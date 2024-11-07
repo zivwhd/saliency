@@ -36,11 +36,14 @@ def get_mcompC_sal_creator():
         segsize=[40], nmasks=500, 
         baselines = baselines,
         groups=[
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0, c_norm=True, c_activation=""), 
-            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0.05, c_norm=True, c_activation=""), 
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0, c_norm=True, c_activation=""), 
             dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.4, c_model=0, c_norm=True, c_activation=""),             
             dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation=""), 
+
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0.05, c_norm=True, c_activation=""), 
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
 
             #dict(c_mask_completeness=1.0, c_completeness=0.1, c_tv=0.3, c_model=0, c_norm=False, c_activation=None, c_magnitude=0), 
