@@ -29,7 +29,19 @@ def get_cpltx_sal_creator():
     cp_gen = CompExpCreator(nmasks=500, segsize=48)
     return LTXSaliencyCreator(cp_gen=cp_gen)
 
-def get_mcompC_sal_creator():
+
+def get_mcompvitD_sal_creator():
+    baselines = [ZeroBaseline()]
+    return MultiCompExpCreator(
+        desc="MComp",
+        segsize=[16], nmasks=1000,
+        baselines = baselines,
+        groups=[
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.05, c_norm=True, c_activation=None),             
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation=None)
+            ] )
+
+def get_mcompD_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(
         desc="MComp",
@@ -38,10 +50,10 @@ def get_mcompC_sal_creator():
         groups=[
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.4, c_model=0, c_norm=True, c_activation=""),             
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation=""), 
-            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation=""), 
+            dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.05, c_norm=True, c_activation=""), 
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.4, c_model=0, c_norm=True, c_activation=""),             
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0, c_norm=True, c_activation=""), 
+            #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0, c_norm=True, c_activation=""), 
 
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0.05, c_norm=True, c_activation=""), 
             #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0, c_norm=True, c_activation=""), 
