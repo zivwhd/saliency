@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import torch
-
+import matplotlib.patheffects as path_effects
 
 
 def show_image(path):
@@ -84,6 +84,50 @@ def showsal(sal, img, caption="", quantile=0.9, mag=True):
 
     plt.show()    
 
-def show_sal_dict(sals, img):
+def show_sal_dict(sals, img, mag=False):
     for name, sal in sals.items():
-        showsal(sal[0].cpu(), img, caption=name)
+        showsal(sal[0].cpu(), img, caption=name, mag=True)
+
+
+def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=False):
+    
+    pimg=img.resize((224,224))  
+    plt.imshow(pimg)  
+    plt.xticks([])  
+    plt.yticks([])
+
+    if name is None:
+        return
+    sal = allsal[name]
+    #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
+    nsal = (sal - sal.min()) / (sal.max() - sal.min())
+    if mag:
+        nsal = torch.min(nsal, torch.quantile(sal,0.999))
+        nsal = torch.max(nsal, torch.quantile(nsal,0.001))
+    nsal = nsal[0]
+
+    if grayscale:
+        plt.imshow(nsal, cmap=plt.cm.gray, vmin=0, vmax=1)
+    elif alpha is None:
+        plt.imshow(nsal, cmap='jet', alpha=nsal*0.7)  # Set alpha for transparency
+    else:
+        plt.imshow(nsal, cmap='jet', alpha=alpha)
+        
+
+def show_grid_sals(allsal, img, figsize=(10,10), fontsize=7, alpha=None, mag=True, get_method_alias=None):
+           
+    idx = 1
+    if figsize:
+        plt.figure(figsize=figsize)
+    
+    method_names = list(allsal.keys())
+    plt.subplot(1, len(method_names)+1, 1) 
+    show_single_sal(img, allsal, None)
+    for cidx, method_name in enumerate(method_names):        
+        plt.subplot(1, len(method_names)+1, cidx+2) 
+        if get_method_alias:
+            alias = get_method_alias(method_name)
+        else:
+            alias = method_name
+        plt.title(alias, fontsize=fontsize)
+        show_single_sal(img, allsal, method_name, alpha=alpha, mag=mag)

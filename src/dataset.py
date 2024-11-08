@@ -48,7 +48,7 @@ class ImagenetSource:
             images[image_name] = ImageInfo(
                 path=path, 
                 name=image_name,
-                target=image_targets[image_name])
+                target=image_targets.get(image_name,0))
 
         if self.selection_name:
             selection = self.read_selection()

@@ -283,6 +283,17 @@ class MaskedRespData:
         self.all_pred = all_pred
         self.baseline = baseline
 
+    def subset(self, nmasks):
+        assert nmasks <= self.all_masks.shape[0]
+        return MaskedRespData(
+            baseline_score = self.baseline_score,
+            label_score = self.label_score,
+            added_score=self.added_score,
+            all_masks=self.all_masks[0:nmasks],
+            all_pred=self.all_pred[0:nmasks],
+            baseline=self.baseline
+        )
+
 
 class ZeroBaseline:
 
@@ -462,7 +473,10 @@ class MultiCompExpCreator:
     def __init__(self, nmasks=500, segsize=[64], batch_size=32, baselines=[ZeroBaseline()],
                  desc="MComp",
                  groups=[]):
-        self.nmasks = nmasks
+        if type(nmasks) == int:
+            self.nmasks = [nmasks]
+        else:
+            self.nmasks = nmasks
         self.segsize=segsize
         self.batch_size = batch_size
         self.baselines = baselines
@@ -474,17 +488,19 @@ class MultiCompExpCreator:
         all_sals = {}
         for bgen in self.baselines:
             for segsize in self.segsize:
-                desc = self.desc + bgen.desc
-                dc = CompExpCreator(nmasks=self.nmasks, segsize=segsize, batch_size=self.batch_size,
-                                    baseline_gen=bgen
-                                    )
-                data = dc.generate_data(me, inp, catidx)
-                self.last_data = data
-                for kwargs in self.groups:
-                    algo = CompExpCreator(nmasks=self.nmasks, segsize=segsize, batch_size=self.batch_size, 
-                                        desc=desc, **kwargs)
-                    res = algo(me, inp, catidx, data=data)
-                    all_sals.update(res)
+                dc = CompExpCreator(nmasks=max(self.nmasks), segsize=segsize, batch_size=self.batch_size,
+                                    baseline_gen=bgen)
+                mdata = dc.generate_data(me, inp, catidx)
+
+                for nmasks in self.nmasks:
+                    desc = self.desc + bgen.desc
+                    data = mdata.subset(nmasks=nmasks)
+                    self.last_data = data
+                    for kwargs in self.groups:
+                        algo = CompExpCreator(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, 
+                                            desc=desc, **kwargs)
+                        res = algo(me, inp, catidx, data=data)
+                        all_sals.update(res)
         logging.info(f"generated: {list(all_sals.keys())}")
         return all_sals
 

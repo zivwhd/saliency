@@ -46,15 +46,18 @@ def median_blur(input_tensor, kernel_size):
 
 
 class IEMPertSaliencyCreator:
-    def __init__(self):
-        self.tv_beta = 1
-        self.tv_coeff = 0.2
-        self.l1_coeff = 0.005
-        self.iterations = 300
+    def __init__(self, out_coeff=1.0, tv_beta=1, tv_coeff=0.2, l1_coeff=0.005, iterations=300,
+                 learning_rate=0.1):        
+        self.out_coeff = out_coeff
+        self.tv_beta = tv_beta
+        self.tv_coeff = tv_coeff
+        self.l1_coeff = l1_coeff
+        self.iterations = iterations
+        self.learning_rate = learning_rate
         self.blur = False
 
     def __call__(self, me, inp, catidx):   
-        desc = f"IEMPert_{self.iterations}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"        
+        desc = f"IEMPert_{self.iterations}_o{self.out_coeff}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"        
         sal = self.explain(me, inp, catidx)        
         return {desc : sal}
     
@@ -63,10 +66,11 @@ class IEMPertSaliencyCreator:
         #Hyper parameters. 
         #TBD: Use argparse
         tv_beta = self.tv_beta
-        learning_rate = 0.1
+        learning_rate = self.learning_rate
         max_iterations = self.iterations #300 #500
         l1_coeff = self.l1_coeff ## 0.01
         tv_coeff = self.tv_coeff # 0.02 ##0.2        
+        out_coeff = self.out_coeff
         device = inp.device
         
         print(f"itr={self.iterations}; tv={self.tv_coeff}:{self.tv_beta}; l1={self.l1_coeff}; lr={learning_rate}")
@@ -126,7 +130,7 @@ class IEMPertSaliencyCreator:
             loss = (
                 l1_coeff*torch.mean(torch.abs(1 - mask)) + 
                 tv_coeff*tv_norm(mask, tv_beta) + 
-                outputs
+                out_coeff * outputs
             )
 
             idesc = f"Itr {i}: loss={loss}"
