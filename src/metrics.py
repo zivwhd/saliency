@@ -24,7 +24,7 @@ class Metrics:
         ## del, pos
         pred_pos_auc, pred_del_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=False, nsteps=nsteps)
         pred_neg_auc, pred_ins_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=True, nsteps=nsteps)
-        pred_adp, pred_pic = self.get_adp_pic(model, inp, saliency[0], topidx)
+        pred_adp, pred_pic, pred_aic, pred_sic = self.get_adp_pic(model, inp, saliency[0], topidx)
 
         if pred_only:
             return dict(
@@ -33,16 +33,19 @@ class Metrics:
                 pred_del_auc=pred_del_auc,
                 pred_ins_auc=pred_ins_auc,
                 pred_adp=pred_adp,
-                pred_pic=pred_pic)
+                pred_pic=pred_pic,
+                pred_aic=pred_aic,
+                pred_sic=pred_sic
+                )
 
         if target == topidx:
             target_pos_auc, target_del_auc = pred_pos_auc, pred_del_auc
             target_neg_auc, target_ins_auc = pred_neg_auc, pred_ins_auc 
-            target_adp, target_pic = pred_adp, pred_pic
+            target_adp, target_pic, target_aic, target_sic = pred_adp, pred_pic, pred_aic, pred_sic
         else:
             target_pos_auc, target_del_auc = self.pert_metrics(model, inp, saliency[1], target, is_neg=False, nsteps=nsteps)
             target_neg_auc, target_ins_auc = self.pert_metrics(model, inp, saliency[1], target, is_neg=True, nsteps=nsteps)
-            target_adp, target_pic = self.get_adp_pic(model, inp, saliency[1], target)
+            target_adp, target_pic, target_aic, target_sic = self.get_adp_pic(model, inp, saliency[1], target)
 
         
 
@@ -53,6 +56,8 @@ class Metrics:
             pred_ins_auc=pred_ins_auc,
             pred_adp=pred_adp,
             pred_pic=pred_pic,
+            pred_aic=pred_aic,
+            pred_sic=pred_sic,
 
             target_pos_auc=target_pos_auc,
             target_neg_auc=target_neg_auc,
@@ -61,6 +66,9 @@ class Metrics:
 
             target_adp=target_adp,
             target_pic=target_pic,
+            target_aic=target_aic,
+            target_sic=target_sic,
+
         )
 
 
@@ -82,11 +90,15 @@ class Metrics:
 
         x = probs[0,target]
         y = probs_mask[0, target]
+        accuracy = (target == probs[0].argmax()).float()
+
 
         adp = (torch.maximum(x - y, torch.zeros_like(x)) / x).mean() * 100
         pic = torch.where(x < y, 1.0, 0.0).mean() * 100
+        aic = accuracy * 100.0
+        sic = (y/x) * 100.0
 
-        return float(adp), float(pic)
+        return float(adp), float(pic), float(aic), float(sic)
         
 
     def pert_metrics(self, model, inp, saliency, target, is_neg=False, nsteps=100, 
