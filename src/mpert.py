@@ -49,8 +49,8 @@ class IEMPertSaliencyCreator:
     # out_coeff=1.0, tv_beta=2, tv_coeff=1, l1_coeff=0.5, iterations=300, learning_rate=0.05, blur=True)
     #def __init__(self, out_coeff=1.0, tv_beta=1, tv_coeff=0.2, l1_coeff=0.005, iterations=300,
     #             blur=False, learning_rate=0.1):        
-    def __init__(self, out_coeff=1.0, tv_beta=2, tv_coeff=1, l1_coeff=0.5, iterations=300,
-                 blur=False, learning_rate=0.05, check_loss=False):
+    #def __init__(self, out_coeff=1.0, tv_beta=2, tv_coeff=1, l1_coeff=0.5, iterations=300, blur=True, learning_rate=0.05, check_loss=False):
+    def __init__(self, out_coeff=1.0, tv_beta=2, tv_coeff=2, l1_coeff=0.2, iterations=300, blur=True, learning_rate=0.05, check_loss=False):
         self.out_coeff = out_coeff
         self.tv_beta = tv_beta
         self.tv_coeff = tv_coeff
