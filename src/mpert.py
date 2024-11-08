@@ -46,18 +46,23 @@ def median_blur(input_tensor, kernel_size):
 
 
 class IEMPertSaliencyCreator:
-    def __init__(self, out_coeff=1.0, tv_beta=1, tv_coeff=0.2, l1_coeff=0.005, iterations=300,
-                 learning_rate=0.1):        
+    # out_coeff=1.0, tv_beta=2, tv_coeff=1, l1_coeff=0.5, iterations=300, learning_rate=0.05, blur=True)
+    #def __init__(self, out_coeff=1.0, tv_beta=1, tv_coeff=0.2, l1_coeff=0.005, iterations=300,
+    #             blur=False, learning_rate=0.1):        
+    def __init__(self, out_coeff=1.0, tv_beta=2, tv_coeff=1, l1_coeff=0.5, iterations=300,
+                 blur=False, learning_rate=0.05, check_loss=False):
         self.out_coeff = out_coeff
         self.tv_beta = tv_beta
         self.tv_coeff = tv_coeff
         self.l1_coeff = l1_coeff
         self.iterations = iterations
         self.learning_rate = learning_rate
-        self.blur = False
+        self.blur = blur
+        self.check_loss = check_loss
+
 
     def __call__(self, me, inp, catidx):   
-        desc = f"IEMPert_{self.iterations}_o{self.out_coeff}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"        
+        desc = f"MPert_{self.iterations}_o{self.out_coeff}_tv{self.tv_coeff}_{self.tv_beta}_l{self.l1_coeff}"        
         sal = self.explain(me, inp, catidx)        
         return {desc : sal}
     
@@ -114,7 +119,7 @@ class IEMPertSaliencyCreator:
         #category = np.argmax(target.cpu().data.numpy())
         #print "Category with highest probability", category
         #print "Optimizing.. "
-
+        
         for i in range(max_iterations):
             upsampled_mask = upsample(mask)
 
@@ -137,10 +142,10 @@ class IEMPertSaliencyCreator:
             if i % 10 == 0:
                 logging.info(idesc)
                 print(idesc)
+            
             optimizer.zero_grad()
             loss.backward()
-            optimizer.step()
-
+            optimizer.step()            
             # Optional: clamping seems to give better results
             mask.data.clamp_(0, 1)
 
