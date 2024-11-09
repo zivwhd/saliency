@@ -115,6 +115,7 @@ class Metrics:
                 pred_func,
                 num_data_points = 20, fraction=0.01):
         
+        img=img.resize((224,224))  
         nimg = np.array(img)
         random_mask = pic.generate_random_mask(image_height=nimg.shape[0], image_width=nimg.shape[1], fraction=fraction)
         
