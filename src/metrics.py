@@ -24,7 +24,7 @@ class Metrics:
         topidx = int(torch.argmax(logits))
         probs = torch.softmax(logits, 1)        
         target = info.target
-        logging.info(f"pred: {taget} {probs[target]}")    
+        logging.info(f"pred: {target} {probs[target]}")    
 
         pred_sic = self.get_sic(me, inp, img, saliency, target)
         pred_aic = self.get_aic(me, inp, img, saliency, target)
