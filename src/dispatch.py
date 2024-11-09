@@ -487,7 +487,7 @@ if __name__ == '__main__':
             else:
                 model_names = [args.model]
             for name in model_names:
-                create_model_summary(name)
+                create_model_summary(name, extended=args.ext)
         elif args.action == "create_sals":        
             model_name = args.model
             sal_names = args.sal
