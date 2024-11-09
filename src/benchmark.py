@@ -86,10 +86,7 @@ class ModelEnv:
             else 'cpu')
         return device
 
-    def  get_image(self, path):
-        img = Image.open(path)
-        # Pre-process the image and convert into a tensor
-        ## TODO: for which models are these transformation relevant
+    def get_transform(self):    
         if 'resnet' in self.arch or 'vgg' in self.arch or 'convnext' in self.arch or 'densenet' in self.arch:
             transform = torchvision.transforms.Compose([
                 torchvision.transforms.Resize(self.shape),
@@ -107,11 +104,18 @@ class ModelEnv:
             ])
         else:
             assert False, "unexpected arch"
+        return transform
 
-
+    def get_image_ext(self, path):
+        img = Image.open(path)
+        # Pre-process the image and convert into a tensor
+        ## TODO: for which models are these transformation relevant
+        transform = self.get_transform()
         x = transform(img).unsqueeze(0)
-        return x.to(self.device)
+        return img, x.to(self.device)
 
+    def get_image(self, path):
+        return self.get_image_ext(path)[1]
     
 
 ### general utils
@@ -189,18 +193,18 @@ class SelectKthLogit(nn.Module):
 def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, skip_img_error=True,
                          pred_only=True):
 
-    for itr, img in enumerate(all_images):    
+    for itr, info in enumerate(all_images):    
         
-        image_name = img.name
-        image_path = img.path 
-        target = img.target
+        image_name = info.name
+        image_path = info.path 
+        target = info.target
 
         pidx = image_name.find(".")
         if pidx > 0:
             image_name = image_name[0:pidx]
 
         try:
-            inp = me.get_image(image_path)
+            img, inp = me.get_image_ext(image_path)
         except:
             logging.exception("Failed getting image")
             if skip_img_error:
@@ -209,7 +213,7 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
 
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
-        logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {img.desc}")
+        logging.info(f"creating sal {itr} {image_path} {image_name} {topidx} {info.desc}")
 
         
         multi_target = getattr(algo, "multi_target", False)
@@ -240,13 +244,13 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         if not with_scores:
             continue
 
-        scores_dict = get_sal_scores(me, inp, img, sal_dict)
+        scores_dict = get_sal_scores(me, inp, img, info, sal_dict)
         save_scores(scores_dict, me.arch, image_name, run=run_idx, update=True)
 
-def get_sal_scores(me, inp, info, sal_dict):
-    metrics = Metrics()
+def get_sal_scores(me, inp, img, info, sal_dict):
+    metrics = Metrics()    
     return {
-        name : metrics.get_metrics(me.model, inp, sal, info)
+        name : metrics.get_metrics(me, inp, img, sal, info)
         for name, sal in sal_dict.items()
     }
     
@@ -301,9 +305,9 @@ def create_scores(me, result_paths, images, update=True):
         logging.debug(f"handling {path}")
         info = images[image_name]
 
-        inp = me.get_image(info.path)
+        img, inp = me.get_image_ext(info.path)
         sal_dict = {variant : torch.load(path).float()}
-        scores_dict = get_sal_scores(me, inp, info, sal_dict)
+        scores_dict = get_sal_scores(me, inp, img, info, sal_dict)
         save_scores(scores_dict, me.arch, image_name, update=update)
 
 
@@ -351,9 +355,10 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
     return pd.DataFrame(res)
 
 def summarize_scores_df(df):
+    ##posmean = lambda x: x[x > 0].mean()
     meta_cols = ["image","variant"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
-    metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}
+    metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
     smry =df.groupby('variant').agg(
         n_valid=('variant', 'size'),
         **metrics

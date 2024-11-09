@@ -36,6 +36,7 @@ def create_resnet101_module(pretrained=True, requires_grad=False):
 
 class GradModel(nn.Module):
     def __init__(self, model_name='resnet50', feature_layer=8):
+        print("GradModel", model_name, feature_layer)
         super(GradModel, self).__init__()
         self.post_features = None
         self.model_str = 'None'
@@ -45,11 +46,11 @@ class GradModel(nn.Module):
             self.post_features = model[feature_layer:-1]
             self.avgpool = model[-1:]
             self.classifier = torchvision.models.resnet101(pretrained=True).fc
-        elif model_name == 'resnet50':
+        elif model_name == 'resnet50':            
             model = create_resnet50_module(requires_grad=True, pretrained=True)
             self.features = model[:feature_layer]
-            self.post_features = model[feature_layer:-1]
-            self.avgpool = model[feature_layer:]
+            self.post_features = model[feature_layer:8] ## model[feature_layer:-1]
+            self.avgpool = model[8:] ##model[feature_layer:]
             self.classifier = torchvision.models.resnet50(pretrained=True).fc
         elif model_name == 'resnet18':
             model = create_resnet18_module(requires_grad=True, pretrained=True)
@@ -57,7 +58,7 @@ class GradModel(nn.Module):
             self.post_features = model[feature_layer:-1]
             self.avgpool = model[-1:]
             self.classifier = torchvision.models.resnet18(pretrained=True).fc
-        elif model_name == 'densnet':
+        elif model_name == 'densnet' or model_name == 'densenet201': 
             model = torchvision.models.densenet201(pretrained=True)
             model.eval()
             self.features = model.features[:feature_layer]
@@ -82,7 +83,7 @@ class GradModel(nn.Module):
             self.avgpool = model.avgpool
             self.classifier = model.classifier
         else:
-            raise NotImplementedError('No such model')
+            raise NotImplementedError(f'No such model {model_name}')
 
         self.gradients = None
 

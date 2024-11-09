@@ -1,6 +1,9 @@
 import torch
 import numpy as np
 from sklearn.metrics import auc
+from saliency.metrics import pic
+from PIL import Image
+import time
 
 class Metrics:
 
@@ -15,8 +18,9 @@ class Metrics:
         return tensor
 
     
-    def get_metrics(self, model, inp, saliency, info, nsteps=20, pred_only=True):
+    def get_metrics(self, me, inp, img, saliency, info, nsteps=20, pred_only=True):
 
+        model = me.model
         logits = model(inp).cpu()
         topidx = int(torch.argmax(logits))
         target = info.target
@@ -24,7 +28,9 @@ class Metrics:
         ## del, pos
         pred_pos_auc, pred_del_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=False, nsteps=nsteps)
         pred_neg_auc, pred_ins_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=True, nsteps=nsteps)
-        pred_adp, pred_pic, pred_aic, pred_sic = self.get_adp_pic(model, inp, saliency[0], topidx)
+        pred_adp, pred_pic = self.get_adp_pic(model, inp, saliency[0], topidx)
+        pred_sic = self.get_sic(me, inp, img, saliency, target)
+        pred_aic = self.get_aic(me, inp, img, saliency, target)
 
         if pred_only:
             return dict(
@@ -35,17 +41,18 @@ class Metrics:
                 pred_adp=pred_adp,
                 pred_pic=pred_pic,
                 pred_aic=pred_aic,
-                pred_sic=pred_sic
+                pred_sic=pred_sic,
                 )
 
+        assert False, "missing aic,sic impl"
         if target == topidx:
             target_pos_auc, target_del_auc = pred_pos_auc, pred_del_auc
             target_neg_auc, target_ins_auc = pred_neg_auc, pred_ins_auc 
-            target_adp, target_pic, target_aic, target_sic = pred_adp, pred_pic, pred_aic, pred_sic
+            target_adp, target_pic = pred_adp, pred_pic, pred_aic, pred_sic
         else:
             target_pos_auc, target_del_auc = self.pert_metrics(model, inp, saliency[1], target, is_neg=False, nsteps=nsteps)
             target_neg_auc, target_ins_auc = self.pert_metrics(model, inp, saliency[1], target, is_neg=True, nsteps=nsteps)
-            target_adp, target_pic, target_aic, target_sic = self.get_adp_pic(model, inp, saliency[1], target)
+            target_adp, target_pic = self.get_adp_pic(model, inp, saliency[1], target)
 
         
 
@@ -56,8 +63,8 @@ class Metrics:
             pred_ins_auc=pred_ins_auc,
             pred_adp=pred_adp,
             pred_pic=pred_pic,
-            pred_aic=pred_aic,
-            pred_sic=pred_sic,
+            pred_aic=0,
+            pred_sic=0,
 
             target_pos_auc=target_pos_auc,
             target_neg_auc=target_neg_auc,
@@ -71,6 +78,61 @@ class Metrics:
 
         )
 
+
+    def get_sic(self, me, inp, img, saliency, target):
+        device = inp.device
+        transform = me.get_transform()
+        model = me.model
+        
+        def predict(image_batch):             
+            nonlocal transform, model, device
+            
+            inp = torch.stack([transform(Image.fromarray(x)) for x in image_batch]).to(device)
+            logits = model(inp)
+            probs = torch.softmax(logits, 1)
+            score = probs[:, target].detach().cpu()
+            return score.numpy()
+        
+        return self.get_pic_auc(model, inp, img, saliency, target, predict)
+
+    def get_aic(self, me, inp, img, saliency, target):        
+        device = inp.device
+        transform = me.get_transform()
+        model = me.model
+        
+        def predict(image_batch):            
+            nonlocal transform, model, device                        
+            inp = torch.stack([transform(Image.fromarray(x)) for x in image_batch]).to(device)
+            logits = model(inp)            
+            image_class = torch.argmax(logits, dim=1)        
+            score = (image_class.detach().cpu() == target).float()
+            return score.numpy()
+        
+        return self.get_pic_auc(model, inp, img, saliency, target, predict)
+
+
+    def get_pic_auc(self, model, inp, img, saliency, target,
+                pred_func,
+                num_data_points = 20, fraction=0.01):
+        random_mask = pic.generate_random_mask(image_height=inp.shape[-1], image_width=inp.shape[-2], fraction=fraction)
+        
+        saliency_thresholds = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.10, 0.13, 0.21, 0.34, 0.5, 0.75]
+        nimg = np.array(img)
+        start = time.time()
+        try:
+            metric = pic.compute_pic_metric(
+                img=nimg,
+                saliency_map=saliency[0].numpy(),
+                random_mask=random_mask,
+                pred_func=pred_func,
+                min_pred_value=0.5,
+                saliency_thresholds=saliency_thresholds,
+                keep_monotonous=True,
+                num_data_points=num_data_points)            
+            return metric.auc * 100.0
+    
+        except pic.ComputePicMetricError as e:        
+            return -10000.0
 
 
     def get_adp_pic(self, model, inp, saliency, target):
@@ -95,10 +157,8 @@ class Metrics:
 
         adp = (torch.maximum(x - y, torch.zeros_like(x)) / x).mean() * 100
         pic = torch.where(x < y, 1.0, 0.0).mean() * 100
-        aic = accuracy * 100.0
-        sic = (y/x) * 100.0
 
-        return float(adp), float(pic), float(aic), float(sic)
+        return float(adp), float(pic)
         
 
     def pert_metrics(self, model, inp, saliency, target, is_neg=False, nsteps=100, 

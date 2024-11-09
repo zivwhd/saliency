@@ -16,8 +16,13 @@ from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
 from mpert import IEMPertSaliencyCreator 
 from ltx import LTXSaliencyCreator
+from dix_cnn import DixCnnSaliencyCreator
 import torch
 import socket
+
+
+def get_dixcnn_sal_creator():
+    return DixCnnSaliencyCreator()
 
 def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
