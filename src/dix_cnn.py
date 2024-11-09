@@ -298,7 +298,12 @@ def make_resize_norm(act_grads):
 
 def gen_dix(me, inp, catidx):
 
-    FEATURE_LAYER_NUMBER = 8 ## 10000 ##8
+    if me.arch == "resnet50":
+        FEATURE_LAYER_NUMBER = 7 ##8 ## 10000 ##8
+    elif me.arch == "resnet50":
+        FEATURE_LAYER_NUMBER = 8 ##8 ## 10000 ##8
+    else:
+        assert False, f"unexpected arch {me.arch}"
     INTERPOLATION_STEPS = 4
     USE_MASK = True
     
