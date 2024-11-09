@@ -366,13 +366,13 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
     return pd.DataFrame(res)
 
 def summarize_scores_df(df, extended=False):
-    if extended:
-        agg = lambda x: x[x > 0].mean()
-    else:
-        agg = 'mean'
     meta_cols = ["image","variant"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
-    metrics = {f"mean_{x}" : (x, agg) for x in metric_cols}   
+    if extended:
+        metrics = {f"mean_{x}" : (x, lambda x: x[x >= 0].mean()) for x in metric_cols}
+        metrics = {f"count_{x}" : (x, lambda x: (x >=0).sum()) for x in metric_cols}
+    else:
+        metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
     smry =df.groupby('variant').agg(
         n_valid=('variant', 'size'),
         **metrics
