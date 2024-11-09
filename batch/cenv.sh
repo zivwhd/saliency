@@ -76,6 +76,7 @@ pip3 install wandb
 pip3 install pytorch-lightning
 pip3 install transformers
 pip3 install icecream
+pip3 install saliency
 
 # Verify the installation
 echo verifying ...
