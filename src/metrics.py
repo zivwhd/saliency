@@ -4,7 +4,7 @@ from sklearn.metrics import auc
 from saliency.metrics import pic
 from PIL import Image
 import time
-
+import logging
 class Metrics:
 
     CONVENT_NORMALIZATION_MEAN = [0.485, 0.456, 0.406]
@@ -142,13 +142,14 @@ class Metrics:
                 saliency_map=saliency[0].numpy(),
                 random_mask=random_mask,
                 pred_func=pred_func,
-                min_pred_value=0.5,
+                min_pred_value=0.2,
                 saliency_thresholds=saliency_thresholds,
                 keep_monotonous=True,
                 num_data_points=num_data_points)            
             return metric.auc * 100.0
     
         except pic.ComputePicMetricError as e:        
+            logging.exception(e)
             return -10000.0
 
 
