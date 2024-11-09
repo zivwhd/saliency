@@ -24,7 +24,7 @@ class Metrics:
         topidx = int(torch.argmax(logits))
         probs = torch.softmax(logits, 1)        
         target = info.target
-        logging.info(f"pred: {target} {probs[0,target]}")    
+        #logging.info(f"pred: {target} {probs[0,target]}")    
 
         pred_sic = self.get_sic(me, inp, img, saliency, target)
         pred_aic = self.get_aic(me, inp, img, saliency, target)
@@ -107,7 +107,7 @@ class Metrics:
             logits = model(inp)
             probs = torch.softmax(logits, 1)
             score = probs[:, target].detach().cpu()
-            logging.info(f"sic-predict: {score}")
+            #logging.info(f"sic-predict: {score}")
             return score.numpy()
         
         return self.get_pic_auc(model, inp, img, saliency, target, predict)
@@ -123,7 +123,7 @@ class Metrics:
             logits = model(inp)            
             image_class = torch.argmax(logits, dim=1)        
             score = (image_class.detach().cpu() == target).float()
-            logging.info(f"aic-predict: {score} {target} {image_class}")
+            #logging.info(f"aic-predict: {score} {target} {image_class}")
             return score.numpy()
         
         return self.get_pic_auc(model, inp, img, saliency, target, predict)
@@ -153,7 +153,7 @@ class Metrics:
             return metric.auc * 100.0
     
         except pic.ComputePicMetricError as e:        
-            logging.exception(e)
+            logging.info("skipping image")
             return -10000.0
 
 

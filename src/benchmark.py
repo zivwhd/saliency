@@ -370,7 +370,7 @@ def summarize_scores_df(df, extended=False):
     metric_cols = [x for x in df.columns if x not in meta_cols]
     if extended:
         metrics = {f"mean_{x}" : (x, lambda x: x[x >= 0].mean()) for x in metric_cols}
-        metrics = {f"count_{x}" : (x, lambda x: (x >=0).sum()) for x in metric_cols}
+        metrics.update({f"count_{x}" : (x, lambda x: (x >=0).sum()) for x in metric_cols})
     else:
         metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
     smry =df.groupby('variant').agg(
