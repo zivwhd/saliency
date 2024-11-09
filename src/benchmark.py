@@ -318,7 +318,7 @@ def create_scores(me, result_paths, images, update=True, extended=False):
 
         img, inp = me.get_image_ext(info.path)
         sal_dict = {variant : torch.load(path).float()}
-        scores_dict = get_sal_scores(me, inp, img, info, sal_dict, extednded=extended)
+        scores_dict = get_sal_scores(me, inp, img, info, sal_dict, extended=extended)
         save_scores(scores_dict, me.arch, image_name, update=update, extended=extended)
 
 
