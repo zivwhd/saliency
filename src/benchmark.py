@@ -322,9 +322,10 @@ def create_scores(me, result_paths, images, update=True, extended=False):
         save_scores(scores_dict, me.arch, image_name, update=update, extended=extended)
 
 
-def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True):
+def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True, extended=False):
     if base_path is None:
-        base_path = os.path.join("results", model_name, "scores")
+        emark = "e" * extended
+        base_path = os.path.join("results", model_name, f"{emark}scores")
 
     if variant_names is None:
         variant_names = [os.path.basename(x) for x in glob.glob(os.path.join(base_path, "*"))]
@@ -364,11 +365,14 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
             
     return pd.DataFrame(res)
 
-def summarize_scores_df(df):
-    ##posmean = lambda x: x[x > 0].mean()
+def summarize_scores_df(df, extended=False):
+    if extended:
+        agg = lambda x: x[x > 0].mean()
+    else:
+        agg = 'mean'
     meta_cols = ["image","variant"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
-    metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
+    metrics = {f"mean_{x}" : (x, agg) for x in metric_cols}   
     smry =df.groupby('variant').agg(
         n_valid=('variant', 'size'),
         **metrics

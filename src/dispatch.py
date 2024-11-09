@@ -399,13 +399,14 @@ def create_model_scores(model_name, marker="c1", extended=False, subset=None):
     result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
     create_scores(me, result_prog, all_images_dict, update=True, extended=extended)
 
-def create_model_summary(model_name):
-    logging.info("summary for {model_name}")
+def create_model_summary(model_name, extended=False):
+    logging.info("summary for {model_name} {extended}")
+    emark = "e" * extended
     base_csv_path = os.path.join("results", model_name)
-    df = load_scores_df(model_name, filter_func=include_result)
-    df.to_csv(f'{base_csv_path}/results.csv', index=False)
-    smry = summarize_scores_df(df)
-    smry.to_csv(f'{base_csv_path}/summary.csv', index=False)
+    df = load_scores_df(model_name, filter_func=include_result, extended=extended)
+    df.to_csv(f'{base_csv_path}/{emark}results.csv', index=False)
+    smry = summarize_scores_df(df, extended=extended)
+    smry.to_csv(f'{base_csv_path}/{emark}summary.csv', index=False)
 
 def get_creators():
     ptrn = re.compile("get_(.*)_sal_creator")
