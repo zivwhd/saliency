@@ -29,8 +29,8 @@ class Metrics:
         pred_pos_auc, pred_del_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=False, nsteps=nsteps)
         pred_neg_auc, pred_ins_auc = self.pert_metrics(model, inp, saliency[0], topidx, is_neg=True, nsteps=nsteps)
         pred_adp, pred_pic = self.get_adp_pic(model, inp, saliency[0], topidx)
-        pred_sic = self.get_sic(me, inp, img, saliency, target)
-        pred_aic = self.get_aic(me, inp, img, saliency, target)
+        #pred_sic = self.get_sic(me, inp, img, saliency, target)
+        #pred_aic = self.get_aic(me, inp, img, saliency, target)
 
         if pred_only:
             return dict(
@@ -40,8 +40,8 @@ class Metrics:
                 pred_ins_auc=pred_ins_auc,
                 pred_adp=pred_adp,
                 pred_pic=pred_pic,
-                pred_aic=pred_aic,
-                pred_sic=pred_sic,
+                #pred_aic=pred_aic,
+                #pred_sic=pred_sic,
                 )
 
         assert False, "missing aic,sic impl"
