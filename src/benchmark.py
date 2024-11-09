@@ -140,9 +140,13 @@ def save_saliency(obj, model_name, variant, image_name, run=0):     ## PPAA
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(obj, path)
 
-def save_scores(scores_dict, model_name, image_name, run=0, update=False):
+def save_scores(scores_dict, model_name, image_name, run=0, update=False, extended=False):
     for variant, scores in scores_dict.items():
-        path = get_result_path(model_name,variant, image_name, run, result_type="scores")
+        if extended:
+            result_type="escores"
+        else:
+            result_type="scores"
+        path = get_result_path(model_name,variant, image_name, run, result_type=result_type)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if update and os.path.exists(path):
             with open(path, "rb") as sof:
@@ -247,12 +251,19 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         scores_dict = get_sal_scores(me, inp, img, info, sal_dict)
         save_scores(scores_dict, me.arch, image_name, run=run_idx, update=True)
 
-def get_sal_scores(me, inp, img, info, sal_dict):
+def get_sal_scores(me, inp, img, info, sal_dict, extended=False):
     metrics = Metrics()    
-    return {
-        name : metrics.get_metrics(me, inp, img, sal, info)
-        for name, sal in sal_dict.items()
-    }
+    if extended:
+        return {
+            name : metrics.get_ext_metrics(me, inp, img, sal, info)
+            for name, sal in sal_dict.items()
+        }
+    else:
+        return {
+            name : metrics.get_metrics(me, inp, img, sal, info)
+            for name, sal in sal_dict.items()
+        }
+    
     
 def get_sal_scores_(me, inp, info, sal_dict, with_breakdown=True):
     smodel = nn.Sequential(me.model, nn.Softmax(dim=1)) 
@@ -292,7 +303,7 @@ def get_sal_scores_(me, inp, info, sal_dict, with_breakdown=True):
 def get_score_name(path):
     return (os.path.basename(os.path.dirname(path)) + "/" + os.path.basename(path))
 
-def create_scores(me, result_paths, images, update=True):
+def create_scores(me, result_paths, images, update=True, extended=False):
     for path in result_paths:
         
         image_name = os.path.basename(path)
@@ -307,9 +318,8 @@ def create_scores(me, result_paths, images, update=True):
 
         img, inp = me.get_image_ext(info.path)
         sal_dict = {variant : torch.load(path).float()}
-        scores_dict = get_sal_scores(me, inp, img, info, sal_dict)
-        save_scores(scores_dict, me.arch, image_name, update=update)
-
+        scores_dict = get_sal_scores(me, inp, img, info, sal_dict, extednded=extended)
+        save_scores(scores_dict, me.arch, image_name, update=update, extended=extended)
 
 
 def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True):

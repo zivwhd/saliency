@@ -389,14 +389,15 @@ def include_result(x):
     
     return True
 
-def create_model_scores(model_name, marker="c1"):
+def create_model_scores(model_name, marker="c1", extended=False, subset=None):
     me = ModelEnv(model_name)            
-    result_paths = get_all_results(model_name)
+    result_paths = get_all_results(model_name, subset=subset)
     result_paths = [x for x in result_paths if include_result(x)]
     logging.info(f"found {len(result_paths)} saliency maps")
-    progress_path = os.path.join("progress", model_name, f"scores_any_{marker}")
+    ext_mark = ("e" if extended else "")
+    progress_path = os.path.join("progress", model_name, f"{ext_mark}scores_any_{marker}")
     result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
-    create_scores(me, result_prog, all_images_dict, update=True)
+    create_scores(me, result_prog, all_images_dict, update=True, extended=extended)
 
 def create_model_summary(model_name):
     logging.info("summary for {model_name}")
@@ -420,8 +421,9 @@ def get_args():
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
-    parser.add_argument("--selection", choices=["rsample3", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
+    parser.add_argument("--selection", choices=["rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
+    parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
 
     args = parser.parse_args()    
     return args
@@ -465,6 +467,8 @@ if __name__ == '__main__':
     
     all_images_dict = isrc.get_all_images()
     all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
+    all_image_names = set(all_images_dict.keys())
+
     task_images = [img for idx, img in enumerate(all_images) if idx % ntasks == task_id]
 
     progress_path = os.path.join("progress", args.model, f"{args.action}_{args.sal}_{args.marker}")
@@ -494,7 +498,7 @@ if __name__ == '__main__':
                 model_names = [args.model]
             for model_name in model_names:
                 logging.info(f"##### scores {model_name} ######")
-                create_model_scores(model_name, args.marker)
+                create_model_scores(model_name, args.marker, extended=args.ext, subset=all_image_names)
         elif args.action == "all":
             for model_name in ALL_MODELS:
                 logging.info(f"##### saliency {model_name} ######")

@@ -18,6 +18,20 @@ class Metrics:
         return tensor
 
     
+    def get_ext_metrics(self, me, inp, img, saliency, info, nsteps=20, pred_only=True):
+        model = me.model
+        logits = model(inp).cpu()
+        topidx = int(torch.argmax(logits))
+        target = info.target
+
+        pred_sic = self.get_sic(me, inp, img, saliency, target)
+        pred_aic = self.get_aic(me, inp, img, saliency, target)
+        
+        return dict(
+                pred_aic=pred_aic,
+                pred_sic=pred_sic)
+
+
     def get_metrics(self, me, inp, img, saliency, info, nsteps=20, pred_only=True):
 
         model = me.model
