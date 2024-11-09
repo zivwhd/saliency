@@ -105,6 +105,7 @@ class Metrics:
             logits = model(inp)
             probs = torch.softmax(logits, 1)
             score = probs[:, target].detach().cpu()
+            logging.info(f"sic-predict: {score}")
             return score.numpy()
         
         return self.get_pic_auc(model, inp, img, saliency, target, predict)
@@ -120,6 +121,7 @@ class Metrics:
             logits = model(inp)            
             image_class = torch.argmax(logits, dim=1)        
             score = (image_class.detach().cpu() == target).float()
+            logging.info(f"aic-predict: {score} {target} {image_class}")
             return score.numpy()
         
         return self.get_pic_auc(model, inp, img, saliency, target, predict)
