@@ -114,10 +114,12 @@ class Metrics:
     def get_pic_auc(self, model, inp, img, saliency, target,
                 pred_func,
                 num_data_points = 20, fraction=0.01):
-        random_mask = pic.generate_random_mask(image_height=inp.shape[-1], image_width=inp.shape[-2], fraction=fraction)
+        
+        nimg = np.array(img)
+        random_mask = pic.generate_random_mask(image_height=nimg.shape[0], image_width=nimg.shape[1], fraction=fraction)
         
         saliency_thresholds = [0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.07, 0.10, 0.13, 0.21, 0.34, 0.5, 0.75]
-        nimg = np.array(img)
+        
         start = time.time()
         try:
             metric = pic.compute_pic_metric(
