@@ -195,8 +195,8 @@ def optimize_explanation_i(
         explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
 
         nweights = mweights * 2
-        #comp_loss = (((output / nweights) - (targets / nweights)) ** 2).mean()
-        comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
+        comp_loss = (((output / nweights) - (targets / nweights)) ** 2).mean()
+        #comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
 
         if c_completeness != 0:            

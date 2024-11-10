@@ -38,9 +38,10 @@ def get_mbench_sal_creator():
     baselines = [ZeroBaseline()]
     
     runs  = [
-        MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[50, 100, 500, 1000, 1500, 2000],  baselines = baselines, 
+        MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=msk,  baselines = baselines, 
                             groups=[dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", epochs=10)]
-                            ),
+                            )
+        for msk in [50, 100, 500, 1000, 1500]
         #MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[50, 100, 500, 1000, 1500, 2000],  baselines = baselines, 
         #                    groups=[
         #                        dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", epochs=epochs)
