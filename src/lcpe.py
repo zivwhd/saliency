@@ -5,8 +5,15 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 import logging, time, pickle
 from cpe import SqMaskGen
+import socket
+
 
 tqdm = lambda x: x
+
+HOSTNAME = socket.gethostname()
+def report_duration(start_time, model_name, operation, nmasks, nitr=0, with_model=False):
+    duration = time.time() - start_time
+    print(f"DURATION,{HOSTNAME},{model_name},{operation},{nmasks},{nitr},{int(with_model)},{duration}")
 
 
 class LoadMaskGen:
@@ -420,6 +427,7 @@ class CompExpCreator:
         #}
 
     def generate_data(self, me, inp, catidx):
+        start_time = time.time()
         baseline = self.baseline_gen(inp)
         mgen = MaskedRespGen(self.segsize, mgen=self.mgen, baseline=baseline)
         fmdl = me.narrow_model(catidx, with_softmax=True)
@@ -439,6 +447,8 @@ class CompExpCreator:
         all_masks = torch.concat(mgen.all_masks).to(device)
         all_pred = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
         all_pred.shape, baseline_score.shape
+                
+        #print("MaskGeneration,{self.segsize},{duration},")
         return MaskedRespData(
             baseline_score = baseline_score,
             label_score = label_score,
@@ -450,8 +460,15 @@ class CompExpCreator:
 
     def explain(self, me, inp, catidx, data=None, initial=None, callback=None):
 
+         
+
         if data is None:
+            start_time_masks = time.time()
             data = self.generate_data(me, inp, catidx)
+            report_duration(start_time_masks, me.arch, "MASKS", self.nmasks)
+
+        start_time_expl = time.time()
+
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
             #initial = (torch.randn(224,224)*0.2+1).abs()
@@ -459,7 +476,7 @@ class CompExpCreator:
             initial = (torch.randn(224,224)*0.2+3)
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
-
+        
         sal = optimize_explanation(fmdl, inp, initial, data.all_masks, data.all_pred, score=data.added_score, 
                                    epochs=self.epochs, model_epochs=self.model_epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
                                    c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
@@ -469,6 +486,8 @@ class CompExpCreator:
                                    c_magnitude=self.c_magnitude,
                                    c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline, callback=callback)
+        
+        report_duration(start_time_expl, me.arch, "OPT", self.nmasks, nitr=self.epochs, with_model=(self.c_model != 0))
         
         return sal
 
