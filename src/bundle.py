@@ -2,15 +2,15 @@
 import sys, os, subprocess, glob
 
 methods = [
-"MCompZr_1000_16_200:200_n_msk1.0_tv0.1_mdl0.05_0_0",
-"RISE_4000_7_0.5_0_0",
-"MCompZr_1000_16_200_n_msk1.0_tv0.1_0_0",
-"sLTX_50_5_5e-05_1.0_0.5_0_0",
-"sLTX_50_5_5e-05_cp1_1.0_0.5_0_0",
-"IEMPert_300_tv0.2_1_l0.005_0_0",
-"Dimpl_t-attr_0_0",
-"Dimpl_dix_0_0",
-"Dimpl_gae_0_0"]
+"MCompZr_1000_16_200:200_n_msk1.0_tv0.1_mdl0.05_0",
+"RISE_4000_7_0.5_0",
+"MCompZr_1000_16_200_n_msk1.0_tv0.1_0",
+"sLTX_50_5_5e-05_1.0_0.5_0",
+"sLTX_50_5_5e-05_cp1_1.0_0.5_0",
+"IEMPert_300_tv0.2_1_l0.005_0",
+"Dimpl_t-attr_0",
+"Dimpl_dix_0",
+"Dimpl_gae_0"]
 
 
 
