@@ -38,7 +38,7 @@ for idx, image_name in enumerate(images):
     print(f"========== {idx} {image_name} ===========")
 
     ptrn = os.path.join(BASE_PATH, f"saliency/results/vit_small_patch16_224/saliency/*/{image_name}")
-    print("## ", ptrn)
+    print("##  '{ptrn}'")
     sal_paths = glob.glob(ptrn)
     
     if not sal_paths:
