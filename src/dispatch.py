@@ -41,15 +41,15 @@ def get_mbench_sal_creator():
         MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[50, 100, 500, 1000, 1500, 2000],  baselines = baselines, 
                             groups=[dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", epochs=10)]
                             ),
-        MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[50, 100, 500, 1000, 1500, 2000],  baselines = baselines, 
-                            groups=[
-                                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", epochs=epochs)
-                                for epochs in [50, 100, 200, 300, 400]
-                                ] + [
-                                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.1, c_norm=True, c_activation="", epochs=epochs)
-                                for epochs in [50, 100, 200, 300, 400]
-                                ] 
-                            )
+        #MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[50, 100, 500, 1000, 1500, 2000],  baselines = baselines, 
+        #                    groups=[
+        #                        dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", epochs=epochs)
+        #                        for epochs in [50, 100, 200, 300, 400]
+        #                        ] + [
+        #                        dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.1, c_norm=True, c_activation="", epochs=epochs)
+        #                        for epochs in [50, 100, 200, 300, 400]
+        #                        ] 
+        #                    )
     ]
     return CombSaliencyCreator(runs)
 

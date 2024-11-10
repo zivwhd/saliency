@@ -6,7 +6,7 @@ import torchvision.transforms as T
 import logging, time, pickle
 from cpe import SqMaskGen
 import socket
-
+from skimage.segmentation import slic,mark_boundaries
 
 tqdm = lambda x: x
 
@@ -29,6 +29,33 @@ class LoadMaskGen:
         self.idx += batch_size
         return rv
 
+
+class SegMaskGen:
+
+    def __init__(self, inp, n_segments):
+        base = inp[0].cpu().numpy().transpose(1,2,0)
+        #print(base.shape)
+        #n_segments = n_segments #base.shape[0] * base.shape[1] / (segsize * segsize)
+        self.segments = torch.tensor(slic(base,n_segments=n_segments,compactness=10,sigma=1), dtype=torch.int32)        
+        #print(inp.shape, self.segments.shape)
+        self.nelm = torch.unique(self.segments).numel()
+        self.mshape = inp.shape
+    
+    def gen_masks(self, nmasks):
+        return (self.gen_masks_cont(nmasks) < 0.5)
+
+    def gen_masks_cont(self, nmasks):        
+        #print("Generating segments mask")
+        step = self.nelm
+        nelm = step * nmasks
+        rnd = torch.rand(2+nelm)
+        stt = []
+        for idx in range(nmasks):
+            wseg = self.segments + step * idx
+            stt.append(wseg)
+        parts = torch.stack(stt)
+        #print(self.nelm, rnd.shape, self.segments.shape, len(self.segments.unique()), len(parts.unique()))
+        return rnd[parts.view(-1)].view(parts.shape)
 
 
 class MaskedRespGen:
@@ -157,7 +184,9 @@ def optimize_explanation_i(
     mexp.train()
     avg_kernel = torch.ones((1,) + avg_kernel_size).to(data.device)
     avg_kernel = avg_kernel / avg_kernel.numel()
-                
+
+    mweights = data.flatten(start_dim=1).sum(dim=1)
+    print("$$$", mweights.shape)
     for epoch in range(epochs):
                 
         # Forward pass
@@ -165,7 +194,10 @@ def optimize_explanation_i(
         output = mexp(data)
         explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
 
+        nweights = mweights * 2
+        #comp_loss = (((output / nweights) - (targets / nweights)) ** 2).mean()
         comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
+
 
         if c_completeness != 0:            
             explanation_sum = mexp.explanation.sum()
@@ -197,9 +229,9 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            if c_norm:
+            if c_norm or True:
                 #magnitude_loss = explanation.abs().sum()
-                magnitude_loss = mexp.explanation.abs().mean()
+                magnitude_loss = (mexp.explanation.abs()).mean()
                 #explanation_mask = explanation
                 #magnitude_loss = (explanation * explanation).mean()
                 #flat_mask = explanation_mask.flatten()
@@ -232,13 +264,16 @@ def optimize_explanation_i(
             c_magnitude * magnitude_loss
             )
         
+        total_loss.backward()
         if callback is not None:            
             callback(epoch=epoch, 
                     explanation=explanation.detach().clone().cpu(),
                     loss = total_loss.detach().clone().cpu(),
-                    comp_loss = comp_loss.detach().clone().cpu())
+                    comp_loss = comp_loss.detach().clone().cpu(),
+                    rexp = mexp.explanation.grad.detach().sum(),
+                    grad = mexp.explanation.detach().mean())
             
-        total_loss.backward()        
+        
         optimizer.step()
 
 
@@ -426,7 +461,7 @@ class CompExpCreator:
         #    f"{self.desc}_{self.nmasks}_{self.segsize}{ksdesc}_{self.epochs}_{self.c_completeness}_{self.c_smoothness}" : sal.cpu().unsqueeze(0)
         #}
 
-    def generate_data(self, me, inp, catidx):
+    def generate_data(self, me, inp, catidx):        
         start_time = time.time()
         baseline = self.baseline_gen(inp)
         mgen = MaskedRespGen(self.segsize, mgen=self.mgen, baseline=baseline)
@@ -447,7 +482,7 @@ class CompExpCreator:
         all_masks = torch.concat(mgen.all_masks).to(device)
         all_pred = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
         all_pred.shape, baseline_score.shape
-                
+        report_duration(start_time, me.arch, "MASKS", self.nmasks)        
         #print("MaskGeneration,{self.segsize},{duration},")
         return MaskedRespData(
             baseline_score = baseline_score,
@@ -459,13 +494,9 @@ class CompExpCreator:
         )
 
     def explain(self, me, inp, catidx, data=None, initial=None, callback=None):
-
          
-
-        if data is None:
-            start_time_masks = time.time()
-            data = self.generate_data(me, inp, catidx)
-            report_duration(start_time_masks, me.arch, "MASKS", self.nmasks)
+        if data is None:            
+            data = self.generate_data(me, inp, catidx)            
 
         start_time_expl = time.time()
 
