@@ -42,6 +42,7 @@ for idx, image_name in enumerate(images):
     sal_paths = glob.glob(ptrn)
     
     if not sal_paths:
+        print("- skipping")
         continue
 
     shell(["cp", os.path.join(IMG_PATH, f"{image_name}.JPEG"), DEST_PATH])
