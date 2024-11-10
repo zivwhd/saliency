@@ -48,8 +48,7 @@ def get_mbench_sal_creator():
                                 ] + [
                                 dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.1, c_norm=True, c_activation="", epochs=epochs)
                                 for epochs in [50, 100, 200, 300, 400]
-                                ] +
-
+                                ] 
                             )
     ]
     return CombSaliencyCreator(runs)
