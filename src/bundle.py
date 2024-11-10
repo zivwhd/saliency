@@ -21,7 +21,7 @@ SAMP_PATH = os.path.join(BASE_PATH, "data", "imagenet", "rsample100.smp")
 with open(SAMP_PATH, "rt") as sf:
     images = sf.readlines()
 
-images = [x.replace(".JPEG","") for x in images]
+images = [x.strip().replace(".JPEG","") for x in images]
 images = images[0:100]
 
 DEST_PATH = os.path.join(BASE_PATH, "report", "bundle")
