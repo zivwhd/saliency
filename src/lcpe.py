@@ -123,7 +123,7 @@ def optimize_explanation_i(
         c_model=0,
         c_activation=None,
         c_norm=False,
-        renorm=False, baseline=None):
+        renorm=False, baseline=None, callback=None):
     mse = nn.MSELoss()  # Mean Squared Error loss
     bce = nn.BCELoss(reduction="mean")
     tv = TotalVariationLoss()
@@ -225,6 +225,12 @@ def optimize_explanation_i(
             c_magnitude * magnitude_loss
             )
         
+        if callback is not None:            
+            callback(epoch=epoch, 
+                    explanation=explanation.detach().clone().cpu(),
+                    loss = total_loss.detach().clone().cpu(),
+                    comp_loss = comp_loss.detach().clone().cpu())
+            
         total_loss.backward()        
         optimizer.step()
 
@@ -442,7 +448,7 @@ class CompExpCreator:
             baseline = baseline
         )
 
-    def explain(self, me, inp, catidx, data=None, initial=None):
+    def explain(self, me, inp, catidx, data=None, initial=None, callback=None):
 
         if data is None:
             data = self.generate_data(me, inp, catidx)
@@ -462,7 +468,7 @@ class CompExpCreator:
                                    c_model=self.c_model,
                                    c_magnitude=self.c_magnitude,
                                    c_norm=self.c_norm, c_activation=self.c_activation,
-                                   baseline=data.baseline)
+                                   baseline=data.baseline, callback=callback)
         
         return sal
 

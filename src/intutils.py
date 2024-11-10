@@ -100,12 +100,14 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
         return
     sal = allsal[name]
     #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
+
     nsal = (sal - sal.min()) / (sal.max() - sal.min())
     if mag:
         nsal = torch.min(nsal, torch.quantile(sal,0.999))
         nsal = torch.max(nsal, torch.quantile(nsal,0.001))
     nsal = nsal[0]
-
+    
+        
     if grayscale:
         plt.imshow(nsal, cmap=plt.cm.gray, vmin=0, vmax=1)
     elif alpha is None:
@@ -128,6 +130,6 @@ def show_grid_sals(allsal, img, figsize=(10,10), fontsize=7, alpha=None, mag=Tru
         if get_method_alias:
             alias = get_method_alias(method_name)
         else:
-            alias = method_name
+            alias = method_name        
         plt.title(alias, fontsize=fontsize)
         show_single_sal(img, allsal, method_name, alpha=alpha, mag=mag)
