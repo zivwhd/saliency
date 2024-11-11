@@ -13,6 +13,7 @@ def read_stats(base_path, model_name):
         filename = os.path.basename(file_path)
 
         # Load stats from pickle file
+        print(f">> loading {file_path}")
         with open(file_path, 'rb') as f:
             stats = pickle.load(f)
 
