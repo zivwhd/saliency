@@ -105,13 +105,14 @@ class MaskedRespGen:
 
 
 class TotalVariationLoss(nn.Module):
-    def __init__(self):
+    def __init__(self, beta=2):
         super(TotalVariationLoss, self).__init__()
+        self.beta = beta
 
     def forward(self, x):
         # Calculate the variation in the x and y directions
-        x_diff = torch.abs(x[ :, :-1] - x[ :, 1:])
-        y_diff = torch.abs(x[ :-1, :] - x[ 1:, :])
+        x_diff = torch.abs(x[ :, :-1] - x[ :, 1:]).pow(self.beta)
+        y_diff = torch.abs(x[ :-1, :] - x[ 1:, :]).pow(self.beta)
         # Sum the variations to get the total variation loss
         loss = torch.mean(x_diff) + torch.mean(y_diff)
         return loss
@@ -149,6 +150,19 @@ def normalize_explanation(explanation, score, c_norm, c_activation):
         explanation = explanation * score / explanation.sum()
     return explanation, sig
 
+
+def qmet(smdl, inp, sal, steps):
+    with torch.no_grad():    
+        bars = sal.quantile(steps).unsqueeze(1).unsqueeze(1)
+        del_masks = (sal.unsqueeze(0) < bars)
+        ins_masks = (sal.unsqueeze(0) > bars)        
+        del_pred = smdl(del_masks.unsqueeze(1) * inp)
+        ins_pred = smdl(ins_masks.unsqueeze(1) * inp)
+        del_auc = ((del_pred[1:]+del_pred[0:-1])*0.5).mean() 
+        ins_auc = ((ins_pred[1:]+ins_pred[0:-1])*0.5).mean() 
+        return del_auc.cpu().tolist(), ins_auc.cpu().tolist()
+
+
 def optimize_explanation_i(
         fmdl, inp, mexp, data, targets, epochs=10, lr=0.001, score=1.0, 
         c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,
@@ -157,7 +171,10 @@ def optimize_explanation_i(
         c_model=0,
         c_activation=None,
         c_norm=False,
-        renorm=False, baseline=None, callback=None):
+        renorm=False, baseline=None, 
+        callback=None, 
+        select_from=None, select_freq=10,
+        start_epoch=0):
     mse = nn.MSELoss()  # Mean Squared Error loss
     bce = nn.BCELoss(reduction="mean")
     tv = TotalVariationLoss()
@@ -185,17 +202,19 @@ def optimize_explanation_i(
     avg_kernel = torch.ones((1,) + avg_kernel_size).to(data.device)
     avg_kernel = avg_kernel / avg_kernel.numel()
 
-    mweights = data.flatten(start_dim=1).sum(dim=1)
-    print("$$$", mweights.shape)
-    for epoch in range(epochs):
+    mweights = data.flatten(start_dim=1).sum(dim=1) * 2
+    metric_steps = torch.tensor([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]).to(inp.device)
+    selection = None
+
+    #print("$$$", mweights.shape)
+    for epoch in range(start_epoch, epochs):
                 
         # Forward pass
         optimizer.zero_grad()
         output = mexp(data)
         explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
-
-        nweights = mweights * 2
-        comp_loss = (((output / nweights) - (targets / nweights)) ** 2).mean()
+        
+        comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()
         #comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
 
@@ -229,18 +248,7 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            if c_norm or True:
-                #magnitude_loss = explanation.abs().sum()
-                magnitude_loss = (mexp.explanation.abs()).mean()
-                #explanation_mask = explanation
-                #magnitude_loss = (explanation * explanation).mean()
-                #flat_mask = explanation_mask.flatten()
-                #magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device))
-                #magnitude_loss = torch.sqrt( (explanation - score / explanation.numel()) ** 2 )
-            else:
-                explanation_mask = (explanation - explanation.min()) / (explanation.max() - explanation.min())            
-                flat_mask = explanation_mask.flatten()
-                magnitude_loss = bce(flat_mask, torch.zeros(flat_mask.shape).to(flat_mask.device)) # explanation_mask.abs().mean()
+            magnitude_loss = (mexp.explanation.abs()).mean()
         else:
             magnitude_loss = 0
 
@@ -287,12 +295,24 @@ def optimize_explanation_i(
                     f"magnitude_loss={magnitude_loss}")
             logging.debug(pdesc)
             print(pdesc)
-            
 
+        if select_from is not None and epoch > select_from and (epoch % select_freq == 0 or epoch == epochs-1):
+            dexpl = explanation.detach().clone()
+            del_score, ins_score = qmet(fmdl, inp, dexpl , metric_steps)
+            print(f"[{epoch}] scores: {del_score} {ins_score}")
+            met_score = ins_score - del_score
+            if selection is None or met_score > selection[0]:
+                print("selected")
+                selection = (met_score, dexpl)
+
+    if selection:
+        print("selection:", selection[0])        
+        return selection[1]
+    return explanation.detach().clone()
 
 def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.0, 
                          epochs=0, model_epochs=0, c_model=0,
-                         c_activation=None, c_norm=False,
+                         c_activation=None, c_norm=False,                         
                          **kwargs):
     # Initialize the model with the given initial explanation
     mexp = MaskedExplanationSum(initial_value=initial_explanation)
@@ -302,15 +322,20 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
         mexp.normalize(score)    
     # Train the model by passing all additional arguments through kwargs
     start_time = time.time()
-    optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, 
-                           c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
+    rv = optimize_explanation_i(
+        fmdl, inp, mexp, data, targets, score=score, 
+        c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
+    
     mid_time = time.time()
     logging.info(f"Optimization I: {mid_time - start_time}")    
     print(f"Optimization I: {mid_time -start_time}")    
     if model_epochs:
-        optimize_explanation_i(fmdl, inp, mexp, data, targets, score=score, 
-                               c_activation=c_activation, c_norm=c_norm,
-                               c_model=c_model, epochs=model_epochs, **kwargs)
+        rv = optimize_explanation_i(
+            fmdl, inp, mexp, data, targets, score=score, 
+            c_activation=c_activation, c_norm=c_norm,
+            c_model=c_model, epochs=epochs, 
+            start_epoch=(epochs-model_epochs),
+            **kwargs)                
         
     end_time = time.time()    
     logging.info(f"Optimization Done: ({mid_time - start_time}) , ({end_time - start_time})")    
@@ -318,8 +343,8 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
     
     #mexp.normalize(score)
     # Return the updated explanation parameter
-    explanation = normalize_explanation(mexp.explanation, score, c_norm=True, c_activation=c_activation)[0]
-    return explanation.detach()
+    #explanation = normalize_explanation(mexp.explanation, score, c_norm=True, c_activation=c_activation)[0]
+    return rv
 
 
 class MaskedRespData:
@@ -388,8 +413,8 @@ class CompExpCreator:
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_magnitude=0, c_norm=False, c_activation=False,
                  avg_kernel_size=(5,5),
-                 epochs=200, 
-                 model_epochs=200, c_model=0,
+                 epochs=300, select_from=100,
+                 model_epochs=300, c_model=0,
                  mgen=None,
                  desc = "MComp",
                  baseline_gen = ZeroBaseline(),                 
@@ -410,6 +435,7 @@ class CompExpCreator:
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
+        self.select_from=select_from
         self.model_epochs = model_epochs
         self.desc = desc
         self.mgen = mgen
@@ -424,6 +450,8 @@ class CompExpCreator:
                                 
         if self.model_epochs:
             desc += f":{self.model_epochs}"
+        if self.select_from is not None:
+            desc += f"b"
 
         if self.c_norm or self.c_activation:
             desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
@@ -509,7 +537,8 @@ class CompExpCreator:
         fmdl = me.narrow_model(catidx, with_softmax=True)        
         
         sal = optimize_explanation(fmdl, inp, initial, data.all_masks, data.all_pred, score=data.added_score, 
-                                   epochs=self.epochs, model_epochs=self.model_epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
+                                   epochs=self.epochs, select_from=self.select_from,
+                                   model_epochs=self.model_epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
                                    c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
                                    c_tv=self.c_tv, c_selfness=self.c_selfness,
                                    c_mask_completeness=self.c_mask_completeness,

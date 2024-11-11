@@ -83,12 +83,14 @@ class SqMaskGen:
         height, width= self.mshape        
         #masks = torch.zeros((nmasks, height, width))
 
-        rnd = torch.rand(1+self.nelm)
+        step = self.nelm
+        nelm = step * nmasks
+        rnd = torch.rand(2+nelm)
         stt = []
         for idx in range(nmasks):
             w_crop = torch.randint(self.segments.shape[1]- width, (nmasks,))
             h_crop = torch.randint(self.segments.shape[0]- height, (nmasks,))
-            wseg = self.segments[h_crop[idx]:height + h_crop[idx], w_crop[idx]:width + w_crop[idx]]
+            wseg = self.segments[h_crop[idx]:height + h_crop[idx], w_crop[idx]:width + w_crop[idx]] + step * idx
             stt.append(wseg)
 
         parts = torch.stack(stt)
