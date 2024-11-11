@@ -49,40 +49,45 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0.9, mag=True):
+def showsal(sal, img, caption="", quantile=0.9, mag=True, alpha=0.4, with_mask=True, save_path=None):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
+    slots = 3+ with_mask
     mask = (sal - sal.min()) / (sal.max()-sal.min())
     if mag:
         sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
-    plt.subplot(1, 4, 1)
+    plt.subplot(1, slots, 1)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
     plt.xticks([])  
     plt.yticks([])
-    plt.subplot(1, 4, 2)
+    plt.subplot(1, slots, 2)
     plt.imshow(img)    
-    plt.imshow(sal, cmap='jet', alpha=0.4)  # Set alpha for transparency
+    plt.imshow(sal, cmap='jet', alpha=alpha)  # Set alpha for transparency
     plt.xticks([])  
     plt.yticks([])
     
-    plt.subplot(1, 4, 3)
+    plt.subplot(1, slots, 3)
     bar = torch.quantile(sal, quantile)
-    masked_img = ((sal > bar).unsqueeze(-1)).numpy() *img
+    masked_img = ((sal >= bar).unsqueeze(-1)).numpy() *img
     #img = img * 
     #plt.imshow((stdsal*img).astype(int))  # Set alpha for transparency
     plt.imshow(masked_img)
     plt.xticks([])  
     plt.yticks([])
 
-    plt.subplot(1, 4, 4)
     
-    masked_img = (mask.unsqueeze(-1).numpy() *img).astype(int)
-    plt.imshow(masked_img)
-    plt.xticks([])  
-    plt.yticks([])
+    if with_mask:
+        plt.subplot(1, slots, 4)
+        masked_img = (mask.unsqueeze(-1).numpy() *img).astype(int)
+        plt.imshow(masked_img)
+        plt.xticks([])  
+        plt.yticks([])
 
-    plt.show()    
+    if save_path:
+        plt.savefig(save_path, dpi=800, bbox_inches='tight', transparent=False, pad_inches=0)
+    else:
+        plt.show()    
 
 def show_sal_dict(sals, img, mag=False):
     for name, sal in sals.items():

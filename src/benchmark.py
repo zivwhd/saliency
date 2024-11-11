@@ -351,7 +351,7 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
                     scores = pickle.load(sf)
                 append_row(
                     res, 
-                    image=image_name, variant=variant, 
+                    model=model_name, image=image_name, variant=variant, 
                     **scores)    
 
         else:
@@ -360,20 +360,20 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
                 image_name = os.path.basename(scores_path)
                 append_row(
                     res, 
-                    image=image_name, variant=variant, 
+                    model=model_name, image=image_name, variant=variant, 
                     **scores)    
             
     return pd.DataFrame(res)
 
 def summarize_scores_df(df, extended=False):
-    meta_cols = ["image","variant"]
+    meta_cols = ["model","image","variant"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
     if extended:
         metrics = {f"mean_{x}" : (x, lambda x: x[x >= 0].mean()) for x in metric_cols}
         metrics.update({f"count_{x}" : (x, lambda x: (x >=0).sum()) for x in metric_cols})
     else:
         metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
-    smry =df.groupby('variant').agg(
+    smry =df.groupby(['model', 'variant']).agg(
         n_valid=('variant', 'size'),
         **metrics
     ).reset_index()
