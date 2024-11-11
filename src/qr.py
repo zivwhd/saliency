@@ -38,7 +38,8 @@ def main():
     df = read_stats(base_path, model_name)
 
     # Save DataFrame to CSV
-    df.to_csv(output_path, index=False)
+    #df.to_csv(output_path, index=False)
+    df.to_pickle(output_path)
     print(f"Data saved to {output_path}")
 
 if __name__ == "__main__":
