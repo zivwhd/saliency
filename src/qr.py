@@ -6,14 +6,15 @@ import sys
 
 def read_stats(base_path, model_name):
     data = []
-
+    idx = 0
     # Iterate over files matching the pattern base_path/*/ILS*
     for file_path in glob.glob(os.path.join(base_path, '*/ILS*')):
         method = os.path.basename(os.path.dirname(file_path))  # Get the method from dirname
         filename = os.path.basename(file_path)
 
         # Load stats from pickle file
-        print(f">> loading {file_path}")
+        print(f">> [{idx}] loading {file_path}")
+        idx += 1
         with open(file_path, 'rb') as f:
             stats = pickle.load(f)
 
