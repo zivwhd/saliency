@@ -36,7 +36,7 @@ def get_cpltx_sal_creator():
 
 def get_mwcomp_sal_creator():
     baselines = [ZeroBaseline()]
-    MultiCompExpCreator(desc="MWComp", segsize=[16,32,40], nmasks=[500,1000],  baselines = baselines, 
+    return MultiCompExpCreator(desc="MWComp", segsize=[16,32,40], nmasks=[500,1000],  baselines = baselines, 
                         groups=[
                             dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0, c_model=0.0, c_norm=True, c_activation="", 
                                  epochs=300, select_from=100),
