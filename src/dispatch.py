@@ -46,18 +46,18 @@ def get_mwcomp_sal_creator():
                                  epochs=300, select_from=100),
                                  
                             dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100),
+                                 epochs=300, select_from=150),
                             dict(c_mask_completeness=1.0, c_magnitude=0.1, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100),
+                                 epochs=300, select_from=150),
                             dict(c_mask_completeness=1.0, c_magnitude=0.5, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100),
+                                 epochs=300, select_from=150),
                                  
                             dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100),
+                                 epochs=300, select_from=150),
                             dict(c_mask_completeness=1.0, c_magnitude=0.1, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100),
+                                 epochs=300, select_from=150),
                             dict(c_mask_completeness=1.0, c_magnitude=0.5, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="", 
-                                 epochs=300, select_from=100)
+                                 epochs=300, select_from=150)
                                  ]
                             )
 
