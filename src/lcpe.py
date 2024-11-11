@@ -214,7 +214,10 @@ def optimize_explanation_i(
         output = mexp(data)
         explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
         
-        comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()
+        comp_loss = (((output - targets) ** 2) / (mweights * explanation.numel())).mean()        
+        
+        #comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()
+                
         #comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
 
