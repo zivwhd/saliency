@@ -7,6 +7,7 @@ import sys
 def read_stats(base_path, model_name):
     data = []
     idx = 0
+    failures = 0
     # Iterate over files matching the pattern base_path/*/ILS*
     for file_path in glob.glob(os.path.join(base_path, '*/ILS*')):
         method = os.path.basename(os.path.dirname(file_path))  # Get the method from dirname
@@ -15,13 +16,18 @@ def read_stats(base_path, model_name):
         # Load stats from pickle file
         print(f">> [{idx}] loading {file_path}")
         idx += 1
-        with open(file_path, 'rb') as f:
-            stats = pickle.load(f)
+        try:
+            with open(file_path, 'rb') as f:
+                stats = pickle.load(f)
+        except:
+            print("failed")
+            failures += 1
+            continue
 
         # Flatten into a dictionary with model_name, method, filename, and stats
         row = {'model_name': model_name, 'image': filename, 'variant': method, **stats}
         data.append(row)
-
+    print("done", failures)
     # Convert list of dictionaries to DataFrame
     df = pd.DataFrame(data)
     return df

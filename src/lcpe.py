@@ -585,8 +585,9 @@ class MultiCompExpCreator:
                     data = mdata.subset(nmasks=nmasks)
                     self.last_data = data
                     for kwargs in self.groups:
-                        algo = CompExpCreator(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, 
-                                            desc=desc, **kwargs)
+                        group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
+                        group_args.update(kwargs)
+                        algo = CompExpCreator(**group_args)
                         res = algo(me, inp, catidx, data=data)
                         all_sals.update(res)
         logging.info(f"generated: {list(all_sals.keys())}")
