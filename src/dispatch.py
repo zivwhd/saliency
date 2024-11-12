@@ -123,61 +123,61 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
 
 
     runs = [
-        MultiCompExpCreator(
-            desc="SEG",
-            segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
-            baselines = baselines,
-            groups=[
-                basic
-            ]),
-        MultiCompExpCreator(
-            desc="MSK",
-            segsize=[segsize], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
-            baselines = baselines,
-            groups=[
-                basic,
-            ]),
+        #MultiCompExpCreator(
+        #    desc="SEG",
+        #    segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
+        #    baselines = baselines,
+        #    groups=[
+        #        basic
+        #    ]),
+        #MultiCompExpCreator(
+        #    desc="MSK",
+        #    segsize=[segsize], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
+        #    baselines = baselines,
+        #    groups=[
+        #        basic,
+        #    ]),
         MultiCompExpCreator(
             desc="MComp",
             segsize=[segsize], nmasks=nmasks, 
             baselines = baselines,
             groups=[
-                modify(c_mask_completeness=0, desc="NCP"),
-                modify(c_mask_completeness=0.01, desc="NCP"),
-                modify(c_mask_completeness=0.1, desc="NCP"),
-                modify(c_mask_completeness=1.0, desc="NCP"),
+                #modify(c_mask_completeness=0, desc="NCP"),
+                #modify(c_mask_completeness=0.01, desc="NCP"),
+                ##modify(c_mask_completeness=0.1, desc="NCP"),
+                #modify(c_mask_completeness=1.0, desc="NCP"),
 
-                modify(c_tv=0, desc="TVL"),
-                modify(c_tv=0.1, desc="TVL"),
-                modify(c_tv=0.2, desc="TVL"),
-                modify(c_tv=0.5, desc="TVL"),
-                modify(c_tv=1, desc="TVL"), ## 2
+                #modify(c_tv=0, desc="TVL"),
+                #modify(c_tv=0.1, desc="TVL"),
+                #modify(c_tv=0.2, desc="TVL"),
+                #modify(c_tv=0.5, desc="TVL"),
+                #modify(c_tv=1, desc="TVL"), ## 2
                 
-                modify(c_magnitude=0, desc="MAG"),
-                modify(c_magnidude=0.01, desc="MAG"),
-                modify(c_magnidude=0.05, desc="MAG"),
-                modify(c_magnidude=0.1, desc="MAG"),
-                modify(c_magnidude=0.25, desc="MAG"),                
-                modify(c_magnitude=0.5, desc="MAG"),
-                modify(c_magnitude=1, desc="MAG"), 
+                #modify(c_magnitude=0, desc="MAG"),
+                #modify(c_magnidude=0.01, desc="MAG"),
+                #modify(c_magnidude=0.05, desc="MAG"),
+                #modify(c_magnidude=0.1, desc="MAG"),
+                #modify(c_magnidude=0.25, desc="MAG"),                
+                #modify(c_magnitude=0.5, desc="MAG"),
+                #modify(c_magnitude=1, desc="MAG"), 
 
-                modify(epochs=100, desc="EPC"),
-                modify(epochs=200, desc="EPC"),
-                modify(epochs=300, desc="EPC"),
-                modify(epochs=400, desc="EPC"),
-                modify(epochs=500, desc="EPC"),
+                #modify(epochs=100, desc="EPC"),
+                #modify(epochs=200, desc="EPC"),
+                #modify(epochs=300, desc="EPC"),
+                #modify(epochs=400, desc="EPC"),
+                #modify(epochs=500, desc="EPC"),
                 
                 #modify(epochs=100),
-                modify(epochs=200, select_from=None, desc="MNT"),
-                modify(epochs=300, select_from=None, desc="MNT"),
-                modify(epochs=400, select_from=None, desc="MNT"),
-                modify(epochs=500, select_from=None, desc="MNT"),
+                #modify(epochs=200, select_from=None, desc="MNT"),
+                #modify(epochs=300, select_from=None, desc="MNT"),
+                #modify(epochs=400, select_from=None, desc="MNT"),
+                ##modify(epochs=500, select_from=None, desc="MNT"),
 
-                modify(c_mdl=0, desc="MDL"),
-                modify(c_mdl=0.01, desc="MDL"),
-                modify(c_mdl=0.05, desc="MDL"),
-                modify(c_mdl=0.1, desc="MDL"),
-                modify(c_mdl=0.2, desc="MDL"), 
+                modify(c_model=0, desc="MDL"),
+                modify(c_model=0.01, desc="MDL"),
+                modify(c_model=0.05, desc="MDL"),
+                modify(c_model=0.1, desc="MDL"),
+                modify(c_model=0.2, desc="MDL"), 
             ])
     ]
     return CombSaliencyCreator(runs)
