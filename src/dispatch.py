@@ -99,96 +99,80 @@ def get_mbench_sal_creator():
     return CombSaliencyCreator(runs)
 
     
-def get_mcomp_abl_sal_creator():
+def get_abl_sal_creator(segsize=40, nmasks=500):
 
     baselines = [ZeroBaseline()]
+
+    basic = dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+                c_activation="",  epochs=300, select_from=150)
+
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+
+
     runs = [
         MultiCompExpCreator(
-            desc="MComp",
-            segsize=[8,16,32,40,48,56,64], nmasks=500, 
+            desc="SEG",
+            segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
             baselines = baselines,
             groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="")
+                basic
+            ]),
+        MultiCompExpCreator(
+            desc="MSK",
+            segsize=[segsize], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
+            baselines = baselines,
+            groups=[
+                basic,
             ]),
         MultiCompExpCreator(
             desc="MComp",
-            segsize=[40], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
+            segsize=[segsize], nmasks=nmasks, 
             baselines = baselines,
             groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation="")
-            ]),
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[40], nmasks=500, 
-            baselines = baselines,
-            groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation=""),                
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0.0, c_norm=True, c_activation=""),
-                #dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation=""),        
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=2, c_model=0.0, c_norm=True, c_activation=""),
+                modify(c_mask_completeness=0, desc="NCP"),
+                modify(c_mask_completeness=0.01, desc="NCP"),
+                modify(c_mask_completeness=0.1, desc="NCP"),
+                modify(c_mask_completeness=1.0, desc="NCP"),
 
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.01, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.1, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.5, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=1, c_norm=True, c_activation=""),
-
-                dict(c_mask_completeness=0, c_completeness=0, c_tv=0.3, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=0.01, c_completeness=0, c_tv=0.3, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=0.1, c_completeness=0, c_tv=0.3, c_model=0.05, c_norm=True, c_activation=""),
+                modify(c_tv=0, desc="TVL"),
+                modify(c_tv=0.1, desc="TVL"),
+                modify(c_tv=0.2, desc="TVL"),
+                modify(c_tv=0.5, desc="TVL"),
+                modify(c_tv=1, desc="TVL"), ## 2
                 
+                modify(c_magnitude=0, desc="MAG"),
+                modify(c_magnidude=0.01, desc="MAG"),
+                modify(c_magnidude=0.05, desc="MAG"),
+                modify(c_magnidude=0.1, desc="MAG"),
+                modify(c_magnidude=0.25, desc="MAG"),                
+                modify(c_magnitude=0.5, desc="MAG"),
+                modify(c_magnitude=1, desc="MAG"), 
+
+                modify(epochs=100, desc="EPC"),
+                modify(epochs=200, desc="EPC"),
+                modify(epochs=300, desc="EPC"),
+                modify(epochs=400, desc="EPC"),
+                modify(epochs=500, desc="EPC"),
+                
+                #modify(epochs=100),
+                modify(epochs=200, select_from=None, desc="MNT"),
+                modify(epochs=300, select_from=None, desc="MNT"),
+                modify(epochs=400, select_from=None, desc="MNT"),
+                modify(epochs=500, select_from=None, desc="MNT"),
+
+                modify(c_mdl=0, desc="MDL"),
+                modify(c_mdl=0.01, desc="MDL"),
+                modify(c_mdl=0.05, desc="MDL"),
+                modify(c_mdl=0.1, desc="MDL"),
+                modify(c_mdl=0.2, desc="MDL"), 
             ])
     ]
     return CombSaliencyCreator(runs)
 
-def get_mcompvit_abl_sal_creator():
-
-    baselines = [ZeroBaseline()]
-    runs = [
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[8,16,32,40,48,56,64], nmasks=1000, 
-            baselines = baselines,
-            groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation="")
-            ]),
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[16], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
-            baselines = baselines,
-            groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=True, c_activation="")
-            ]),
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[16], nmasks=1000, 
-            baselines = baselines,
-            groups=[
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.01, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.05, c_model=0.0, c_norm=True, c_activation=""),                
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.2, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=True, c_activation=""),        
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.5, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=1, c_model=0.0, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=2, c_model=0.0, c_norm=True, c_activation=""),
-
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.01, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.1, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=0.5, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.1, c_model=1, c_norm=True, c_activation=""),
-
-                dict(c_mask_completeness=0, c_completeness=0, c_tv=0.1, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=0.01, c_completeness=0, c_tv=0.1, c_model=0.05, c_norm=True, c_activation=""),
-                dict(c_mask_completeness=0.1, c_completeness=0, c_tv=0.1, c_model=0.05, c_norm=True, c_activation=""),
-            ])
-    ]
-    return CombSaliencyCreator(runs)
+def get_ablvit_sal_creator():
+    return get_abl_sal_creator(segsize=16, nmasks=1000)
 
 
 def get_mcompvitD_sal_creator():

@@ -122,7 +122,6 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
         
 
 def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7, alpha=None, mag=True, get_method_alias=None):
-    print("111")
     if type(images) != list:
         images = [images]  
         sals_list = [sals_list]
@@ -131,7 +130,9 @@ def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7,
     idx = 1
     if figsize:
         plt.figure(figsize=figsize)
-    
+    plt.subplots_adjust(hspace=0, wspace=0)
+    plt.tight_layout(pad=0)
+
     nrows = len(images)    
     for row, img in enumerate(images):
         sals = sals_list[row]
@@ -147,5 +148,7 @@ def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7,
             else:
                 alias = method_name
             if row == 0:
+                if alias == "TCE":
+                    alias = "Ours"
                 plt.title(alias, fontsize=fontsize)
             show_single_sal(img, sals, method_name, alpha=alpha, mag=mag)
