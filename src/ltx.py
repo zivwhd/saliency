@@ -2,6 +2,7 @@ import sys, os, logging, time
 import torch
 import pytorch_lightning as pl
 from torch.utils.data import Dataset, DataLoader
+import socket, time
 
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +15,13 @@ def setup_path():
 import metrics
 
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
+
+
+HOSTNAME = socket.gethostname()
+def report_duration(start_time, model_name, operation, nitr=0):
+    duration = time.time() - start_time
+    print(f"DURATION_LTX,{HOSTNAME},{model_name},{operation},{nitr},{duration}")
+
 
 class SimpleDataset(Dataset):
     def __init__(self, data):
@@ -159,6 +167,7 @@ class LTXSaliencyCreator:
             train_data_loader=dl
         )
 
+        start_finetune_time = time.time()
         trainer = pl.Trainer(
             logger=[],
             accelerator='gpu',
@@ -178,6 +187,7 @@ class LTXSaliencyCreator:
         trainer.fit(model=model, datamodule=data_module)
 
         logging.info("finetuning")
+        
 
         with torch.no_grad():
             mask_model = model.vit_for_patch_classification.to(inp.device)            
@@ -197,7 +207,7 @@ class LTXSaliencyCreator:
             #logging.info(f"{mins} {pins}")
             #logging.info(f"model weight sum: {sum_model_weights(me.model)}, {sum_model_weights(model_for_classification_image)} {sum_model_weights(model.vit_for_classification_image)}")
 
-
+        report_duration(start_finetune_time, model_name, "FINETUNE", nitr=training_steps)
         
         mask_loss_mul=args["mask_loss_mul"]        
         lr = args["lr_finetune"]

@@ -6,11 +6,18 @@ import sys, logging
 import numpy as np
 import torch.nn.functional as F
 import torchvision.transforms as T
+import time, socket
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
 Tensor = FloatTensor
+
+HOSTNAME = socket.gethostname()
+def report_duration(start_time, model_name, operation, nitr=0):
+    duration = time.time() - start_time
+    print(f"DURATION_MPERT,{HOSTNAME},{model_name},{operation},{nitr},{duration}")
+
 
 def tv_norm(input, tv_beta):
     img = input[0, 0, :]
@@ -68,6 +75,7 @@ class IEMPertSaliencyCreator:
     
     def explain(self, me, inp, catidx):
     
+        start_time = time.time()        
         #Hyper parameters. 
         #TBD: Use argparse
         tv_beta = self.tv_beta
@@ -152,4 +160,5 @@ class IEMPertSaliencyCreator:
         upsampled_mask = upsample(mask)
         sal = upsampled_mask.detach().cpu().squeeze(0)
         sal = (sal - sal.min()) / (sal.max()- sal.min())        
+        report_duration(start_time, me.arch, "OPTIMIZATION", nitr=self.iterations)
         return 1 - sal

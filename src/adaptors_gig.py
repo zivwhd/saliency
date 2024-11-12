@@ -3,14 +3,19 @@ from baselines.gig import setup
 import saliency.core as saliency
 import torch
 import numpy as np
+import time, socket
 
+HOSTNAME = socket.gethostname()
+def report_duration(start_time, model_name, operation, nitr=0):
+    duration = time.time() - start_time
+    print(f"DURATION_GIG,{HOSTNAME},{model_name},{operation},{nitr},{duration}")
 
 
 class IGSaliencyCreator:
     def __init__(self, nsteps=100):
         self.nsteps = nsteps
 
-    def __call__(self, me, inp, catidx):
+    def __call__(self, me, inp, catidx):        
         orig_device = inp.device
         #inp = inp.cpu()
         device = inp.device
@@ -45,16 +50,20 @@ class IGSaliencyCreator:
                 return conv_layer_outputs
 
         baseline = np.zeros(im.shape)
-        
+
+        start_time = time.time()                
         integrated_gradients = saliency.IntegratedGradients()
         vanilla_integrated_gradients_mask_3d = integrated_gradients.GetMask(
             im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, batch_size=20)        
         ig_sal = torch.tensor(np.sum(np.abs(vanilla_integrated_gradients_mask_3d), axis=2)).unsqueeze(0).float()
+        report_duration(start_time, me.arch, "IG", nitr=self.nsteps)
 
+        start_time = time.time()                
         guided_ig = saliency.GuidedIG()
         guided_ig_mask_3d = guided_ig.GetMask(
         im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, max_dist=1.0, fraction=0.5)
         gig_sal = torch.tensor(np.sum(np.abs(guided_ig_mask_3d), axis=2)).unsqueeze(0).float()
         model = me.model.to(orig_device)
         res = {f"IG_{self.nsteps}" : ig_sal, f"GIG_{self.nsteps}" : gig_sal}
+        report_duration(start_time, me.arch, "GIG", nitr=self.nsteps)
         return res

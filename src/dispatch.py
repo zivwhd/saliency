@@ -21,6 +21,7 @@ import torch
 import socket
 
 
+
 def get_dixcnn_sal_creator():
     return DixCnnSaliencyCreator()
 
@@ -78,6 +79,15 @@ def get_mwcomp_sal_creator():
                             )
 
     
+def get_obench_sal_creator():
+    return CombSaliencyCreator([
+        LTXSaliencyCreator(),
+        IEMPertSaliencyCreator(),
+        IGSaliencyCreator(100),
+        IGSaliencyCreator(300),
+        IGSaliencyCreator(500)        
+    ])
+
 def get_mbench_sal_creator():
     baselines = [ZeroBaseline()]
     
