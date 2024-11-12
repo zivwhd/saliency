@@ -325,9 +325,10 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
         mexp.normalize(score)    
     # Train the model by passing all additional arguments through kwargs
     start_time = time.time()
-    rv = optimize_explanation_i(
-        fmdl, inp, mexp, data, targets, score=score, 
-        c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
+    if epochs > model_epochs:
+        rv = optimize_explanation_i(
+            fmdl, inp, mexp, data, targets, score=score, 
+            c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
     
     mid_time = time.time()
     logging.info(f"Optimization I: {mid_time - start_time}")    

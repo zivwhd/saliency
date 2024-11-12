@@ -149,6 +149,6 @@ def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7,
                 alias = method_name
             if row == 0:
                 if alias == "TCE":
-                    alias = "Ours"
+                    alias = "LSC"
                 plt.title(alias, fontsize=fontsize)
             show_single_sal(img, sals, method_name, alpha=alpha, mag=mag)
