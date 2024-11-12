@@ -154,10 +154,10 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
                 #modify(c_tv=1, desc="TVL"), ## 2
                 
                 #modify(c_magnitude=0, desc="MAG"),
-                #modify(c_magnidude=0.01, desc="MAG"),
-                #modify(c_magnidude=0.05, desc="MAG"),
-                #modify(c_magnidude=0.1, desc="MAG"),
-                #modify(c_magnidude=0.25, desc="MAG"),                
+                #modify(c_magnitude=0.01, desc="MAG"),
+                modify(c_magnitude=0.05, desc="MAG"),
+                modify(c_magnitude=0.1, desc="MAG"),
+                modify(c_magnitude=0.25, desc="MAG"),                
                 #modify(c_magnitude=0.5, desc="MAG"),
                 #modify(c_magnitude=1, desc="MAG"), 
 
@@ -168,16 +168,17 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
                 #modify(epochs=500, desc="EPC"),
                 
                 #modify(epochs=100),
+                modify(epochs=100, select_from=None, desc="MNT"),
                 #modify(epochs=200, select_from=None, desc="MNT"),
                 #modify(epochs=300, select_from=None, desc="MNT"),
                 #modify(epochs=400, select_from=None, desc="MNT"),
                 ##modify(epochs=500, select_from=None, desc="MNT"),
 
-                modify(c_model=0, desc="MDL"),
-                modify(c_model=0.01, desc="MDL"),
-                modify(c_model=0.05, desc="MDL"),
-                modify(c_model=0.1, desc="MDL"),
-                modify(c_model=0.2, desc="MDL"), 
+                #modify(c_model=0, desc="MDL"),
+                #modify(c_model=0.01, desc="MDL"),
+                #modify(c_model=0.05, desc="MDL"),
+                #modify(c_model=0.1, desc="MDL"),
+                #modify(c_model=0.2, desc="MDL"), 
             ])
     ]
     return CombSaliencyCreator(runs)
