@@ -109,6 +109,7 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
     def modify(**kwargs):
         args = basic.copy()
         args.update(**kwargs)
+        return args
 
 
     runs = [
