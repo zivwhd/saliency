@@ -121,20 +121,31 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
         plt.imshow(nsal, cmap='jet', alpha=alpha)
         
 
-def show_grid_sals(allsal, img, figsize=(10,10), fontsize=7, alpha=None, mag=True, get_method_alias=None):
-           
+def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7, alpha=None, mag=True, get_method_alias=None):
+    print("111")
+    if type(images) != list:
+        images = [images]  
+        sals_list = [sals_list]
+
+    
     idx = 1
     if figsize:
         plt.figure(figsize=figsize)
     
-    method_names = list(allsal.keys())
-    plt.subplot(1, len(method_names)+1, 1) 
-    show_single_sal(img, allsal, None)
-    for cidx, method_name in enumerate(method_names):        
-        plt.subplot(1, len(method_names)+1, cidx+2) 
-        if get_method_alias:
-            alias = get_method_alias(method_name)
-        else:
-            alias = method_name        
-        plt.title(alias, fontsize=fontsize)
-        show_single_sal(img, allsal, method_name, alpha=alpha, mag=mag)
+    nrows = len(images)    
+    for row, img in enumerate(images):
+        sals = sals_list[row]
+        #method_names = list(sals.keys())
+        plt.subplot(nrows, len(method_names)+1, idx)         
+        idx += 1
+        show_single_sal(img, sals, None)
+        for cidx, method_name in enumerate(method_names):        
+            plt.subplot(nrows, len(method_names)+1, idx) 
+            idx += 1
+            if get_method_alias:
+                alias = get_method_alias(method_name)
+            else:
+                alias = method_name
+            if row == 0:
+                plt.title(alias, fontsize=fontsize)
+            show_single_sal(img, sals, method_name, alpha=alpha, mag=mag)

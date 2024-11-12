@@ -34,6 +34,22 @@ def get_cpltx_sal_creator():
     cp_gen = CompExpCreator(nmasks=500, segsize=48)
     return LTXSaliencyCreator(cp_gen=cp_gen)
 
+def get_mwcomp_cnn_sal_creator():
+    baselines = [ZeroBaseline()]
+    return MultiCompExpCreator(desc="MWComp", segsize=[40], nmasks=[500],  baselines = baselines, 
+                        groups=[
+                            dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.01, c_model=0.0, c_norm=False, 
+                                 c_activation="",  epochs=300, select_from=150),
+                        ])
+
+def get_mwcomp_vit_sal_creator():
+    baselines = [ZeroBaseline()]
+    return MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines, 
+                        groups=[
+                            dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.01, c_model=0.0, c_norm=False, 
+                                 c_activation="",  epochs=300, select_from=150),
+                        ])
+    
 def get_mwcomp_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(desc="MWComp", segsize=[16,32,40], nmasks=[500,1000],  baselines = baselines, 

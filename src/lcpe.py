@@ -303,7 +303,7 @@ def optimize_explanation_i(
             dexpl = explanation.detach().clone()
             del_score, ins_score = qmet(fmdl, inp, dexpl , metric_steps)
             print(f"[{epoch}] scores: {del_score} {ins_score}")
-            met_score = ins_score - del_score
+            met_score = ins_score - 0.5 * del_score
             if selection is None or met_score > selection[0]:
                 print("selected")
                 selection = (met_score, dexpl)
