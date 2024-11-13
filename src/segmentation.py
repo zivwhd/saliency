@@ -221,7 +221,7 @@ def create_scores(model_name, dataset_name, marker="m"):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
         res_path = f"results/{model_name}/*/{idx}"
         sal_paths = glob(res_path)
-        logging.info(f"found: {sal_paths}")
+        logging.info(f"found: {res_path}: {sal_paths}")
         result_prog = Coord(sal_paths, progress_path, getname=get_score_name)
         for path in result_prog:
             image_idx = os.path.basename(path)
