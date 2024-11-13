@@ -1,6 +1,18 @@
 from torchray.attribution.extremal_perturbation import extremal_perturbation, contrastive_reward
 from torchray.utils import get_device
 import logging
+import torch
+
+def qmet(smdl, inp, sal, steps):
+    with torch.no_grad():    
+        bars = sal.quantile(steps).unsqueeze(1).unsqueeze(1)
+        del_masks = (sal.unsqueeze(0) < bars)
+        ins_masks = (sal.unsqueeze(0) > bars)        
+        del_pred = smdl(del_masks.unsqueeze(1) * inp)
+        ins_pred = smdl(ins_masks.unsqueeze(1) * inp)
+        del_auc = ((del_pred[1:]+del_pred[0:-1])*0.5).mean() 
+        ins_auc = ((ins_pred[1:]+ins_pred[0:-1])*0.5).mean() 
+        return del_auc.cpu().tolist(), ins_auc.cpu().tolist()
 
 class ExtPertSaliencyCreator:
 
@@ -24,15 +36,28 @@ class ExtPertSaliencyCreator:
 
         res = {}
         selected = None
+        met_selected = None
+
         for idx,mask in enumerate(masks):
             desc = f'ExtPert_{areas[idx]}'
+
+
             cmask = mask.detach().clone().cpu()
+            
             res[desc] = cmask
             prob = me.model(inp * mask.unsqueeze(0))[0,0]
-            
+
             if (selected is None) and ((prob >= threshold) or (idx == len(masks) -1)):
                 selected = cmask
                 res[f'ExtPertS'] = selected
+
+            sdel, sins = qmet(smdl, inp, mask.squeeze(0), steps=10)
+            mscore = sdel-sins
+
+            if met_selected is None or mscore > met_selected[0]:
+                met_selected = (mscore, cmask)
+                res[f'ExtPertM'] = cmask
+
             
         return res
 
