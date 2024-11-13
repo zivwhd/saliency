@@ -459,6 +459,8 @@ def include_result(x):
         return False
     if ('CexCnnA_' in x) and  ('_0.5_' not in x) and ('_0.75_' not in x) and ('_0.95_' not in x) and ('_0.995_' not in x):
         return False
+    if ('ExtPert' in x) and ('ExtPertM' not in x):
+        return False
     
     return True
 
