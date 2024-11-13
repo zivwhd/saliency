@@ -3,7 +3,7 @@ import torch
 import pytorch_lightning as pl
 from torch.utils.data import Dataset, DataLoader
 import socket, time
-from report import report_duration
+from reports import report_duration
 def setup_path():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     targets = [ os.path.join(os.path.dirname(current_dir),"LTX")  ]
