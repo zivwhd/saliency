@@ -81,18 +81,6 @@ CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201"] ## "resnet18"
 ALL_MODELS = CNN_MODELS + VIT_MODELS
 
 
-def get_args(): 
-    
-    parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
-    #parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
-    parser.add_argument("--marker", default="m1", help="TBD")       
-    parser.add_argument("--dataset", default="imagenet", help="TBD")       
-    parser.add_argument("--selection", choices=["rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
-    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
-    parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
-    args = parser.parse_args()    
-    return args
 
 
 
@@ -176,6 +164,52 @@ def create_sals(model_name, dataset_name, marker="m"):
             logging.info("DONE")
             break
 
+def eval_batch(Res, labels):
+    Res = (Res - Res.min()) / (Res.max() - Res.min())
+
+    ret = Res.mean()
+
+    Res_1 = Res.gt(ret).type(Res.type())
+    Res_0 = Res.le(ret).type(Res.type())
+
+    Res_1_AP = Res
+    Res_0_AP = 1 - Res
+
+    Res_1[Res_1 != Res_1] = 0
+    Res_0[Res_0 != Res_0] = 0
+    Res_1_AP[Res_1_AP != Res_1_AP] = 0
+    Res_0_AP[Res_0_AP != Res_0_AP] = 0
+
+    # TEST
+    pred = Res.clamp(min=0) / Res.max()
+    pred = pred.view(-1).data.cpu().numpy()
+    target = labels.view(-1).data.cpu().numpy()
+    # print("target", target.shape)
+
+    output = torch.cat((Res_0, Res_1), 1)
+    output_AP = torch.cat((Res_0_AP, Res_1_AP), 1)
+
+    # Evaluate Segmentation
+    batch_inter, batch_union, batch_correct, batch_label = 0, 0, 0, 0
+    batch_ap, batch_f1 = 0, 0
+
+    # Segmentation resutls
+    correct, labeled = batch_pix_accuracy(output[0].data.cpu(), labels[0])
+    inter, union = batch_intersection_union(output[0].data.cpu(), labels[0], 2)
+    batch_correct += correct
+    batch_label += labeled
+    batch_inter += inter
+    batch_union += union
+    # print("outputs", outputs.shape)
+    # print("ap labels", labels.shape)
+    # ap = np.nan_to_num(get_ap_scores(outputs, labels))
+    ap = np.nan_to_num(get_ap_scores(output_AP, labels))
+    f1 = np.nan_to_num(get_f1_scores(output[0, 1].data.cpu(), labels[0]))
+    batch_ap += ap
+    batch_f1 += f1
+
+    return batch_correct, batch_label, batch_inter, batch_union, batch_ap, batch_f1, pred, target
+
 def create_scores(model_name, dataset_name):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
@@ -188,9 +222,53 @@ def create_scores(model_name, dataset_name):
         res_path = "results/{model_name}/*/{idx}"
         sal_paths = glob.glob(res_path)
 
+        result_prog = Coord(sal_paths, progress_path, getname=get_score_name)
+        for path in result_prog:
+            image_idx = os.path.basename(path)
+            variant = os.path.basename(os.path.dirname(path))
+            logging.debug(f"checking: {path} name={image_idx} variant={variant}")
+
+            sal = torch.load(path)
+
+
+            correct, labeled, inter, union, ap, f1, pred, target = eval_batch(
+                torch.tensor(sal).unsqueeze(0), #.unsqueeze(0),
+                torch.tensor(tgt).unsqueeze(0))
+
+            total_correct += correct.astype('int64')
+            total_label += labeled.astype('int64')
+            total_inter += inter.astype('int64')
+            total_union += union.astype('int64')
+            total_ap += [ap]
+            total_f1 += [f1]
+            pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
+            IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
+            mIoU = IoU.mean()
+            mAp = np.mean(total_ap)
+            mF1 = np.mean(total_f1)
+            scores = {}
+            scores[f'IoU'] = mIoU
+            scores[f'mAP'] = mAp
+            scores[f'pixAcc'] = pixAcc
+            scores[f'mF1'] = mF1
+
+
         if idx >= LIMIT_DS:
             logging.info("DONE")
             break
+
+def get_args(): 
+    
+    parser = argparse.ArgumentParser(description="dispatcher")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
+    #parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
+    parser.add_argument("--marker", default="m1", help="TBD")       
+    parser.add_argument("--dataset", default="imagenet", help="TBD")       
+    parser.add_argument("--selection", choices=["rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
+    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
+    parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
+    args = parser.parse_args()    
+    return args
 
 
 if __name__ == '__main__':
@@ -201,7 +279,10 @@ if __name__ == '__main__':
     args = get_args()
     model_name = args.model
     dataset_name = args.dataset
-    create_sals(model_name, dataset_name, marker=args.marker)
+    if args.action == 'create_sals':
+        create_sals(model_name, dataset_name, marker=args.marker)
+    if args.action == 'scores':
+        create_scores(model_name, dataset_name, marker=args.marker)
 
 
 
