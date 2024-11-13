@@ -219,7 +219,7 @@ def create_scores(model_name, dataset_name, marker="m"):
 
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
-        res_path = f"results/{model_name}/*/{idx}"
+        res_path = f"results/{model_name}/saliency/*/{idx}"
         sal_paths = glob(res_path)
         logging.info(f"found: {res_path}: {sal_paths}")
         result_prog = Coord(sal_paths, progress_path, getname=get_score_name)
