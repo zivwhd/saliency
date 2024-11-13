@@ -172,9 +172,9 @@ def create_sals(model_name, dataset_name, marker="m"):
             for variant, sal in sals.items():
                 save_saliency(sal, model_name, variant, str(idx), run=0)
 
-            if idx >= LIMIT_DS:
-                logging.info("DONE")
-                break
+        if idx >= LIMIT_DS:
+            logging.info("DONE")
+            break
 
 def create_scores(model_name, dataset_name):
     me = ModelEnv(model_name)
