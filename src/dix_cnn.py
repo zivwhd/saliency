@@ -8,7 +8,7 @@ from saliency_utils import * # type: ignore
 from salieny_models import * # type: ignore
 from saliency_lib import * # type: ignore
 import time
-from benchmark import report_duration
+from reports import report_duration
 
 
 INTERPOLATION_STEPS = 4
