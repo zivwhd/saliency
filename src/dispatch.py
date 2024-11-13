@@ -85,7 +85,7 @@ def get_obench_sal_creator():
         IEMPertSaliencyCreator(),
         IGSaliencyCreator(100),
         IGSaliencyCreator(300),
-        IGSaliencyCreator(500) 
+        IGSaliencyCreator(500),
         MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[500], 
                             groups=[dict(c_mask_completeness=1.0, c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=False, c_activation="", epochs=300)]),
         MultiCompExpCreator(desc="MComp", segsize=[40], nmasks=[500], 
