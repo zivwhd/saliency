@@ -22,6 +22,8 @@ import torch
 import socket
 import os
 from glob import glob
+from collections import defaultdict
+import pickle
 
 import h5py
 import numpy as np
@@ -41,6 +43,10 @@ def setup_path():
 
 setup_path()
 from utils.metrices import *
+
+def dump_obj(obj, path):
+    with open(path, "wb") as obf:
+        pickle.dump(obj, obf)
 
 LIMIT_DS = 1000
 
@@ -122,6 +128,7 @@ def get_creators_vit():
     ]
 
     return CombSaliencyCreator(runs)
+
 
 
 def get_creators_cnn():
@@ -220,11 +227,21 @@ def eval_batch(Res, labels):
 
     return batch_correct, batch_label, batch_inter, batch_union, batch_ap, batch_f1, pred, target
 
+class Stats:
+    def __init__(self):
+        total_inter, total_union, total_correct, total_label = np.int64(0), np.int64(0), np.int64(0), np.int64(0)
+        total_ap, total_f1 = [], []
+    
+
 def create_scores(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
 
+    #total_inter, total_union, total_correct, total_label = np.int64(0), np.int64(0), np.int64(0), np.int64(0)
+    #total_ap, total_f1 = [], []
     
+    stats = defaultdict(Stats)
+    dump_obj(stats, f"results/{model_name}/bs.obj")
     progress_path = os.path.join("progress", model_name, f"create_{marker}")
 
     for idx, (img, tgt) in enumerate(ds):
@@ -236,36 +253,52 @@ def create_scores(model_name, dataset_name, marker="m"):
         for path in result_prog:
             image_idx = os.path.basename(path)
             variant = os.path.basename(os.path.dirname(path))
+            
             logging.debug(f"checking: {path} name={image_idx} variant={variant}")
-
+            vstat = stats[variant]
+            
             sal = torch.load(path)
-
 
             correct, labeled, inter, union, ap, f1, pred, target = eval_batch(
                 torch.tensor(sal).unsqueeze(0), #.unsqueeze(0),
                 torch.tensor(tgt).unsqueeze(0))
 
-            total_correct += correct.astype('int64')
-            total_label += labeled.astype('int64')
-            total_inter += inter.astype('int64')
-            total_union += union.astype('int64')
-            total_ap += [ap]
-            total_f1 += [f1]
-            pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
-            IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
-            mIoU = IoU.mean()
-            mAp = np.mean(total_ap)
-            mF1 = np.mean(total_f1)
-            scores = {}
-            scores[f'IoU'] = mIoU
-            scores[f'mAP'] = mAp
-            scores[f'pixAcc'] = pixAcc
-            scores[f'mF1'] = mF1
+            vstat.total_correct += correct.astype('int64')
+            vstat.total_label += labeled.astype('int64')
+            vstat.total_inter += inter.astype('int64')
+            vstat.total_union += union.astype('int64')
+            vstat.total_ap += [ap]
+            vstat.total_f1 += [f1]
+            ###
+            #pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
+            #IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
+            #mIoU = IoU.mean()
+            #mAp = np.mean(total_ap)
+            #mF1 = np.mean(total_f1)
+            #scores = {}
+            #scores[f'IoU'] = mIoU
+            #scores[f'mAP'] = mAp
+            #scores[f'pixAcc'] = pixAcc
+            #scores[f'mF1'] = mF1
 
 
         if idx >= LIMIT_DS:
             logging.info("DONE")
             break
+        dump_obj(stats, f"results/{model_name}/stats.obj")
+        with open(f"results/{model_name}/stats.txt", "wt") as sf:
+            write_stats(stats, sf)
+
+def write_stats(stats, out):
+    print(f'variant,mIoU,mAp, pixAcc,mF1', file=out)
+    for variant, vstat in stats.items():
+        pixAcc = np.float64(1.0) * vstat.total_correct / (np.spacing(1, dtype=np.float64) + vstat.total_label)
+        IoU = np.float64(1.0) * vstat.total_inter / (np.spacing(1, dtype=np.float64) + vstat.total_union)
+        mIoU = IoU.mean()
+        mAp = np.mean(vstat.total_ap)
+        mF1 = np.mean(vstat.total_f1)
+
+        print(f'{variant},{mIoU},{mAp},{pixAcc},{mF1}', file=out)
 
 def get_args(): 
     
