@@ -220,7 +220,7 @@ def create_scores(model_name, dataset_name, marker="m"):
     for idx, (img, tgt) in enumerate(ds):
 
         res_path = "results/{model_name}/*/{idx}"
-        sal_paths = glob.glob(res_path)
+        sal_paths = glob(res_path)
 
         result_prog = Coord(sal_paths, progress_path, getname=get_score_name)
         for path in result_prog:
