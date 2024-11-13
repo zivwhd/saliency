@@ -30,7 +30,7 @@ def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
 
 def get_extpert_sal_creator():
-    return ExtPertSaliencyCreator
+    return ExtPertSaliencyCreator()
 
 def get_ltx_sal_creator():
     return LTXSaliencyCreator()
