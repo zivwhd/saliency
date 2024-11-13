@@ -4,11 +4,7 @@ import saliency.core as saliency
 import torch
 import numpy as np
 import time, socket
-
-HOSTNAME = socket.gethostname()
-def report_duration(start_time, model_name, operation, nitr=0):
-    duration = time.time() - start_time
-    print(f"DURATION_GIG,{HOSTNAME},{model_name},{operation},{nitr},{duration}")
+from benchmark import report_duration
 
 
 class IGSaliencyCreator:
@@ -56,8 +52,8 @@ class IGSaliencyCreator:
         vanilla_integrated_gradients_mask_3d = integrated_gradients.GetMask(
             im, call_model_function, call_model_args, x_steps=self.nsteps, x_baseline=baseline, batch_size=20)        
         ig_sal = torch.tensor(np.sum(np.abs(vanilla_integrated_gradients_mask_3d), axis=2)).unsqueeze(0).float()
-        report_duration(start_time, me.arch, "IG", nitr=self.nsteps)
-
+        report_duration(start_time, me.arch, "IG", self.nsteps)
+        
         start_time = time.time()                
         guided_ig = saliency.GuidedIG()
         guided_ig_mask_3d = guided_ig.GetMask(
@@ -65,5 +61,5 @@ class IGSaliencyCreator:
         gig_sal = torch.tensor(np.sum(np.abs(guided_ig_mask_3d), axis=2)).unsqueeze(0).float()
         model = me.model.to(orig_device)
         res = {f"IG_{self.nsteps}" : ig_sal, f"GIG_{self.nsteps}" : gig_sal}
-        report_duration(start_time, me.arch, "GIG", nitr=self.nsteps)
+        report_duration(start_time, me.arch, "GIG", self.nsteps)
         return res

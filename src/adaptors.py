@@ -4,7 +4,7 @@ except:
     pass
 
 from enum import Enum, auto
-import logging
+import logging,time
 import torch
 
 from pytorch_grad_cam import run_dff_on_image, GradCAM, FullGrad, LayerCAM, GradCAMPlusPlus, AblationCAM
@@ -12,7 +12,7 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 import captum
 import cv2
-
+from benchmark import report_duration
 
 class CMethod(Enum):
     GradCAM = auto()
@@ -37,12 +37,14 @@ class CamSaliencyCreator:
     def __call__(self, me, inp, catidx):
         res = {}
         for mthd in self.methods:   
+            start_time = time.time()
             method = METHOD_CONV[mthd]
             cam = method(model=me.model, target_layers=[me.get_cam_target_layer()])
             targets_for_gradcam = [ClassifierOutputTarget(catidx)]
             cinp = inp.clone().detach()
             cinp.requires_grad_(True)
             sal = cam(input_tensor=cinp, targets=targets_for_gradcam)
+            report_duration(start_time, me.arch, mthd.name, '')
             res[f"pgc_{mthd.name}"] = torch.Tensor(sal)
         return res
 

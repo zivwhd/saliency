@@ -7,6 +7,9 @@ from salieny_models import GradModel
 from saliency_utils import * # type: ignore
 from salieny_models import * # type: ignore
 from saliency_lib import * # type: ignore
+import time
+from benchmark import report_duration
+
 
 INTERPOLATION_STEPS = 4
 
@@ -298,6 +301,7 @@ def make_resize_norm(act_grads):
 
 def gen_dix(me, inp, catidx):
 
+    start_time = time.time()
     if me.arch == "resnet50":
         FEATURE_LAYER_NUMBER = 7 ##8 ## 10000 ##8
     elif me.arch == "resnet50":
@@ -320,7 +324,7 @@ def gen_dix(me, inp, catidx):
             interpolation_on_activations_steps_arr=interpolation_on_activations_steps_arr,
             device=inp.device,
             use_mask=USE_MASK))
-
+    report_duration(start_time, me.arch, "DIX", '')
     return heatmap
 
 class DixCnnSaliencyCreator:

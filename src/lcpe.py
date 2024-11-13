@@ -5,16 +5,10 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 import logging, time, pickle
 from cpe import SqMaskGen
-import socket
 from skimage.segmentation import slic,mark_boundaries
+from benchmark import report_duration
 
 tqdm = lambda x: x
-
-HOSTNAME = socket.gethostname()
-def report_duration(start_time, model_name, operation, nmasks, nitr=0, with_model=False):
-    duration = time.time() - start_time
-    print(f"DURATION,{HOSTNAME},{model_name},{operation},{nmasks},{nitr},{int(with_model)},{duration}")
-
 
 class LoadMaskGen:
     def __init__(self, path):
@@ -203,6 +197,8 @@ def optimize_explanation_i(
     avg_kernel = avg_kernel / avg_kernel.numel()
 
     mweights = data.flatten(start_dim=1).sum(dim=1) * 2
+    #mweights = mexp.explanation.numel()
+
     metric_steps = torch.tensor([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]).to(inp.device)
     selection = None
 
@@ -514,7 +510,7 @@ class CompExpCreator:
         all_masks = torch.concat(mgen.all_masks).to(device)
         all_pred = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
         all_pred.shape, baseline_score.shape
-        report_duration(start_time, me.arch, "MASKS", self.nmasks)        
+        
         #print("MaskGeneration,{self.segsize},{duration},")
         return MaskedRespData(
             baseline_score = baseline_score,
@@ -526,7 +522,8 @@ class CompExpCreator:
         )
 
     def explain(self, me, inp, catidx, data=None, initial=None, callback=None):
-         
+
+        start_time = time.time() 
         if data is None:            
             data = self.generate_data(me, inp, catidx)            
 
@@ -551,7 +548,8 @@ class CompExpCreator:
                                    c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline, callback=callback)
         
-        report_duration(start_time_expl, me.arch, "OPT", self.nmasks, nitr=self.epochs, with_model=(self.c_model != 0))
+        report_duration(start_time, me.arch, "LSC", f'{self.nmasks}_{self.epochs}')
+        
         
         return sal
 

@@ -5,7 +5,7 @@ import torch.nn as nn
 import pandas as pd
 
 import os, glob, json, pickle
-import random, logging
+import random, logging, socket
 
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -18,6 +18,13 @@ import timm
 from saleval import *
 from metrics import *
 from pklread import read_pickle_files
+from benchmark import report_duration
+
+HOSTNAME = socket.gethostname()
+def report_duration(start_time, model_name, method, args):
+    duration = time.time() - start_time
+    print(f"DURATION,{HOSTNAME},{model_name},{method},{args},{duration}")
+
 
 class ModelEnv:
 

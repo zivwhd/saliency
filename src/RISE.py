@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from skimage.transform import resize
 from tqdm import tqdm
-
+from benchmark import report_duration
 
 class RISE(nn.Module):
     def __init__(self, model, input_size, gpu_batch=100):
@@ -112,11 +112,13 @@ class RiseSaliencyCreator:
 
     def __call__(self, me, inp, catidx, batch_size=32):
         assert self.nmasks % batch_size == 0
-        
+        start_time = time.time()
+                
         sal = RISE_explain(
             me.narrow_model(catidx), inp, 
             itr = self.nmasks // batch_size, 
             seg=self.seg, p1=self.p1, batch_size=batch_size)
+        report_duration(start_time, me.arch, "RISE", self.nmasks)
         name = f"RISE_{self.nmasks}_{self.seg}_{self.p1}"
         return {name : sal.cpu()}
         
