@@ -9,12 +9,15 @@ class ExtPertSaliencyCreator:
 
     def __call__(self, me, inp, catidx):   
         desc = f"ExtPert"        
+        areas = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
         masks, _ = extremal_perturbation(
             me.model, inp, catidx,
             reward_func=contrastive_reward,
             debug=False,
-            areas=[0.05, 0.1, 0.2, 0.4, 0.6, 0.8])
+            areas=areas)
 
-        logging.info(f"::mask {masks.shape}")                
-        raise Exception("aaaa")
-        return {"ExtPert" : masks}
+        res = {}
+        for idx, area in enumerate(areas):
+            res[f'ExtPert_{area}'] = masks[idx:idx+1]
+    
+        return res
