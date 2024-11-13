@@ -12,7 +12,7 @@ from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 import captum
 import cv2
-from benchmark import report_duration
+from timeit import report_duration
 
 class CMethod(Enum):
     GradCAM = auto()

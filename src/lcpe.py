@@ -6,7 +6,7 @@ import torchvision.transforms as T
 import logging, time, pickle
 from cpe import SqMaskGen
 from skimage.segmentation import slic,mark_boundaries
-from benchmark import report_duration
+from timeit import report_duration
 
 tqdm = lambda x: x
 
