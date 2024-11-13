@@ -2,7 +2,7 @@ from torchray.attribution.extremal_perturbation import extremal_perturbation, co
 from torchray.utils import get_device
 import logging
 
-class IEMPertSaliencyCreator:
+class ExtPertSaliencyCreator:
 
     def __init__(self):
         pass
@@ -15,6 +15,6 @@ class IEMPertSaliencyCreator:
             debug=False,
             areas=[0.05, 0.1, 0.2, 0.4, 0.6, 0.8])
 
-        logging.info(f"::mask {mask.shape}")        
-        sal = self.explain(me, inp, catidx)        
-        return {desc : sal}
+        logging.info(f"::mask {mask.shape}")                
+        raise Exception("aaaa")
+        return {"ExtPert" : masks}
