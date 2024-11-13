@@ -21,7 +21,7 @@ class ExtPertSaliencyCreator:
 
     def __call__(self, me, inp, catidx):   
         smdl = me.narrow_model(catidx, with_softmax=True)
-        threshold = smdl(inp)[0,0]
+        threshold = smdl(inp)[0,0] * 0.6
         
         desc = f"ExtPert"        
         areas = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
