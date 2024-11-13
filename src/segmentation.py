@@ -106,7 +106,27 @@ def get_dataset(me, dataset_name):
                             target_transform=test_lbl_trans)
     return ds
 
-def get_creators():
+
+
+def get_creators_vit():
+    baselines = [ZeroBaseline()]
+    
+
+    runs = [
+        MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
+                            dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+                                 c_activation="",  epochs=300, select_from=150)
+                                 ]),
+        LTXSaliencyCreator(),
+        IEMPertSaliencyCreator(),        
+        RiseSaliencyCreator(),
+        DimplVitSaliencyCreator()
+    ]
+
+    return CombSaliencyCreator(runs)
+
+
+def get_creators_cnn():
     baselines = [ZeroBaseline()]
     
 
@@ -125,12 +145,18 @@ def get_creators():
 
     return CombSaliencyCreator(runs)
 
+def get_creators(model_name):
+    if 'resnet' in model_name or 'densenet' in model_name:
+        return get_creators_cnn()
+    if 'vit' in model_name:
+        return get_creators_vit()
+    assert False
 
 def create_sals(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
     progress_path = os.path.join("progress", model_name, f"create_{marker}")
-    algo = get_creators()
+    algo = get_creators(model_name)
 
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
@@ -155,6 +181,7 @@ def create_scores(model_name, dataset_name):
     ds = get_dataset(me, dataset_name)
 
     algo = get_creators()
+    progress_path = os.path.join("progress", model_name, f"create_{marker}")
 
     for idx, (img, tgt) in enumerate(ds):
 
