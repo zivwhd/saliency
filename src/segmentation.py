@@ -133,9 +133,9 @@ def create_sals(model_name, dataset_name):
     algo = get_creators()
 
     for idx, (img, tgt) in enumerate(ds):
-        logging.info(f"[{idx}], {img.shape}, {tgt.shape}")
+        logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
 
-        inp = img.to(me.device)
+        inp = img.to(me.device).unsqueeze(0)
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         logging.info(f"creating sal {idx} {topidx} ")
