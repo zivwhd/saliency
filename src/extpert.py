@@ -3,6 +3,7 @@ from torchray.utils import get_device
 import logging
 import torch
 
+
 def qmet(smdl, inp, sal, steps):
     with torch.no_grad():    
         bars = sal.quantile(steps).unsqueeze(1).unsqueeze(1)
@@ -42,7 +43,7 @@ class ExtPertSaliencyCreator:
             desc = f'ExtPert_{areas[idx]}'
 
 
-            cmask = mask.detach().clone().cpu()
+            cmask = mask.detach().clone().cpu() ## 1,224,224
             
             res[desc] = cmask
             prob = me.model(inp * mask.unsqueeze(0))[0,0]
@@ -52,12 +53,11 @@ class ExtPertSaliencyCreator:
                 res[f'ExtPertS'] = selected
 
             sdel, sins = qmet(smdl, inp, mask.squeeze(0), steps=metric_steps )
-            mscore = sdel-sins
+            mscore = sins-sdel
 
             if met_selected is None or mscore > met_selected[0]:
                 met_selected = (mscore, cmask)
                 res[f'ExtPertM'] = cmask
-
             
         return res
 
