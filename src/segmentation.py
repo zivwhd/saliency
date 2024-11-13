@@ -79,10 +79,10 @@ class Imagenet_Segmentation(data.Dataset):
 
 
 def get_args(): 
-    creators = get_creators() + ['any','all']
+    
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
-    parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
+    #parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--dataset", default="imagenet", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       

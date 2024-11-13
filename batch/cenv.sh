@@ -77,7 +77,7 @@ pip3 install pytorch-lightning
 pip3 install transformers
 pip3 install icecream
 pip3 install saliency
-
+pip3 install h5py
 # Verify the installation
 echo verifying ...
 srun nvcc --version
