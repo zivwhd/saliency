@@ -19,9 +19,13 @@ methods = [
     "MDL_500_40_300:300b_msk1.0_tv0.1_mgn0.01_mdl0.2_0"
 ]
 
+methods =[ 
+    "ExtPertM_0",  "ExtPertS_0",  "ExtPert_0.05_0",  "ExtPert_0.1_0",  
+    "ExtPert_0.2_0",  "ExtPert_0.4_0",  "ExtPert_0.6_0",  "ExtPert_0.8_0"]
+
 
 BASE_PATH = "/home/weziv5/work"
-SAMP_PATH = os.path.join(BASE_PATH, "data", "imagenet", "rsample100.smp")
+SAMP_PATH = os.path.join(BASE_PATH, "data", "imagenet", "vis.smp")
 
 with open(SAMP_PATH, "rt") as sf:
     images = sf.readlines()
@@ -42,7 +46,7 @@ os.makedirs(DEST_PATH, exist_ok=True)
 for idx, image_name in enumerate(images):    
     print(f"========== {idx} {image_name} ===========")
 
-    ptrn = os.path.join(BASE_PATH, f"saliency/results/vit_small_patch16_224/saliency/*/{image_name}")
+    ptrn = os.path.join(BASE_PATH, f"saliency/results/*/saliency/*/{image_name}")
     print(f"##  '{ptrn}'")
     sal_paths = glob.glob(ptrn)
     
