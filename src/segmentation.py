@@ -86,7 +86,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
     #parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
-    parser.add_argument("--marker", default="m", help="TBD")       
+    parser.add_argument("--marker", default="m1", help="TBD")       
     parser.add_argument("--dataset", default="imagenet", help="TBD")       
     parser.add_argument("--selection", choices=["rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
@@ -117,10 +117,10 @@ def get_creators():
                                  ]),
         CamSaliencyCreator(),
         DixCnnSaliencyCreator(),
-        #IGSaliencyCreator(),                                 
-        #LTXSaliencyCreator(),
-        #IEMPertSaliencyCreator(),        
-        #RiseSaliencyCreator(),
+        IGSaliencyCreator(),                                 
+        LTXSaliencyCreator(),
+        IEMPertSaliencyCreator(),        
+        RiseSaliencyCreator(),
     ]
 
     return CombSaliencyCreator(runs)
@@ -129,7 +129,7 @@ def get_creators():
 def create_sals(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
-    progress_path = os.path.join("progress", model_name, "create_{marker}")
+    progress_path = os.path.join("progress", model_name, f"create_{marker}")
     algo = get_creators()
 
     for idx, (img, tgt) in enumerate(ds):
