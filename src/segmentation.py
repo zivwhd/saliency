@@ -76,6 +76,9 @@ class Imagenet_Segmentation(data.Dataset):
         # return len(self.h5py['/value/img'])
         return self.data_length
 
+VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224","vit_base_patch16_224.mae"]
+CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201"] ## "resnet18"
+ALL_MODELS = CNN_MODELS + VIT_MODELS
 
 
 def get_args(): 
