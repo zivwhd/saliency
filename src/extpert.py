@@ -36,8 +36,8 @@ class ExtPertSaliencyCreator:
 
         res = {}
         selected = None
-        met_selected = None
-
+        met_selected = None        
+        metric_steps = torch.tensor([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]).to(inp.device)
         for idx,mask in enumerate(masks):
             desc = f'ExtPert_{areas[idx]}'
 
@@ -51,7 +51,7 @@ class ExtPertSaliencyCreator:
                 selected = cmask
                 res[f'ExtPertS'] = selected
 
-            sdel, sins = qmet(smdl, inp, mask.squeeze(0), steps=10)
+            sdel, sins = qmet(smdl, inp, mask.squeeze(0), steps=metric_steps )
             mscore = sdel-sins
 
             if met_selected is None or mscore > met_selected[0]:

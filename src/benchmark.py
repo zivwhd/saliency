@@ -122,7 +122,7 @@ class ModelEnv:
 
 
 
-def get_result_path(model_name, variant, image_name, run=0, result_type="saliency"):
+def get_result_path(model_name, variant, image_name, run=0, result_type="saliency"):    
     return os.path.join("results", model_name, result_type, f"{variant}_{run}", image_name)
 
 def get_all_results(model_name, subset=None): ## PPAA

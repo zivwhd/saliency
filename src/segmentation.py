@@ -106,12 +106,47 @@ def get_dataset(me, dataset_name):
                             target_transform=test_lbl_trans)
     return ds
 
+def get_creators():
+    baselines = [ZeroBaseline()]
+    
+
+    runs = [
+        MultiCompExpCreator(desc="MWComp", segsize=[40], nmasks=[500],  baselines = baselines,  groups=[
+                            dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+                                 c_activation="",  epochs=300, select_from=150)
+                                 ]),
+        CamSaliencyCreator(),
+        DixCnnSaliencyCreator(),
+        #IGSaliencyCreator(),                                 
+        #LTXSaliencyCreator(),
+        #IEMPertSaliencyCreator(),        
+        #RiseSaliencyCreator(),
+    ]
+
+    return CombSaliencyCreator(runs)
+
+
 def create_sals(model_name, dataset_name):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
 
+    algo = get_creators()
+
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}")
+
+        inp = inp.to(me.device)
+        logits = me.model(inp).cpu()
+        topidx = int(torch.argmax(logits))        
+        logging.info(f"creating sal {idx} {topidx} ")
+
+        sals = algo(me, inp, topidx)
+        
+        for variant, sal in sals.items():
+            save_saliency(sal, model_name, variant, str(idx), run=0)
+
+        if idx >= 1000:
+            break
 
 
 if __name__ == '__main__':
