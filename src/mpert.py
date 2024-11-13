@@ -7,7 +7,7 @@ import numpy as np
 import torch.nn.functional as F
 import torchvision.transforms as T
 import time, socket
-from benchmark import report_duration
+from reports import report_duration
 
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
