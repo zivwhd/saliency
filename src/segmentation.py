@@ -214,7 +214,7 @@ def create_scores(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
 
-    algo = get_creators()
+    
     progress_path = os.path.join("progress", model_name, f"create_{marker}")
 
     for idx, (img, tgt) in enumerate(ds):
