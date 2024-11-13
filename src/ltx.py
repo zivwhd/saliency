@@ -17,12 +17,6 @@ import metrics
 CHECKPOINT_BASE_PATH = "/home/weziv5/work/products/ltx"
 
 
-HOSTNAME = socket.gethostname()
-def report_duration(start_time, model_name, operation, nitr=0):
-    duration = time.time() - start_time
-    print(f"DURATION_LTX,{HOSTNAME},{model_name},{operation},{nitr},{duration}")
-
-
 class SimpleDataset(Dataset):
     def __init__(self, data):
         self.data = data  # data is a list of (tensor, target) pairs

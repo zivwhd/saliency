@@ -15,6 +15,7 @@ from benchmark import *
 from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
 from mpert import IEMPertSaliencyCreator 
+from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
 from dix_cnn import DixCnnSaliencyCreator
 import torch
@@ -27,6 +28,9 @@ def get_dixcnn_sal_creator():
 
 def get_mpert_sal_creator():
     return IEMPertSaliencyCreator()
+
+def get_extpert_sal_creator():
+    return ExtPertSaliencyCreator
 
 def get_ltx_sal_creator():
     return LTXSaliencyCreator()
