@@ -15,6 +15,6 @@ class ExtPertSaliencyCreator:
             debug=False,
             areas=[0.05, 0.1, 0.2, 0.4, 0.6, 0.8])
 
-        logging.info(f"::mask {mask.shape}")                
+        logging.info(f"::mask {masks.shape}")                
         raise Exception("aaaa")
         return {"ExtPert" : masks}
