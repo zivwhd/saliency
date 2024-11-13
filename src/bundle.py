@@ -12,7 +12,12 @@ methods = [
 "Dimpl_dix_0",
 "Dimpl_gae_0"]
 
-
+methods = [
+    "MDL_500_40_300:300b_msk1.0_tv0.1_mgn0.01_mdl0.01_0",
+    "MDL_500_40_300:300b_msk1.0_tv0.1_mgn0.01_mdl0.05_0",
+    "MDL_500_40_300:300b_msk1.0_tv0.1_mgn0.01_mdl0.1_0",
+    "MDL_500_40_300:300b_msk1.0_tv0.1_mgn0.01_mdl0.2_0"
+]
 
 
 BASE_PATH = "/home/weziv5/work"
@@ -24,7 +29,7 @@ with open(SAMP_PATH, "rt") as sf:
 images = [x.strip().replace(".JPEG","") for x in images]
 images = images[0:100]
 
-DEST_PATH = os.path.join(BASE_PATH, "report", "bundle")
+DEST_PATH = os.path.join(BASE_PATH, "report", "bundle2")
 IMG_PATH = os.path.join(BASE_PATH, "data", "imagenet", "validation")
 
 
