@@ -210,7 +210,7 @@ def eval_batch(Res, labels):
 
     return batch_correct, batch_label, batch_inter, batch_union, batch_ap, batch_f1, pred, target
 
-def create_scores(model_name, dataset_name):
+def create_scores(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
 
