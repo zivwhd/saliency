@@ -30,7 +30,16 @@ import torch
 import torch.utils.data as data
 from PIL import Image, ImageFilter
 
+def setup_path():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    targets = [ os.path.join(os.path.dirname(current_dir),"LTX")  ]
+    for path in targets:
+        if path not in sys.path:
+            logging.info(f"adding {path}")
+            sys.path.append(path)
 
+setup_path()
+from utils.metrices import *
 
 LIMIT_DS = 1000
 
