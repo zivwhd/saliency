@@ -229,8 +229,8 @@ def eval_batch(Res, labels):
 
 class Stats:
     def __init__(self):
-        total_inter, total_union, total_correct, total_label = np.int64(0), np.int64(0), np.int64(0), np.int64(0)
-        total_ap, total_f1 = [], []
+        self.total_inter, self.total_union, self.total_correct, self.total_label = np.int64(0), np.int64(0), np.int64(0), np.int64(0)
+        self.total_ap, self.total_f1 = [], []
     
 
 def create_scores(model_name, dataset_name, marker="m"):
@@ -242,7 +242,7 @@ def create_scores(model_name, dataset_name, marker="m"):
     
     stats = defaultdict(Stats)
     dump_obj(stats, f"results/{model_name}/bs.obj")
-    progress_path = os.path.join("progress", model_name, f"create_{marker}")
+    progress_path = os.path.join("progress", model_name, f"scores_{marker}")
 
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
