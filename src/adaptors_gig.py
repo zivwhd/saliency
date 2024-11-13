@@ -4,7 +4,7 @@ import saliency.core as saliency
 import torch
 import numpy as np
 import time, socket
-from benchmark import report_duration
+from reports import report_duration
 
 
 class IGSaliencyCreator:
