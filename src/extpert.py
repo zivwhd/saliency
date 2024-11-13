@@ -22,10 +22,17 @@ class ExtPertSaliencyCreator:
 
         logging.info(f"got masks {masks.shape} [{inp.shape} {threshold}]")
 
-        for mask in masks:
+        res = {}
+        selected = None
+        for idx,mask in enumerate(masks):
+            desc = f'ExtPert_{areas[idx]}'
+            cmask = mask.detach().clone().cpu()
+            res[desc] = cmask
             prob = me.model(inp * mask.unsqueeze(0))[0,0]
-            if prob >= threshold:
-                return { 'ExtPert' : mask[0].detach().clone().cpu() }
             
-        return { 'ExtPert' : masks[-1][0].detach().clone().cpu() }
+            if (selected is None) and ((prob >= threshold) or (idx == len(masks) -1)):
+                selected = cmask
+                res[f'ExtPertS'] = selected
+            
+        return res
 
