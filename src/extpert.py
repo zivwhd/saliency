@@ -9,7 +9,7 @@ class ExtPertSaliencyCreator:
 
     def __call__(self, me, inp, catidx):   
         smdl = me.narrow_model(catidx, with_softmax=True)
-        threshold = smdl(inp)
+        threshold = smdl(inp)[0,0]
         
         desc = f"ExtPert"        
         areas = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
@@ -20,12 +20,12 @@ class ExtPertSaliencyCreator:
             debug=False,
             areas=areas)
 
-        logging.info(f"got masks {masks.shape} [{inp.shape}]")
+        logging.info(f"got masks {masks.shape} [{inp.shape} {threshold}]")
 
         for mask in masks:
-            prob = me.model(inp * mask)
+            prob = me.model(inp * mask.unsqueeze(0))[0,0]
             if prob >= threshold:
-                return { 'ExtPert' : mask.detach().clone().cpu() }
+                return { 'ExtPert' : mask[0].detach().clone().cpu() }
             
-        return { 'ExtPert' : masks[-1].detach().clone().cpu() }
+        return { 'ExtPert' : masks[-1][0].detach().clone().cpu() }
 

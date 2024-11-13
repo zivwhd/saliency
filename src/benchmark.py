@@ -45,7 +45,7 @@ class ModelEnv:
     def narrow_model(self, catidx, with_softmax=False):
         modules = (
             [self.model] + 
-            ([nn.Softmax()] if with_softmax else []) +
+            ([nn.Softmax(dim=1)] if with_softmax else []) +
             [SelectKthLogit(catidx)])
 
         return nn.Sequential(*modules)
