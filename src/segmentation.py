@@ -126,28 +126,29 @@ def get_creators():
     return CombSaliencyCreator(runs)
 
 
-def create_sals(model_name, dataset_name):
+def create_sals(model_name, dataset_name, mark="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
-
+    progress_path = os.path.join("progress", model_name, "create_{mark}")
     algo = get_creators()
 
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
+        coord = Coord([str(idx)], progress_path)
+        for chk in coord:
+            inp = img.to(me.device).unsqueeze(0)
+            logits = me.model(inp).cpu()
+            topidx = int(torch.argmax(logits))        
+            logging.info(f"creating sal {idx} {topidx} ")
 
-        inp = img.to(me.device).unsqueeze(0)
-        logits = me.model(inp).cpu()
-        topidx = int(torch.argmax(logits))        
-        logging.info(f"creating sal {idx} {topidx} ")
+            sals = algo(me, inp, topidx)
+            
+            for variant, sal in sals.items():
+                save_saliency(sal, model_name, variant, str(idx), run=0)
 
-        sals = algo(me, inp, topidx)
-        
-        for variant, sal in sals.items():
-            save_saliency(sal, model_name, variant, str(idx), run=0)
-
-        if idx >= LIMIT_DS:
-            logging.info("DONE")
-            break
+            if idx >= LIMIT_DS:
+                logging.info("DONE")
+                break
 
 def create_scores(model_name, dataset_name):
     me = ModelEnv(model_name)
