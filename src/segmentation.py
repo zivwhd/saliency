@@ -32,7 +32,7 @@ from PIL import Image, ImageFilter
 
 
 
-
+LIMIT_DS = 1000
 
 class Imagenet_Segmentation(data.Dataset):
     CLASSES = 2
@@ -74,7 +74,7 @@ class Imagenet_Segmentation(data.Dataset):
 
     def __len__(self):
         # return len(self.h5py['/value/img'])
-        return min(self.data_length, 1000)
+        return min(self.data_length, LIMIT_DS)
 
 VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224","vit_base_patch16_224.mae"]
 CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201"] ## "resnet18"
@@ -135,7 +135,7 @@ def create_sals(model_name, dataset_name):
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}")
 
-        inp = inp.to(me.device)
+        inp = img.to(me.device)
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         logging.info(f"creating sal {idx} {topidx} ")
@@ -145,7 +145,23 @@ def create_sals(model_name, dataset_name):
         for variant, sal in sals.items():
             save_saliency(sal, model_name, variant, str(idx), run=0)
 
-        if idx >= 1000:
+        if idx >= LIMIT_DS:
+            logging.info("DONE")
+            break
+
+def create_scores(model_name, dataset_name):
+    me = ModelEnv(model_name)
+    ds = get_dataset(me, dataset_name)
+
+    algo = get_creators()
+
+    for idx, (img, tgt) in enumerate(ds):
+
+        res_path = "results/{model_name}/*/{idx}"
+        sal_paths = glob.glob(res_path)
+
+        if idx >= LIMIT_DS:
+            logging.info("DONE")
             break
 
 
