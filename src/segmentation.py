@@ -1,6 +1,8 @@
 #!/bin/python
 
 print("## segmentation.py ")
+import logging
+logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
 
 import argparse, logging, os, re
 from dataset import ImagenetSource, Coord
