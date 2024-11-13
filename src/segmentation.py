@@ -111,7 +111,7 @@ def create_sals(model_name, dataset_name):
     ds = get_dataset(me, dataset_name)
 
     for idx, (img, tgt) in enumerate(ds):
-        logging.info(idx, img.shape, tgt.shape)
+        logging.info(f"[{idx}], {img.shape}, {tgt.shape}")
 
 
 if __name__ == '__main__':
