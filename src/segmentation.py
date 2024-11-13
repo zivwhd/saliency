@@ -134,7 +134,7 @@ def create_sals(model_name, dataset_name, marker="m"):
 
     for idx, (img, tgt) in enumerate(ds):
         logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
-        coord = Coord([str(idx)], progress_path)
+        coord = Coord([str(idx)], progress_path, getname=lambda x: str(x))
         for chk in coord:
             inp = img.to(me.device).unsqueeze(0)
             logits = me.model(inp).cpu()
