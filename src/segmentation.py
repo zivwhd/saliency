@@ -126,10 +126,10 @@ def get_creators():
     return CombSaliencyCreator(runs)
 
 
-def create_sals(model_name, dataset_name, mark="m"):
+def create_sals(model_name, dataset_name, marker="m"):
     me = ModelEnv(model_name)
     ds = get_dataset(me, dataset_name)
-    progress_path = os.path.join("progress", model_name, "create_{mark}")
+    progress_path = os.path.join("progress", model_name, "create_{marker}")
     algo = get_creators()
 
     for idx, (img, tgt) in enumerate(ds):
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     args = get_args()
     model_name = args.model
     dataset_name = args.dataset
-    create_sals(model_name, dataset_name)
+    create_sals(model_name, dataset_name, marker=args.marker)
 
 
 
