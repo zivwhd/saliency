@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from skimage.transform import resize
 from tqdm import tqdm
-from timeit import report_duration
+from reports import report_duration
 
 class RISE(nn.Module):
     def __init__(self, model, input_size, gpu_batch=100):
