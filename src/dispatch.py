@@ -160,8 +160,10 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
             segsize=[segsize], nmasks=nmasks, 
             baselines = baselines,
             groups=[
-                modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
-                modify(c_model=0.05, desc="MDLA", c_mask_completeness=0),
+                modify(desc="CPONLY", c_tv=0, c_magnitude=0),        
+                #modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
+                #modify(c_model=0.05, desc="MDLA", c_mask_completeness=0),
+
                 #modify(c_mask_completeness=0, desc="NCP"),
                 #modify(c_mask_completeness=0.01, desc="NCP"),
                 ##modify(c_mask_completeness=0.1, desc="NCP"),
