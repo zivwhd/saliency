@@ -1,6 +1,6 @@
 from torchray.attribution.extremal_perturbation import extremal_perturbation, contrastive_reward
 from torchray.utils import get_device
-import logging
+import logging, time
 import torch
 
 
@@ -21,6 +21,7 @@ class ExtPertSaliencyCreator:
         pass
 
     def __call__(self, me, inp, catidx):   
+        start = time.time()
         smdl = me.narrow_model(catidx, with_softmax=True)
         threshold = smdl(inp)[0,0] * 0.6
         
@@ -58,6 +59,7 @@ class ExtPertSaliencyCreator:
             if met_selected is None or mscore > met_selected[0]:
                 met_selected = (mscore, cmask)
                 res[f'ExtPertM'] = cmask
-            
+        duration = time.time() - start_time
+        logging.info(f"run-time: {duration}")
         return res
 
