@@ -49,7 +49,7 @@ def get_mwcomp_cnn_sal_creator():
 
 def get_mwcomp_vit_sal_creator():
     baselines = [ZeroBaseline()]
-    return MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines, 
+    return MultiCompExpCreator(desc="MWComp", segsize=[24, 32, 40], nmasks=[1000],  baselines = baselines, 
                         groups=[
                             dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
                                  c_activation="",  epochs=300, select_from=150),
@@ -152,8 +152,15 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
         MultiCompExpCreator(
             desc="MComp",
             segsize=[segsize], nmasks=nmasks, 
+            baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
+            groups=[basic]),
+
+        MultiCompExpCreator(
+            desc="MComp",
+            segsize=[segsize], nmasks=nmasks, 
             baselines = baselines,
             groups=[
+                modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
                 #modify(c_mask_completeness=0, desc="NCP"),
                 #modify(c_mask_completeness=0.01, desc="NCP"),
                 ##modify(c_mask_completeness=0.1, desc="NCP"),
@@ -167,9 +174,9 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
                 
                 #modify(c_magnitude=0, desc="MAG"),
                 #modify(c_magnitude=0.01, desc="MAG"),
-                modify(c_magnitude=0.05, desc="MAG"),
-                modify(c_magnitude=0.1, desc="MAG"),
-                modify(c_magnitude=0.25, desc="MAG"),                
+                #modify(c_magnitude=0.05, desc="MAG"),
+                #modify(c_magnitude=0.1, desc="MAG"),
+                #modify(c_magnitude=0.25, desc="MAG"),                
                 #modify(c_magnitude=0.5, desc="MAG"),
                 #modify(c_magnitude=1, desc="MAG"), 
 
@@ -185,7 +192,7 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
                 #modify(epochs=300, select_from=None, desc="MNT"),
                 #modify(epochs=400, select_from=None, desc="MNT"),
                 ##modify(epochs=500, select_from=None, desc="MNT"),
-
+                
                 #modify(c_model=0, desc="MDL"),
                 #modify(c_model=0.01, desc="MDL"),
                 #modify(c_model=0.05, desc="MDL"),
