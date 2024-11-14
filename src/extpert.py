@@ -21,7 +21,7 @@ class ExtPertSaliencyCreator:
         pass
 
     def __call__(self, me, inp, catidx):   
-        start = time.time()
+        start_time = time.time()
         smdl = me.narrow_model(catidx, with_softmax=True)
         threshold = smdl(inp)[0,0] * 0.6
         
