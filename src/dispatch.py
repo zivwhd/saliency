@@ -149,11 +149,11 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
         #    groups=[
         #        basic,
         #    ]),
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[segsize], nmasks=nmasks, 
-            baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
-            groups=[basic]),
+        #MultiCompExpCreator(
+        #    desc="MComp",
+        ##    segsize=[segsize], nmasks=nmasks, 
+        #   baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
+        #    groups=[basic]),
 
         MultiCompExpCreator(
             desc="MComp",
@@ -161,6 +161,7 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
             baselines = baselines,
             groups=[
                 modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
+                modify(c_model=0.05, desc="MDLA", c_mask_completeness=0),
                 #modify(c_mask_completeness=0, desc="NCP"),
                 #modify(c_mask_completeness=0.01, desc="NCP"),
                 ##modify(c_mask_completeness=0.1, desc="NCP"),
@@ -187,7 +188,7 @@ def get_abl_sal_creator(segsize=40, nmasks=500):
                 #modify(epochs=500, desc="EPC"),
                 
                 #modify(epochs=100),
-                modify(epochs=100, select_from=None, desc="MNT"),
+                #modify(epochs=100, select_from=None, desc="MNT"),
                 #modify(epochs=200, select_from=None, desc="MNT"),
                 #modify(epochs=300, select_from=None, desc="MNT"),
                 #modify(epochs=400, select_from=None, desc="MNT"),

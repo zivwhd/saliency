@@ -77,7 +77,7 @@ class MaskedRespGen:
         w = self.ishape[1]
         
         baseline = self.baseline.to(inp.device)
-
+        
         for idx in tqdm(range(itr)):            
             masks = self.mgen.gen_masks(batch_size)
             dmasks = masks.to(inp.device).float()

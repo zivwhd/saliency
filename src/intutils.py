@@ -56,7 +56,7 @@ def showsal(sal, img, caption="", quantile=0.9, mag=True, alpha=0.4, with_mask=T
     mask = (sal - sal.min()) / (sal.max()-sal.min())
     if mag:
         sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
-    plt.subplot(1, slots, 1)
+    plt.subplot(1, slots, 3)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
     plt.xticks([])  
@@ -67,7 +67,7 @@ def showsal(sal, img, caption="", quantile=0.9, mag=True, alpha=0.4, with_mask=T
     plt.xticks([])  
     plt.yticks([])
     
-    plt.subplot(1, slots, 3)
+    plt.subplot(1, slots, 1)
     bar = torch.quantile(sal, quantile)
     masked_img = ((sal >= bar).unsqueeze(-1)).numpy() *img
     #img = img * 
