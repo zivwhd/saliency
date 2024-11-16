@@ -11,7 +11,7 @@ from PIL import Image
 import random
 import os, logging
 logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
-
+from dataset import ImagenetSource
 
 # Parameters
 data_dir = "/home/weziv5/work/data/imagenet/validation"
@@ -44,9 +44,12 @@ transform = transforms.Compose([
 
 class FlatFolderDataset(Dataset):
     def __init__(self, root, transform=None, num_classes=1000):
-        self.root = root
-        self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.JPEG'))]
-        self.targets =  [random.randint(0, num_classes -  1) for _ in range(len(self.image_paths))]
+        isrc = ImagenetSource()
+        self.images = list(isrc.get_all_images().values())
+        #self.root = root
+        #self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.JPEG'))]
+        self.pertubation =  list(range(num_classes))
+        random.shuffle(self.pertubation)
         self.transform = transform
         self.num_classes = num_classes
 
@@ -55,7 +58,8 @@ class FlatFolderDataset(Dataset):
 
     def __getitem__(self, index):
         # Load image
-        img_path = self.image_paths[index]
+        info = self.images[index]
+        img_path = info.path
         image = Image.open(img_path).convert("RGB")
 
         # Apply transforms
@@ -63,8 +67,8 @@ class FlatFolderDataset(Dataset):
             image = self.transform(image)
 
         # Generate random target
-        target = random.randint(0, self.num_classes - 1)
-
+        target = self.pertubation[info.target]
+        
         return image, target
 
 transform = transforms.Compose([
@@ -96,28 +100,33 @@ for epoch in range(num_epochs):
     total_loss = 0
 
     idx = 0
-    for images, _ in dataloader:
+    num_correct = 0
+    num_samples = 0
+    for images, targets in dataloader:
         images = images.to(device)
-        random_targets = generate_random_targets(images.size(0), num_classes).to(device)
+        targets = targets.to(device)
 
         # Forward pass
         outputs = model(images)
-        loss = criterion(outputs, random_targets)
+        loss = criterion(outputs, targets)
 
+        pred = outputs.argmax(dim=1)
+        num_correct = (pred == targets).sum().cpu().tolist()
+        num_samples += pred.shape[0]
         # Backward pass and optimization
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
-
+    
         if (idx % 100):
-            logging.info(f"epoch {epoch}; idx {idx}")
+            logging.info(f"epoch {epoch}; idx {idx}; accuracy={num_correct/num_samples}")
         idx += 1
 
 
-    logging.info(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}")
-    output_weights_path = get_output_weights_path(epoch)
+    logging.info(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}; accuracy={num_correct/num_samples}")
+    output_weights_path = get_output_weights_path(epoch+1)
     torch.save(model.state_dict(), output_weights_path)
     logging.info(f"Model weights saved to {output_weights_path}")
 
