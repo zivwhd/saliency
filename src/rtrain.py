@@ -43,7 +43,7 @@ transform = transforms.Compose([
 class FlatFolderDataset(Dataset):
     def __init__(self, root, transform=None, num_classes=1000):
         self.root = root
-        self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.jpg', '.png'))]
+        self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.JPEG'))]
         self.transform = transform
         self.num_classes = num_classes
 
