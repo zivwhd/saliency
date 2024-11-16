@@ -6,6 +6,10 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from timm import create_model
+from torch.utils.data import Dataset, DataLoader
+from PIL import Image
+import os
+
 
 # Parameters
 data_dir = "/home/weziv5/work/data/imagenet/validation"
@@ -16,7 +20,7 @@ num_classes = 1000
 
 if not os.path.exists('models'):
     os.makedirs('models')
-    
+
 def get_output_weights_path(idx):    
     return f"models/densenet201_retrained_{idx}.pth"
 
@@ -35,8 +39,33 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-dataset = datasets.ImageFolder(root=data_dir, transform=transform)
-dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+
+class FlatFolderDataset(Dataset):
+    def __init__(self, root, transform=transform, num_classes=1000):
+        self.root = root
+        self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.jpg', '.png'))]
+        self.transform = transform
+        self.num_classes = num_classes
+
+    def __len__(self):
+        return len(self.image_paths)
+
+    def __getitem__(self, index):
+        # Load image
+        img_path = self.image_paths[index]
+        image = Image.open(img_path).convert("RGB")
+
+        # Apply transforms
+        if self.transform:
+            image = self.transform(image)
+
+        # Generate random target
+        target = random.randint(0, self.num_classes - 1)
+
+        return image, target
+
+#dataset = datasets.ImageFolder(root=data_dir, transform=transform)
+#dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
 # Load DenseNet-201 with pretrained weights
 model = create_model("densenet201", pretrained=True, num_classes=num_classes)
@@ -67,7 +96,7 @@ for epoch in range(num_epochs):
 
         total_loss += loss.item()
 
-    print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss / len(dataloader):.4f}")
+    print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}")
     output_weights_path = get_output_weights_path(epoch)
     torch.save(model.state_dict(), output_weights_path)
     print(f"Model weights saved to {output_weights_path}")
