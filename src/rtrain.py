@@ -54,7 +54,7 @@ class FlatFolderDataset(Dataset):
         self.num_classes = num_classes
 
     def __len__(self):
-        return len(self.image_paths)
+        return len(self.images)
 
     def __getitem__(self, index):
         # Load image
