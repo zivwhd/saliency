@@ -41,7 +41,7 @@ transform = transforms.Compose([
 
 
 class FlatFolderDataset(Dataset):
-    def __init__(self, root, transform=transform, num_classes=1000):
+    def __init__(self, root, transform=None, num_classes=1000):
         self.root = root
         self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.jpg', '.png'))]
         self.transform = transform
@@ -63,6 +63,17 @@ class FlatFolderDataset(Dataset):
         target = random.randint(0, self.num_classes - 1)
 
         return image, target
+
+transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+
+# Create dataset and dataloader
+dataset = FlatFolderDataset(root=data_dir, transform=transform, num_classes=num_classes)
+dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=1)
 
 #dataset = datasets.ImageFolder(root=data_dir, transform=transform)
 #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
