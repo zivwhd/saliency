@@ -8,11 +8,17 @@ from torchvision import datasets, transforms
 from timm import create_model
 
 # Parameters
-data_dir = "/home/weziv5/data/imagenet/validation"
+data_dir = "/home/weziv5/work/data/imagenet/validation"
 batch_size = 64
 num_epochs = 10
 num_classes = 1000
-output_weights_path = "densenet201_retrained.pth"
+
+
+if not os.path.exists('models'):
+    os.makedirs('models')
+    
+def get_output_weights_path(idx):    
+    return f"models/densenet201_retrained_{idx}.pth"
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -62,7 +68,11 @@ for epoch in range(num_epochs):
         total_loss += loss.item()
 
     print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss / len(dataloader):.4f}")
+    output_weights_path = get_output_weights_path(epoch)
+    torch.save(model.state_dict(), output_weights_path)
+    print(f"Model weights saved to {output_weights_path}")
+
+    #torch.save(model.state_dict(), output_weights_path)
+    #print(f"Model weights saved to {output_weights_path}")
 
 # Save the trained model
-torch.save(model.state_dict(), output_weights_path)
-print(f"Model weights saved to {output_weights_path}")
