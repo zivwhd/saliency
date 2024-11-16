@@ -91,7 +91,7 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
 # Training loop
 for epoch in range(num_epochs):
-    log.info(f"Starting epoch {epoch + 1}/{num_epochs}")
+    logging.info(f"Starting epoch {epoch + 1}/{num_epochs}")
     model.train()
     total_loss = 0
 
