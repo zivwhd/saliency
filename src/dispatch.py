@@ -52,7 +52,7 @@ def get_mwcomp_vis_sal_creator():
     return MultiCompExpCreator(desc="MWComp", segsize=[40], nmasks=[500,2000],  baselines = baselines, 
                         groups=[
                             dict(c_mask_completeness=1.0, c_magnitude=0.1, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
-                                 c_activation="",  epochs=300, select_from=150)
+                                 c_activation="",  epochs=300, select_from=150),
                             dict(c_mask_completeness=1.0, c_magnitude=0.5, c_completeness=0, c_tv=0.5, c_model=0.0, c_norm=False, 
                                  c_activation="",  epochs=300, select_from=150)
                         ])
