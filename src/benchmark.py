@@ -28,7 +28,9 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
-        if 'resnet' in arch or 'vgg' in arch:
+        if arch == 'densenet201NT':
+            model = timm.create_model('densenet201', pretrained=False)
+        elif 'resnet' in arch or 'vgg' in arch:
         # Get a network pre-trained on ImageNet.
             model = torchvision.models.__dict__[arch](pretrained=True)
             #for param in model.parameters():
