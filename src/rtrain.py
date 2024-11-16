@@ -8,7 +8,9 @@ from torchvision import datasets, transforms
 from timm import create_model
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
-import os
+import random
+import os, logging
+logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
 
 
 # Parameters
@@ -44,6 +46,7 @@ class FlatFolderDataset(Dataset):
     def __init__(self, root, transform=None, num_classes=1000):
         self.root = root
         self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.JPEG'))]
+        self.targets =  [random.randint(0, num_classes -  1) for _ in range(len(self.image_paths))]
         self.transform = transform
         self.num_classes = num_classes
 
@@ -88,10 +91,11 @@ optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
 # Training loop
 for epoch in range(num_epochs):
-    print(f"Starting epoch {epoch + 1}/{num_epochs}")
+    log.info(f"Starting epoch {epoch + 1}/{num_epochs}")
     model.train()
     total_loss = 0
 
+    idx = 0
     for images, _ in dataloader:
         images = images.to(device)
         random_targets = generate_random_targets(images.size(0), num_classes).to(device)
@@ -107,10 +111,15 @@ for epoch in range(num_epochs):
 
         total_loss += loss.item()
 
-    print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}")
+        if (idx % 100):
+            logging.info(f"epoch {epoch}; idx {idx}")
+        idx += 1
+
+
+    logging.info(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}")
     output_weights_path = get_output_weights_path(epoch)
     torch.save(model.state_dict(), output_weights_path)
-    print(f"Model weights saved to {output_weights_path}")
+    logging.info(f"Model weights saved to {output_weights_path}")
 
     #torch.save(model.state_dict(), output_weights_path)
     #print(f"Model weights saved to {output_weights_path}")
