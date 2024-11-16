@@ -30,6 +30,11 @@ class ModelEnv:
     def load_model(self, arch, dev):
         if arch == 'densenet201NT':
             model = timm.create_model('densenet201', pretrained=False)
+        elif arch == 'densenet201RT':
+            model = timm.create_model('densenet201', pretrained=False)
+            output_weights_path = 'densenet201_retrained_4.pth'
+            model.load_state_dict(torch.load(output_weights_path))
+
         elif 'resnet' in arch or 'vgg' in arch:
         # Get a network pre-trained on ImageNet.
             model = torchvision.models.__dict__[arch](pretrained=True)
