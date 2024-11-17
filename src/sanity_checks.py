@@ -38,10 +38,10 @@ def stats():
     ptrn = os.path.join(BASE_PATH, "Base_0", "*")
     logging.info(f">> {ptrn}")
     base_paths = glob.glob(ptrn)
-    logging.info(f"images: {base_paths}")
+    logging.info(f"images: {base_paths[0:5]}")
     logging.info(f"num images: {len(base_paths)}")
     rows = []
-    for path in base_paths[0:5]:
+    for path in base_paths:
         logging.info(f">> {path}")
         image_name = os.path.basename(path)
         base = torch.load(path, map_location=map_location)
