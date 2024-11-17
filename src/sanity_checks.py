@@ -38,7 +38,7 @@ def stats():
     base_paths = glob.glob(os.path.join(BASE_PATH, "Base_0", "*"))
     rows = []
     for path in base_paths[0:5]:
-
+        logging.info(f">> {path}")
         image_name = os.path.basename(path)
         base = torch.load(path)
 
@@ -55,6 +55,7 @@ def stats():
             scor = spearman_rank_correlation(base.flatten(), other.flatten())
             rows.append(dict(rtype=mdl, image=image_name, scor=scor, idx=0))
             
+        logging.info(f"total rows: {len(rows)}")
     df = pd.DataFrame(rows)
     df.to_csv("results/sanity.csv")
 
