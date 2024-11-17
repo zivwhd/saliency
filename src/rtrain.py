@@ -46,14 +46,17 @@ class FlatFolderDataset(Dataset):
     def __init__(self, root, transform=None, num_classes=1000):
         isrc = ImagenetSource()
         self.images = list(isrc.get_all_images().values())
+        self.targets = [x.target for x in self.images]
+        random.seed(11)
+        random.shuffle(self.targets)
         #self.root = root
         #self.image_paths = [os.path.join(root, fname) for fname in os.listdir(root) if fname.endswith(('.JPEG'))]
-        self.pertubation =  list(range(num_classes))
-        random.shuffle(self.pertubation)
+        #self.pertubation =  list(range(num_classes))
+        
         self.transform = transform
         self.num_classes = num_classes
 
-    def __len__(self):
+    def __len__(self): 
         return len(self.images)
 
     def __getitem__(self, index):
@@ -67,7 +70,7 @@ class FlatFolderDataset(Dataset):
             image = self.transform(image)
 
         # Generate random target
-        target = self.pertubation[info.target]
+        target = self.targets[index]
         
         return image, target
 
@@ -126,7 +129,7 @@ for epoch in range(num_epochs):
 
 
     logging.info(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {total_loss:.4f}; accuracy={num_correct/num_samples}")
-    output_weights_path = get_output_weights_path(epoch+1)
+    output_weights_path = get_output_weights_path(epoch % 5)
     torch.save(model.state_dict(), output_weights_path)
     logging.info(f"Model weights saved to {output_weights_path}")
 
