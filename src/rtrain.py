@@ -24,7 +24,7 @@ if not os.path.exists('models'):
     os.makedirs('models')
 
 def get_output_weights_path(idx):    
-    return f"models/densenet201_retrainedB_{idx}.pth"
+    return f"models/densenet201_retrainedC_{idx}.pth"
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
