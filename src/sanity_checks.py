@@ -34,7 +34,7 @@ def spearman_rank_correlation(x, y):
 
 BASE_PATH = "resultsA/densenet201/saliency/"
 def stats():
-
+    map_location = torch.device('cpu')
     ptrn = os.path.join(BASE_PATH, "Base_0", "*")
     logging.info(f">> {ptrn}")
     base_paths = glob.glob(ptrn)
@@ -44,18 +44,18 @@ def stats():
     for path in base_paths[0:5]:
         logging.info(f">> {path}")
         image_name = os.path.basename(path)
-        base = torch.load(path)
+        base = torch.load(path, map_location=map_location)
 
         for rtype in ["Rnd","Csc"]:
             for lidx in range(1, 33):
                 other_path = os.path.join(BASE_PATH, f"{rtype}_{lidx}_0", image_name)
-                other = torch.load(other_path)
+                other = torch.load(other_path, map_location=map_location)
                 scor = spearman_rank_correlation(base.flatten(), other.flatten())
                 rows.append(dict(rtype=rtype, image=image_name, scor=scor, idx=lidx))
 
         for mdl in ["NT","RT"]:
             other_path = "resultsA/desnenet201{msdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
-            other = torch.load(other_path)
+            other = torch.load(other_path, map_location=map_location)
             scor = spearman_rank_correlation(base.flatten(), other.flatten())
             rows.append(dict(rtype=mdl, image=image_name, scor=scor, idx=0))
             
