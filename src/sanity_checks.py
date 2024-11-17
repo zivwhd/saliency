@@ -49,8 +49,8 @@ def stats():
         for rtype in ["Rnd","Csc"]:
             for lidx in range(1, 33):
                 other_path = os.path.join(BASE_PATH, f"{rtype}_{lidx}_0", image_name)
-                if os.path.isfile(other_path):
-                    continue
+                #if os.path.isfile(other_path):
+                #    continue
 
                 other = torch.load(other_path, map_location=map_location)
                 scor = spearman_rank_correlation(base.flatten(), other.flatten())
