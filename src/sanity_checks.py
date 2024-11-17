@@ -54,7 +54,7 @@ def stats():
                 rows.append(dict(rtype=rtype, image=image_name, scor=scor, idx=lidx))
 
         for mdl in ["NT","RT"]:
-            other_path = f"resultsA/desnenet201{msdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
+            other_path = f"resultsA/desnenet201{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
             other = torch.load(other_path, map_location=map_location)
             scor = spearman_rank_correlation(base.flatten(), other.flatten())
             rows.append(dict(rtype=mdl, image=image_name, scor=scor, idx=0))
