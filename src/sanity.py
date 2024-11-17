@@ -4,43 +4,6 @@ import copy
 import torch
 from timm import create_model
 
-def replace_layer_weights_with_random(model, layer_index):
-    """
-    Replaces the weights of a layer in the model at the specified index with random values.
-    
-    Args:
-        model: PyTorch model (e.g., DenseNet201 from timm).
-        layer_index: Index of the layer in model.named_parameters().
-    """
-    # List all named parameters in the model
-    named_params = list(model.named_parameters())
-    
-    if layer_index < 0 or layer_index >= len(named_params):
-        raise IndexError(f"Layer index {layer_index} is out of bounds. Model has {len(named_params)} layers.")
-    
-    # Get the layer name and current weights
-    layer_name, param = named_params[layer_index]
-    print(f"Replacing weights for layer '{layer_name}' with random values.")
-    
-    # Generate random weights with the same shape
-    random_weights = torch.randn_like(param.data)
-    
-    # Replace the weights
-    param.data = random_weights
-    
-    print(f"Layer '{layer_name}' updated with random weights.")
-
-# Example Usage
-# Load DenseNet201 model
-model = create_model("densenet201", pretrained=True)
-
-# Replace weights for the 10th layer (example)
-replace_layer_weights_with_random(model, layer_index=10)
-
-# Verify the weights
-named_params = list(model.named_parameters())
-print(f"Updated weights for layer '{named_params[10][0]}':")
-print(named_params[10][1].data)
 
 
 
@@ -50,8 +13,8 @@ def randomize_layer(me, layer_index):
         if (f".denselayer{layer_index}." not in name):
             continue
         modified = True
-        logging.info("randomizing layer weights {name}")
-        random_weights = torch.randn_like(param.data)        
+        logging.info(f"randomizing layer weights {name}")
+        random_weights = torch.randn_like(param.data) * param.data.std() + param.data.mean()        
         # Replace the weights
         param.data = random_weights
     assert modified
@@ -67,19 +30,21 @@ class SanityCreator:
         orig_model = me.model
         res = {}
         
-        res["Base"] = self.lsc.explain(me, inp, catidx)
+        res["Base"] = self.lsc.explain(me, inp, catidx).cpu()
 
         for idx in range (1, 33):
             layer_id = 33 - idx
             try:
-                me.model = copy.deepcopy(me.model)
+                me.model = copy.deepcopy(orig_model)
 
                 randomize_layer(me, idx)                
-                res[f"Rnd_{layer_id}"] = self.lsc.explain(me, inp, catidx)
+                res[f"Rnd_{layer_id}"] = self.lsc.explain(me, inp, catidx).cpu()
                 for lidx in range(idx, 33):
                     randomize_layer(me, lidx)
-                res[f"Csc_{layer_id}"] = self.lsc.explain(me, inp, catidx)
+                res[f"Csc_{layer_id}"] = self.lsc.explain(me, inp, catidx).cpu()
             finally:
                 me.model = orig_model
 
         return res
+
+
