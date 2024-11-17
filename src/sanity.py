@@ -75,10 +75,10 @@ class SanityCreator:
                 me.model = copy.deepcopy(me.model)
 
                 randomize_layer(me, idx)                
-                res["Rnd_{layer_id}"] = self.lsc.explain(me, inp, catidx)
+                res[f"Rnd_{layer_id}"] = self.lsc.explain(me, inp, catidx)
                 for lidx in range(idx, 33):
                     randomize_layer(me, lidx)
-                res["Csc_{layer_id}"] = self.lsc.explain(me, inp, catidx)
+                res[f"Csc_{layer_id}"] = self.lsc.explain(me, inp, catidx)
             finally:
                 me.model = orig_model
 
