@@ -18,6 +18,7 @@ from mpert import IEMPertSaliencyCreator
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
 from dix_cnn import DixCnnSaliencyCreator
+from sanity import SanityCreator
 import torch
 import socket
 
@@ -38,6 +39,9 @@ def get_ltx_sal_creator():
 def get_cpltx_sal_creator():
     cp_gen = CompExpCreator(nmasks=500, segsize=48)
     return LTXSaliencyCreator(cp_gen=cp_gen)
+
+def get_sanity_sal_creator():
+    return SanityCreator()
 
 def get_mwcomp_cnn_sal_creator():
     baselines = [ZeroBaseline()]

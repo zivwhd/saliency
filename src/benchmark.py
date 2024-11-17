@@ -32,7 +32,7 @@ class ModelEnv:
             model = timm.create_model('densenet201', pretrained=False)
         elif arch == 'densenet201RT':
             model = timm.create_model('densenet201', pretrained=False)
-            output_weights_path = 'models/densenet201_retrained_7.pth'
+            output_weights_path = 'models/densenet201_retrained_n.pth'
             model.load_state_dict(torch.load(output_weights_path))
 
         elif 'resnet' in arch or 'vgg' in arch:
