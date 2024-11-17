@@ -49,12 +49,17 @@ def stats():
         for rtype in ["Rnd","Csc"]:
             for lidx in range(1, 33):
                 other_path = os.path.join(BASE_PATH, f"{rtype}_{lidx}_0", image_name)
+                if os.isfile(other_path):
+                    continue
+
                 other = torch.load(other_path, map_location=map_location)
                 scor = spearman_rank_correlation(base.flatten(), other.flatten())
                 rows.append(dict(rtype=rtype, image=image_name, scor=scor, idx=lidx))
 
         for mdl in ["NT","RT"]:
             other_path = f"resultsA/desnenet201{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
+            if os.isfile(other_path):
+                continue
             other = torch.load(other_path, map_location=map_location)
             scor = spearman_rank_correlation(base.flatten(), other.flatten())
             rows.append(dict(rtype=mdl, image=image_name, scor=scor, idx=0))
