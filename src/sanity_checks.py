@@ -35,9 +35,11 @@ def spearman_rank_correlation(x, y):
 BASE_PATH = "resultsA/desnenet201/saliency/"
 def stats():
 
-    base_paths = glob.glob(os.path.join(BASE_PATH, "Base_0", "*"))
-    logging.info("images: {base_paths[0:5]}")
-    logging.info("num images: {len(base_paths)}")
+    ptrn = os.path.join(BASE_PATH, "Base_0", "*")
+    logging.info(f">> {ptrn}")
+    base_paths = glob.glob(ptrn)
+    logging.info(f"images: {base_paths[0:5]}")
+    logging.info(f"num images: {len(base_paths)}")
     rows = []
     for path in base_paths[0:5]:
         logging.info(f">> {path}")
