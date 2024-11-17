@@ -57,8 +57,8 @@ def randomize_layer(me, layer_index):
     assert modified
 
 class SanityCreator:
-    def __init__(self):
-        self.lsc = CompExpCreator(nmasks=500, segsize=40, c_mask_completeness=1.0, c_magnitude=0.01, 
+    def __init__(self, nmasks=500, c_magnitude=0.01):
+        self.lsc = CompExpCreator(nmasks=nmasks, segsize=40, c_mask_completeness=1.0, c_magnitude=c_magnitude, 
                                   c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
                                  c_activation="",  epochs=300, select_from=None)
 
