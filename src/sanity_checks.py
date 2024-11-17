@@ -32,7 +32,7 @@ def spearman_rank_correlation(x, y):
 
 
 
-BASE_PATH = "resultsA/desnenet201/saliency/"
+BASE_PATH = "resultsA/densenet201/saliency/"
 def stats():
 
     ptrn = os.path.join(BASE_PATH, "Base_0", "*")
