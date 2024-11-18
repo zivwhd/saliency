@@ -17,7 +17,7 @@ def set_seed(seed=42):
 
 PMODEL = None
 def randomize_layer(me, layer_index):
-    global MODEL
+    global PMODEL
     assert me.arch == "resnet50"
     if PMODEL is None:
         PMODEL = torchvision.models.resnet50(pretrained=False)
