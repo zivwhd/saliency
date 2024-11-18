@@ -57,7 +57,7 @@ def stats():
                 rows.append(dict(rtype=rtype, image=image_name, scor=scor, idx=lidx))
 
         for mdl in ["NT","RT"]:
-            other_path = f"resultsA/resnet{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
+            other_path = f"resultsA/resnet50{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
             #if os.isfile(other_path):
             #    continue
             other = torch.load(other_path, map_location=map_location)
