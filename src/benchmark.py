@@ -28,11 +28,11 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
-        if arch == 'densenet201NT':
-            model = timm.create_model('densenet201', pretrained=False)
-        elif arch == 'densenet201RT':
-            model = timm.create_model('densenet201', pretrained=False)
-            output_weights_path = 'models/densenet201_retrained_n.pth'
+        if arch == 'resnet50NT':
+            model = torchvision.models.resnet50(pretrained=False)
+        elif arch == 'resnet50RT':            
+            model = torchvision.models.resnet50(pretrained=False)
+            output_weights_path = 'models/resnet50_retrained_n.pth'
             model.load_state_dict(torch.load(output_weights_path))
 
         elif 'resnet' in arch or 'vgg' in arch:

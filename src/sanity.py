@@ -6,6 +6,12 @@ from timm import create_model
 
 
 
+def set_seed(seed=42):
+    seed = 42
+    torch.manual_seed(seed)
+    # If using CUDA:
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # For multi-G
 
 def randomize_layer(me, layer_index):    
     modified = False
@@ -37,8 +43,8 @@ class SanityCreator:
             layer_id = nlayers - idx
             try:
                 me.model = copy.deepcopy(orig_model)
-
-                randomize_layer(me, idx)                
+                
+                randomize_layer(me, idx)
                 res[f"Rnd_{layer_id}"] = self.lsca.explain(me, inp, catidx).cpu()
                 for lidx in range(idx, nlayers):
                     randomize_layer(me, lidx)

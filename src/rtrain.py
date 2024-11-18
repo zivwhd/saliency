@@ -12,6 +12,9 @@ import random
 import os, logging
 logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
 from dataset import ImagenetSource
+import torch
+import torchvision
+
 
 # Parameters
 data_dir = "/home/weziv5/work/data/imagenet/validation"
@@ -24,7 +27,7 @@ if not os.path.exists('models'):
     os.makedirs('models')
 
 def get_output_weights_path(idx):    
-    return f"models/densenet201_retrainedC_{idx}.pth"
+    return f"models/resnet50_retrained_{idx}.pth"
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -89,12 +92,12 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_worker
 #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
 # Load DenseNet-201 with pretrained weights
-model = create_model("densenet201", pretrained=True, num_classes=num_classes)
+model = torchvision.models.resnet50(pretrained=True)
 model = model.to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-4)
+optimizer = optim.AdamW(model.parameters(), lr=1e-4)
 
 # Training loop
 for epoch in range(num_epochs):
