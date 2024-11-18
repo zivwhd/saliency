@@ -14,7 +14,7 @@ def randomize_layer(me, layer_index):
             continue
         modified = True
         logging.info(f"randomizing layer weights {name}")
-        random_weights = torch.randn_like(param.data) * param.data.std() + param.data.mean()        
+        random_weights = torch.randn_like(param.data) * param.data.std() * 4 + param.data.mean()        
         # Replace the weights
         param.data = random_weights
     assert modified
