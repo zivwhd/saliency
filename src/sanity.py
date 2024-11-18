@@ -4,6 +4,8 @@ import copy
 import torch
 from timm import create_model
 
+import torch
+import torchvision
 
 
 def set_seed(seed=42):
@@ -13,11 +15,18 @@ def set_seed(seed=42):
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)  # For multi-G
 
-def randomize_layer(me, layer_index):    
+PMODEL = None
+def randomize_layer(me, layer_index):
+    global MODEL
+    assert me.arch == "resnet50"
+    if PMODEL is None:
+        PMODEL = torchvision.models.resnet50(pretrained=False)
+    
     modified = False
     conv_layers = [x for x in me.model.named_parameters() if "conv" in x[0]]
+    rnd_conv_layers = [x for x in MODEL.named_parameters() if "conv" in x[0]]
     param = conv_layers[layer_index][1]
-    param.data = torch.randn_like(param.data) 
+    param.data = conv_layers[layer_index][1].data ##torch.randn_like(param.data) 
 
 class SanityCreator:
     def __init__(self, nmasks=500, c_magnitude=0.01):
