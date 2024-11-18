@@ -15,9 +15,9 @@ def randomize_layer(me, layer_index):
         modified = True
         logging.info(f"randomizing layer weights {name}")
         if 'bias' in name:
-            random_weights = torch.randn_like(param.data) * 3 + 0.0
+            random_weights = torch.randn_like(param.data)  + 0.0
         else:
-            random_weights = torch.randn_like(param.data) * 3 + 1.0
+            random_weights = torch.randn_like(param.data)  + 0.1
         #random_weights = torch.randn_like(param.data) * param.data.std() * 4 + param.data.mean()        
         # Replace the weights
         param.data = random_weights
