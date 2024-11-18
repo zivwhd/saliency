@@ -524,7 +524,7 @@ def get_creators():
     return [match.group(1) for match in [ptrn.match(vr) for vr in globals()] if match is not None]
 
 VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224","vit_base_patch16_224.mae"]
-CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201","densenet201NT","densenet201RT"] ## "resnet18"
+CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201","densenet201NT","densenet201RT","resnet50NT", "resnet50RT"] ## "resnet18"
 ALL_MODELS = CNN_MODELS + VIT_MODELS
 
 def get_args(): 
