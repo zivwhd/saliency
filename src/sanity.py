@@ -24,9 +24,9 @@ def randomize_layer(me, layer_index):
     
     modified = False
     conv_layers = [x for x in me.model.named_parameters() if "conv" in x[0]]
-    rnd_conv_layers = [x for x in MODEL.named_parameters() if "conv" in x[0]]
+    rnd_conv_layers = [x for x in PMODEL.named_parameters() if "conv" in x[0]]
     param = conv_layers[layer_index][1]
-    param.data = conv_layers[layer_index][1].data ##torch.randn_like(param.data) 
+    param.data = rnd_conv_layers[layer_index][1].data ##torch.randn_like(param.data) 
 
 class SanityCreator:
     def __init__(self, nmasks=500, c_magnitude=0.01):
