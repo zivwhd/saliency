@@ -18,7 +18,7 @@ def randomize_layer(me, layer_index):
             #param.data = torch.randn_like(param.data)*0  + 1.0
             logging.info("is bias")
         elif 'conv' in name:
-            param.data = torch.randn_like(param.data)
+            param.data = torch.randn_like(param.data) + 0.5
             logging.info("is conv")
         else:
             logging.info("skipping")
