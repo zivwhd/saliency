@@ -27,7 +27,7 @@ if not os.path.exists('models'):
     os.makedirs('models')
 
 def get_output_weights_path(idx):    
-    return f"models/resnet50_retrained_{idx}.pth"
+    return f"models/vgg16_retrained_{idx}.pth"
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -47,7 +47,7 @@ transform = transforms.Compose([
 
 class FlatFolderDataset(Dataset):
     def __init__(self, root, transform=None, num_classes=1000):
-        isrc = ImagenetSource()
+        isrc = ImagenetSource(selection_name="rsample1000")
         self.images = list(isrc.get_all_images().values())
         self.targets = [x.target for x in self.images]
         random.seed(11)
@@ -92,7 +92,7 @@ dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_worker
 #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=4)
 
 # Load DenseNet-201 with pretrained weights
-model = torchvision.models.resnet50(pretrained=True)
+model = torchvision.models.vgg16(pretrained=True)
 model = model.to(device)
 
 # Loss and optimizer
