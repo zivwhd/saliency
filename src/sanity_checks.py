@@ -47,7 +47,7 @@ def stats():
         base = torch.load(path, map_location=map_location)
 
         for rtype in ["Rnd","Csc"]:
-            for lidx in range(1, 58):
+            for lidx in range(1, 17):
                 other_path = os.path.join(BASE_PATH, f"{rtype}_{lidx}_0", image_name)
                 #if os.path.isfile(other_path):
                 #    continue
