@@ -28,6 +28,36 @@ def randomize_layer(me, layer_index):
     param = conv_layers[layer_index][1]
     param.data = rnd_conv_layers[layer_index][1].data.to(me.device) ##torch.randn_like(param.data) 
 
+
+def randomize_layer(me, start_idx, end_idx=None):
+    if end_idx is None:
+        end_idx = start_idx
+
+    global PMODEL
+    assert me.arch == "resnet50"
+    if PMODEL is None:
+        PMODEL = torchvision.models.resnet50(pretrained=False)
+
+    state_dict = me.model.state_dict()
+    other_state_dict = PMODEL.state_dict()
+    import re
+    lidx = 0
+    selected = []
+
+    ptrn = re.compile('(conv[0-9]|downsample|fc).*weight')
+    layer_keys = [key for key in state_dict.keys() if ptrn.search(key)]
+    total = len(layer_keys)
+    select = []
+    for key in list(state_dict.keys()):
+        if lidx >= total - start_idx and lidx <= total - end_idx:
+            select.append(key)            
+        lidx += (key in layer_keys)
+    
+    for key in select:
+        state_dict[key] = other_state_dict[key]
+    me.model.load_state_dict(state_dict)
+
+
 class SanityCreator:
     def __init__(self, nmasks=500, c_magnitude=0.01):
         self.lsc = CompExpCreator(nmasks=nmasks, segsize=40, c_mask_completeness=1.0, c_magnitude=c_magnitude, 
@@ -43,20 +73,19 @@ class SanityCreator:
         orig_model = me.model
         res = {}
         
-        conv_layers = [x for x in me.model.named_parameters() if "conv" in x[0]]
-        nlayers = len(conv_layers)
-        
+        #conv_layers = [x for x in me.model.named_parameters() if "conv" in x[0]]
+        #nlayers = len(conv_layers)
+        nlayers = 58        
         res["Base"] = self.lsc.explain(me, inp, catidx).cpu()
 
-        for idx in range(nlayers):
-            layer_id = nlayers - idx
+        for idx in range(1,nlayers+1):
+            layer_id = idx
             try:
                 me.model = copy.deepcopy(orig_model)
                 
-                randomize_layer(me, idx)
+                randomize_layer(me, idx, idx)
                 res[f"Rnd_{layer_id}"] = self.lsca.explain(me, inp, catidx).cpu()
-                for lidx in range(idx, nlayers):
-                    randomize_layer(me, lidx)
+                randomize_layer(me, idx, 0)
                 res[f"Csc_{layer_id}"] = self.lsca.explain(me, inp, catidx).cpu()
             finally:
                 me.model = orig_model
