@@ -16,7 +16,8 @@ def set_seed(seed=42):
     torch.cuda.manual_seed_all(seed)  # For multi-G
 
 PMODEL = None
-def randomize_layer(me, layer_index):
+VMODEL = None
+def randomize_layer_(me, layer_index):
     global PMODEL
     assert me.arch == "resnet50"
     if PMODEL is None:
@@ -34,28 +35,64 @@ def randomize_layer(me, start_idx, end_idx=None):
         end_idx = start_idx
 
     global PMODEL
-    assert me.arch == "resnet50"
-    if PMODEL is None:
-        PMODEL = torchvision.models.resnet50(pretrained=False)
+    global VMODEL
+    if me.arch == "resnet50":
+        if PMODEL is None:
+            PMODEL = torchvision.models.resnet50(pretrained=False)
 
-    state_dict = me.model.state_dict()
-    other_state_dict = PMODEL.state_dict()
-    import re
-    lidx = 0
-    selected = []
+        state_dict = me.model.state_dict()
+        other_state_dict = PMODEL.state_dict()
+        import re
+        lidx = 0
+        selected = []
 
-    ptrn = re.compile('(conv[0-9]|downsample|fc).*weight')
-    layer_keys = [key for key in state_dict.keys() if ptrn.search(key)]
-    total = len(layer_keys)
-    select = []
-    for key in list(state_dict.keys()):
-        if lidx >= total - start_idx and lidx <= total - end_idx:
-            select.append(key)            
-        lidx += (key in layer_keys)
-    
-    for key in select:
-        state_dict[key] = other_state_dict[key]
-    me.model.load_state_dict(state_dict)
+        ptrn = re.compile('(conv[0-9]|downsample|fc).*weight')
+        layer_keys = [key for key in state_dict.keys() if ptrn.search(key)]
+        total = len(layer_keys)
+        select = []
+        for key in list(state_dict.keys()):
+            if lidx >= total - start_idx and lidx <= total - end_idx:
+                select.append(key)            
+            lidx += (key in layer_keys)
+        
+        for key in select:
+            state_dict[key] = other_state_dict[key]
+        me.model.load_state_dict(state_dict)
+    if me.arch == "vgg16":
+        if VMODEL is None:
+            VMODEL = torchvision.models.vgg16(pretrained=False)
+        state_dict = me.model.state_dict()
+        other_state_dict = VMODEL.state_dict()
+        import re
+
+        from collections import defaultdict
+
+        layer_key_list = []
+        ptrn = re.compile('(features.[0-9]+|classifier.[0-9]+).(weight|bias)')
+        for key in list(state_dict.keys()):
+            match = ptrn.match(key)
+            if not match:
+                continue
+            layer_key = match.group(1)
+            if layer_key not in layer_key_list:
+                layer_key_list.append(layer_key)
+        layer_key_list.reverse()
+
+        for key in list(state_dict.keys()):
+            match = ptrn.match(key)
+            if not match:
+                continue
+            layer_key = match.group(1)
+            if layer_key not in layer_key_list:
+                continue
+            layer_idx = layer_key_list.index(layer_key) + 1            
+            if layer_idx >= end_idx and layer_idx <= start_idx:
+                state_dict[key] = other_state_dict[key]
+                logging.info(f"updating {key}")
+
+        me.model.load_state_dict(state_dict)        
+    else:
+        assert False, f"unexpected arch {me.arch}"
 
 
 class SanityCreator:
