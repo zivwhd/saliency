@@ -32,7 +32,7 @@ def spearman_rank_correlation(x, y):
 
 
 
-BASE_PATH = "resultsA/resnet50/saliency/"
+BASE_PATH = "results/vgg16/saliency/"
 def stats():
     map_location = torch.device('cpu')
     ptrn = os.path.join(BASE_PATH, "Base_0", "*")
@@ -57,7 +57,7 @@ def stats():
                 rows.append(dict(rtype=rtype, image=image_name, scor=scor, idx=lidx))
 
         for mdl in ["NT","RT"]:
-            other_path = f"resultsA/resnet50{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
+            other_path = f"results/vgg16{mdl}/saliency/MWCompZr_500_40_300b_msk1.0_tv0.1_mgn0.01_0/{image_name}"
             #if os.isfile(other_path):
             #    continue
             other = torch.load(other_path, map_location=map_location)
