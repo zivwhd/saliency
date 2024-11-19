@@ -28,11 +28,11 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
-        if arch == 'resnet50NT':
-            model = torchvision.models.resnet50(pretrained=False)
-        elif arch == 'resnet50RT':            
-            model = torchvision.models.resnet50(pretrained=False)
-            output_weights_path = 'models/resnet50_retrained_n.pth'
+        if arch == 'vgg16NT':
+            model = torchvision.models.vgg16(pretrained=False)
+        elif arch == 'vgg16RT':            
+            model = torchvision.models.vgg16(pretrained=False)
+            output_weights_path = 'models/vgg16_retrained_n.pth'
             model.load_state_dict(torch.load(output_weights_path))
 
         elif 'resnet' in arch or 'vgg' in arch:
