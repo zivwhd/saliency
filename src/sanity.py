@@ -112,7 +112,7 @@ class SanityCreator:
         
         #conv_layers = [x for x in me.model.named_parameters() if "conv" in x[0]]
         #nlayers = len(conv_layers)
-        nlayers = 58        
+        nlayers = 16
         res["Base"] = self.lsc.explain(me, inp, catidx).cpu()
 
         for idx in range(1,nlayers+1):
