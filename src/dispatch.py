@@ -47,13 +47,6 @@ def get_sanity_ext_sal_creator():
     return SanityCreator(nmasks=2000, c_magnitude=0.1)
 
 def mrcomp_cnn_sal_creator():
-    return CompExpCreator(
-        desc="MWComp", segsize=[40], nmasks=[500],
-        c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
-        c_activation="",  epochs=300, select_from=150
-    )
-
-def mrcomp_cnn_sal_creator():
     ## desc="MrCompA", segsize=[32,40,48], nmasks=[300,400,300],
     return CompExpCreator(
         desc="MrCompA", segsize=[32,40,48], nmasks=[300,400,300],
@@ -76,6 +69,7 @@ def get_mwcomp_cnn_sal_creator():
                             dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
                                  c_activation="",  epochs=300, select_from=150),
                         ])
+
 
 def get_mwcomp_vit_sal_creator():
     baselines = [ZeroBaseline()]
