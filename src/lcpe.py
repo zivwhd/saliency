@@ -420,6 +420,12 @@ class CompExpCreator:
                  baseline_gen = ZeroBaseline(),                 
                  **kwargs):
         
+        assert type(segsize) == type(nmasks)
+        if type(segsize) == int:
+            segsize = [segsize]
+            nmasks = [nmasks]
+        assert len(segsize) == len(nmasks)
+
         self.segsize = segsize
         self.nmasks = nmasks
         self.batch_size = batch_size
@@ -446,8 +452,11 @@ class CompExpCreator:
 
 
     def description(self):
-        desc = f"{self.desc}_{self.nmasks}_{self.segsize}_{self.epochs}"
-                                
+        if len(self.nmasks) == 1:
+            desc = f"{self.desc}_{self.nmasks[0]}_{self.segsize[0]}_{self.epochs}"
+        else:
+            desc = f"{self.desc}_Mr_{self.epochs}"
+
         if self.model_epochs:
             desc += f":{self.model_epochs}"
         if self.select_from is not None:
@@ -489,14 +498,22 @@ class CompExpCreator:
         #    f"{self.desc}_{self.nmasks}_{self.segsize}{ksdesc}_{self.epochs}_{self.c_completeness}_{self.c_smoothness}" : sal.cpu().unsqueeze(0)
         #}
 
-    def generate_data(self, me, inp, catidx):        
+
+    def generate_data(self, me, inp, catidx, parts):        
         start_time = time.time()
         baseline = self.baseline_gen(inp)
-        mgen = MaskedRespGen(self.segsize, mgen=self.mgen, baseline=baseline)
         fmdl = me.narrow_model(catidx, with_softmax=True)
-        logging.debug(f"generating {self.nmasks} masks and responses")
-        print(f"generating {self.nmasks} masks and responses segsize={self.segsize}")
-        mgen.gen(fmdl, inp, self.nmasks, batch_size=self.batch_size,)        
+        all_masks_list = []
+        all_pred_list = []
+
+        parts = list(self.zip(self.segsize, self.nmasks))
+        for segsize, nmasks in parts:
+            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline)            
+            logging.debug(f"generating {nmasks} masks and responses")
+            print(f"generating {nmasks} masks and responses segsize={segsize}")
+            mgen.gen(fmdl, inp, nmasks, batch_size=self.batch_size)        
+            all_masks_list += mgen.all_masks
+            all_pred_list += mgen.all_pred
         logging.debug("Done generating masks")
 
         rfactor = inp.numel()        
@@ -507,8 +524,8 @@ class CompExpCreator:
         #print(label_score, baseline_score, delta_score)
     
         device = me.device
-        all_masks = torch.concat(mgen.all_masks).to(device)
-        all_pred = torch.concat(mgen.all_pred).to(device).squeeze() * rfactor - baseline_score
+        all_masks = torch.concat(all_masks_list).to(device)
+        all_pred = torch.concat(all_pred_list).to(device).squeeze() * rfactor - baseline_score
         all_pred.shape, baseline_score.shape
         
         #print("MaskGeneration,{self.segsize},{duration},")
@@ -552,7 +569,6 @@ class CompExpCreator:
         
         
         return sal
-
 
 
 class MultiCompExpCreator:
