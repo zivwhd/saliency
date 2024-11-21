@@ -49,7 +49,7 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0.9, mag=True, alpha=0.4, with_mask=True, save_path=None):
+def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, save_path=None):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
     slots = 3+ with_mask
