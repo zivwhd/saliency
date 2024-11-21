@@ -46,7 +46,7 @@ def get_sanity_sal_creator():
 def get_sanity_ext_sal_creator():
     return SanityCreator(nmasks=2000, c_magnitude=0.1)
 
-def mrcomp_cnn_sal_creator():
+def get_mrcomp_cnn_sal_creator():
     ## desc="MrCompA", segsize=[32,40,48], nmasks=[300,400,300],
     return CompExpCreator(
         desc="MrCompA", segsize=[32,40,48], nmasks=[300,400,300],
@@ -54,7 +54,7 @@ def mrcomp_cnn_sal_creator():
         c_activation="",  epochs=300, select_from=150
     )
 
-def mrcomp_vit_creator():
+def get_mrcomp_vit_creator():
     ## desc="MrCompA", segsize=[500,250,250], nmasks=[16,24,32],
     return CompExpCreator(
         desc="MrCompA", segsize=[500,250,250], nmasks=[16,24,32],
