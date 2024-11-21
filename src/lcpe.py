@@ -506,7 +506,7 @@ class CompExpCreator:
         all_masks_list = []
         all_pred_list = []
 
-        parts = list(self.zip(self.segsize, self.nmasks))
+        parts = list(zip(self.segsize, self.nmasks))
         for segsize, nmasks in parts:
             mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline)            
             logging.debug(f"generating {nmasks} masks and responses")
