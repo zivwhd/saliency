@@ -499,7 +499,7 @@ class CompExpCreator:
         #}
 
 
-    def generate_data(self, me, inp, catidx, parts):        
+    def generate_data(self, me, inp, catidx):
         start_time = time.time()
         baseline = self.baseline_gen(inp)
         fmdl = me.narrow_model(catidx, with_softmax=True)
