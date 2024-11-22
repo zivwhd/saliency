@@ -56,8 +56,9 @@ def get_mrcomp_cnn_sal_creator():
 
 def get_mrcomp_vit_sal_creator():
     ## desc="MrCompA", segsize=[500,250,250], nmasks=[16,24,32],
+    ## desc="MrCompB", segsize=[16,48], nmasks=[500,500],
     return CompExpCreator(
-        desc="MrCompA", segsize=[16,24,32], nmasks=[500,250,250],
+        desc="MrCompB", segsize=[16,48], nmasks=[500,500],
         c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
         c_activation="",  epochs=300, select_from=150
     )
