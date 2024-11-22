@@ -7,6 +7,7 @@ import logging, time, pickle
 from cpe import SqMaskGen
 from skimage.segmentation import slic,mark_boundaries
 from reports import report_duration
+from torch.optim.lr_scheduler import StepLR
 
 tqdm = lambda x: x
 
@@ -158,8 +159,10 @@ def qmet(smdl, inp, sal, steps):
 
 
 def optimize_explanation_i(
-        fmdl, inp, mexp, data, targets, epochs=10, lr=0.001, score=1.0, 
-        c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,
+        fmdl, inp, mexp, data, targets, epochs=10, 
+        lr=0.001, lr_step=0, lr_step_decay=0,
+        score=1.0, 
+        c_mask_completeness=1.0, c_smoothness=0.1, c_completeness=0.0, c_selfness=0.0,        
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
@@ -197,6 +200,10 @@ def optimize_explanation_i(
         optimizer = optim.SGD(mexp.parameters(), lr=lr)
     else:
         assert False
+
+    scheduler = None
+    if lr_step:
+        scheduler = StepLR(optimizer, step_size=lr_step, gamma=lr_step_decay)
 
     #if not c_activation:
     #    mexp.normalize(score)
@@ -291,7 +298,8 @@ def optimize_explanation_i(
             
         
         optimizer.step()
-
+        if scheduler:
+            scheduler.step()
 
         # Normalize the explanation with the given score
         if epoch % 100 == 0 and renorm:
@@ -418,7 +426,8 @@ class BlurBaseline:
 class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=64, batch_size=32, 
-                 lr = 0.05, c_mask_completeness=1.0, c_completeness=0.1, 
+                 lr = 0.05, lr_step=0, lr_step_decay=0,
+                 c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_magnitude=0, c_norm=False, c_activation=False,
                  avg_kernel_size=(5,5),
@@ -450,6 +459,8 @@ class CompExpCreator:
         self.c_magnitude = c_magnitude
         self.c_opt = c_opt
         self.lr = lr
+        self.lr_step = lr_step
+        lr_step_decay = lr_step_decay
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
         self.select_from=select_from
