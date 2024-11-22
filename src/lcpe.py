@@ -194,12 +194,12 @@ def optimize_explanation_i(
     
     if c_opt=="Adam":
         optimizer = optim.Adam(mexp.parameters(), lr=lr)
-    if c_opt=="AdamW":
+    elif c_opt=="AdamW":
         optimizer = optim.AdamW(mexp.parameters(), lr=lr)
     elif c_opt == "SGD":
         optimizer = optim.SGD(mexp.parameters(), lr=lr)
     else:
-        assert False
+        assert False, f"unexpected optimizer {c_opt}"
 
     scheduler = None
     if lr_step:
