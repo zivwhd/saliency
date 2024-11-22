@@ -168,7 +168,9 @@ def optimize_explanation_i(
         renorm=False, baseline=None, 
         callback=None, 
         select_from=None, select_freq=10,
-        start_epoch=0):
+        start_epoch=0,
+        c_opt="Adam"
+        ):
     mse = nn.MSELoss()  # Mean Squared Error loss
     bce = nn.BCELoss(reduction="mean")
     tv = TotalVariationLoss()
@@ -179,7 +181,7 @@ def optimize_explanation_i(
 
     #print(list(model.parameters()))
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
-    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation} c_model={c_model}")
+    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation}; c_model={c_model}; c_opt={c_opt}")
 
     print("###", dict(epochs=epochs, lr=lr, score=score, 
         c_mask_completeness=c_mask_completeness, c_smoothness=c_smoothness, c_completeness=c_completeness, c_selfness=c_selfness,
@@ -187,7 +189,14 @@ def optimize_explanation_i(
         c_tv=c_tv, avg_kernel_size=avg_kernel_size, c_model=c_model,
         c_activation=c_activation, c_norm=c_norm, renorm=renorm))
     
-    optimizer = optim.Adam(mexp.parameters(), lr=lr)
+    if c_opt=="Adam":
+        optimizer = optim.Adam(mexp.parameters(), lr=lr)
+    if c_opt=="AdamW":
+        optimizer = optim.AdamW(mexp.parameters(), lr=lr)
+    elif c_opt == "SGD":
+        optimizer = optim.SGD(mexp.parameters(), lr=lr)
+    else:
+        assert False
 
     #if not c_activation:
     #    mexp.normalize(score)
@@ -415,8 +424,9 @@ class CompExpCreator:
                  avg_kernel_size=(5,5),
                  epochs=300, select_from=100,
                  model_epochs=300, c_model=0,
+                 c_opt="Adam",
                  mgen=None,
-                 desc = "MComp",
+                 desc = "MComp",                 
                  baseline_gen = ZeroBaseline(),                 
                  **kwargs):
         
@@ -438,13 +448,14 @@ class CompExpCreator:
         self.c_norm = c_norm
         self.c_activation = c_activation
         self.c_magnitude = c_magnitude
+        self.c_opt = c_opt
         self.lr = lr
         self.avg_kernel_size = avg_kernel_size      
         self.epochs = epochs
         self.select_from=select_from
         self.model_epochs = model_epochs
         self.desc = desc
-        self.mgen = mgen
+        self.mgen = mgen        
         self.baseline_gen = baseline_gen
         if self.model_epochs == 0 or self.c_model == 0:
             self.model_epochs = 0
@@ -556,7 +567,8 @@ class CompExpCreator:
         
         sal = optimize_explanation(fmdl, inp, initial, data.all_masks, data.all_pred, score=data.added_score, 
                                    epochs=self.epochs, select_from=self.select_from,
-                                   model_epochs=self.model_epochs, lr=self.lr, avg_kernel_size=self.avg_kernel_size,
+                                   model_epochs=self.model_epochs, lr=self.lr, c_opt=self.c_opt,
+                                   avg_kernel_size=self.avg_kernel_size,
                                    c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
                                    c_tv=self.c_tv, c_selfness=self.c_selfness,
                                    c_mask_completeness=self.c_mask_completeness,
