@@ -430,6 +430,7 @@ class CompExpCreator:
                  c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_magnitude=0, c_norm=False, c_activation=False,
+                 c_logit = False,
                  avg_kernel_size=(5,5),
                  epochs=300, select_from=100,
                  model_epochs=300, c_model=0,
@@ -456,6 +457,7 @@ class CompExpCreator:
         self.c_model = c_model
         self.c_norm = c_norm
         self.c_activation = c_activation
+        self.c_logit = c_logit
         self.c_magnitude = c_magnitude
         self.c_opt = c_opt
         self.lr = lr
@@ -486,6 +488,9 @@ class CompExpCreator:
 
         if self.c_norm or self.c_activation:
             desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
+
+        if self.c_logit:
+            desc += "l"
 
         if self.c_smoothness != 0:
             desc += f"_krn{self.c_smoothness}_" + str("x").join(map(str, self.avg_kernel_size))
@@ -521,7 +526,7 @@ class CompExpCreator:
         #}
 
 
-    def generate_data(self, me, inp, catidx):
+    def generate_data(self, me, inp, catidx, logit=False):
         start_time = time.time()
         baseline = self.baseline_gen(inp)
         fmdl = me.narrow_model(catidx, with_softmax=True)
@@ -538,16 +543,25 @@ class CompExpCreator:
             all_pred_list += mgen.all_pred
         logging.debug("Done generating masks")
 
+        
         rfactor = inp.numel()        
-        baseline_score = fmdl(baseline).detach().squeeze() * rfactor
-        label_score = fmdl(inp).detach().squeeze() * rfactor
+        baseline_score = fmdl(baseline).detach().squeeze()
+        label_score = fmdl(inp).detach().squeeze()
 
-        added_score = label_score - baseline_score
+        if logit:
+            norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
+        else:
+            norm = lambda x: (x - baseline_score) * rfactor
+                
+        
+                
+        added_score = norm(label_score)
         #print(label_score, baseline_score, delta_score)
     
         device = me.device
         all_masks = torch.concat(all_masks_list).to(device)
-        all_pred = torch.concat(all_pred_list).to(device).squeeze() * rfactor - baseline_score
+        
+        all_pred = norm(torch.concat(all_pred_list).to(device).squeeze())
         all_pred.shape, baseline_score.shape
         
         #print("MaskGeneration,{self.segsize},{duration},")
@@ -564,7 +578,7 @@ class CompExpCreator:
 
         start_time = time.time() 
         if data is None:            
-            data = self.generate_data(me, inp, catidx)            
+            data = self.generate_data(me, inp, catidx, logit=self.c_logit)
 
         start_time_expl = time.time()
 
