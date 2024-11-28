@@ -63,8 +63,9 @@ def get_mrcomp_vit_sal_creator():
     ## desc="MrCompF", segsize=[32,40,48], nmasks=[300,400,300], c_opt="Adam", lr=4, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3, c_logit=True,
     ## desc="MrCompG", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=4, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3, c_logit=True,
     ## desc="MrCompH", segsize=[16,48], nmasks=[300,700],  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3,
+    ## desc="MrCompI", segsize=[16,48], nmasks=[700,300], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3,
     return CompExpCreator(
-        desc="MrCompH", segsize=[16,48], nmasks=[300,700], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3,
+        desc="MrCompI", segsize=[16,48], nmasks=[700,300], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3,
         c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
         c_activation="",
     )
