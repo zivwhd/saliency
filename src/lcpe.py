@@ -653,7 +653,9 @@ class MultiCompExpCreator:
                                     baseline_gen=bgen)
                 seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
 
+            logging.info(f"mask_groups: {len(self.mask_groups)}; group:{len(self.groups)}")
             for nm, maskspec in self.mask_groups.items():
+                logging.info(f"mask: {nm} {maskspec}")
                 data = MaskedRespData.join([seg_masks[segsize].subset(nmasks) for segsize, nmasks in maskspec])
                 
                 desc = self.desc + nm + bgen.desc                
