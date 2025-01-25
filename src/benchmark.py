@@ -392,6 +392,7 @@ class CombSaliencyCreator:
         self.inner = inner
 
     def __call__(self, me, inp, catidx):
+        logging.info(f"CombSaliencyCreator: {len(self.inner}}")
         res = {}
         for inner in self.inner:
             ires = inner(me, inp, catidx)

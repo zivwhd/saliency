@@ -637,6 +637,7 @@ class MultiCompExpCreator:
         self.groups = groups
         self.desc = desc
         self.last_data = None
+        logging.info("MultiCompExpCreator")
 
     def __call__(self, me, inp, catidx):        
         all_sals = {}
