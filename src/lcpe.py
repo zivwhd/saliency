@@ -646,7 +646,7 @@ class MultiCompExpCreator:
             
             seglimit = defaultdict(int)            
             for nm, maskspec in self.mask_groups.items():
-                for segsize, nmasks in maskspec:
+                for segsize, nmasks in maskspec.items():
                     seglimit[segsize] = max(seglimit[segsize], nmasks)
             
             seg_masks = {}
@@ -657,7 +657,7 @@ class MultiCompExpCreator:
             
             for nm, maskspec in self.mask_groups.items():
                 logging.info(f"mask: {nm} {maskspec}")
-                data = MaskedRespData.join([seg_masks[segsize].subset(nmasks) for segsize, nmasks in maskspec])
+                data = MaskedRespData.join([seg_masks[segsize].subset(nmasks) for segsize, nmasks in maskspec.items()])
                 
                 desc = self.desc + nm + bgen.desc                
                 # self.last_data = data
