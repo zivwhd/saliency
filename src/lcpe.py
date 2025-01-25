@@ -650,8 +650,8 @@ class MultiCompExpCreator:
                     seglimit[segsize] = max(seglimit[segsize], nmasks)
             
             seg_masks = {}
-            for segsize, limit in seglimit.items():
-                dc = CompExpCreator(nmasks=max(self.nmasks), segsize=segsize, batch_size=self.batch_size,
+            for segsize, mlimit in seglimit.items():
+                dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
                                     baseline_gen=bgen)
                 seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
             
