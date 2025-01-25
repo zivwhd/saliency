@@ -393,7 +393,7 @@ class MaskedRespData:
             label_score = data[0].label_score,
             added_score=data[0].added_score,
             all_masks=torch.concat([x.all_masks for x in data]),
-            all_pred=torch.concat([x.all_pred for x in data])
+            all_pred=torch.concat([x.all_pred for x in data]),
             baseline=data[0].baseline
         )
 
