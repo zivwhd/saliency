@@ -8,6 +8,7 @@ from cpe import SqMaskGen
 from skimage.segmentation import slic,mark_boundaries
 from reports import report_duration
 from torch.optim.lr_scheduler import StepLR
+from collections import defaultdict
 
 tqdm = lambda x: x
 
@@ -383,6 +384,17 @@ class MaskedRespData:
             all_masks=self.all_masks[0:nmasks],
             all_pred=self.all_pred[0:nmasks],
             baseline=self.baseline
+        ) 
+
+    @staticmethod
+    def join(data):
+        return MaskedRespData(
+            baseline_score = data[0].baseline_score,
+            label_score = data[0].label_score,
+            added_score=data[0].added_score,
+            all_masks=torch.concat([x.all_masks for x in data]),
+            all_pred=torch.concat([x.all_pred for x in data])
+            baseline=data[0].baseline
         )
 
 
@@ -615,14 +627,10 @@ class CompExpCreator:
 
 class MultiCompExpCreator:
 
-    def __init__(self, nmasks=500, segsize=[64], batch_size=32, baselines=[ZeroBaseline()],
+    def __init__(self, nmasks=500, mask_groups={"":{16:500,48:500}}, baselines=[ZeroBaseline()],
                  desc="MComp",
-                 groups=[]):
-        if type(nmasks) == int:
-            self.nmasks = [nmasks]
-        else:
-            self.nmasks = nmasks
-        self.segsize=segsize
+                 groups=[]):        
+        self.mask_groups = mask_groups
         self.batch_size = batch_size
         self.baselines = baselines
         self.groups = groups
@@ -632,21 +640,30 @@ class MultiCompExpCreator:
     def __call__(self, me, inp, catidx):        
         all_sals = {}
         for bgen in self.baselines:
-            for segsize in self.segsize:
+            
+            seglimit = defaultdict(int)            
+            for nm, maskspec in self.mask_groups.items():
+                for segsize, nmasks in maskspec:
+                    seglimit[segsize] = max(seglimit[segsize], nmasks)
+            
+            seg_masks = {}
+            for segsize, limit in seglimit.items():
                 dc = CompExpCreator(nmasks=max(self.nmasks), segsize=segsize, batch_size=self.batch_size,
                                     baseline_gen=bgen)
-                mdata = dc.generate_data(me, inp, catidx)
+                seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
 
-                for nmasks in self.nmasks:
-                    desc = self.desc + bgen.desc
-                    data = mdata.subset(nmasks=nmasks)
-                    self.last_data = data
-                    for kwargs in self.groups:
-                        group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
-                        group_args.update(kwargs)
-                        algo = CompExpCreator(**group_args)
-                        res = algo(me, inp, catidx, data=data)
-                        all_sals.update(res)
+            for nm, maskspec in self.mask_groups.items():
+                data = MaskedRespData.join([seg_masks[segsize].subset(nmasks) for segsize, nmasks in maskspec])
+                
+                desc = self.desc + nm + bgen.desc                
+                # self.last_data = data
+                for kwargs in self.groups:
+                    group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
+                    group_args.update(kwargs)
+                    algo = CompExpCreator(**group_args)
+                    res = algo(me, inp, catidx, data=data)
+                    all_sals.update(res)
+
         logging.info(f"generated: {list(all_sals.keys())}")
         return all_sals
 

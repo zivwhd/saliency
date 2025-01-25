@@ -71,6 +71,102 @@ def get_mrcomp_vit_sal_creator():
         c_activation="",
     )
 
+def get_abl_sal_creator(nmasks=1000):
+
+    baselines = [ZeroBaseline()]
+
+    basic = dict(#segsize=[16,48], nmasks=[500,500], 
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
+                 #select_from=10, select_freq=3, select_del=1.0,
+                c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    
+    basic_mask_groups = {"":{16:500, 48:500}}
+
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+
+    segsizes = [16,48]
+    
+    runs = [
+        MultiCompExpCreator(
+            desc="SEG",
+            mask_groups={f"_{seg}_":{seg:nmasks} for segsize in [8,16,32,40,48,56,64]},
+            segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
+            baselines = baselines,
+            groups=[
+                basic
+            ]),
+
+        MultiCompExpCreator(
+            desc="MSK",
+            mask_groups={f"_{nmasks}_": {sg: nmasks for sg in segsizes} for nmasks in [10,100,250,500,750,1000]},            
+            baselines = baselines,
+            groups=[
+                basic,
+            ]),
+        MultiCompExpCreator(
+            desc="BSLN",
+            mask_groups=
+            baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
+            groups=[basic]),
+
+        MultiCompExpCreator(
+            desc="MComp",
+            segsize=[segsize], nmasks=nmasks, 
+            baselines = baselines,
+            groups=[
+                #modify(desc="CPONLY", c_tv=0, c_magnitude=0),        
+                #modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
+                #modify(c_model=0.05, desc="MDLA", c_mask_completeness=0),
+
+                modify(c_mask_completeness=0, desc="NCP"),
+                modify(c_mask_completeness=0.01, desc="NCP"),
+                modify(c_mask_completeness=0.1, desc="NCP"),
+                modify(c_mask_completeness=1.0, desc="NCP"),
+
+                modify(c_tv=0, desc="TVL"),
+                modify(c_tv=0.01, desc="TVL"),
+                modify(c_tv=0.1, desc="TVL"),
+                modify(c_tv=0.2, desc="TVL"),
+                modify(c_tv=0.5, desc="TVL"),
+                modify(c_tv=1, desc="TVL"), ## 2
+                
+                modify(c_magnitude=0, desc="MAG"),
+                modify(c_magnitude=0.01, desc="MAG"),
+                modify(c_magnitude=0.05, desc="MAG"),
+                modify(c_magnitude=0.1, desc="MAG"),
+                #modify(c_magnitude=0.25, desc="MAG"),                
+                #modify(c_magnitude=0.5, desc="MAG"),
+                #modify(c_magnitude=1, desc="MAG"), 
+
+                modify(epochs=25, desc="EPC"),
+                modify(epochs=50, desc="EPC"),
+                modify(epochs=75, desc="EPC"),
+                modify(epochs=100, desc="EPC"),
+                modify(epochs=150, desc="EPC"),
+                modify(epochs=175, desc="EPC"),
+                modify(epochs=200, desc="EPC"),
+                
+                #modify(epochs=100),
+                #modify(epochs=100, select_from=None, desc="MNT"),
+                #modify(epochs=200, select_from=None, desc="MNT"),
+                #modify(epochs=300, select_from=None, desc="MNT"),
+                #modify(epochs=400, select_from=None, desc="MNT"),
+                ##modify(epochs=500, select_from=None, desc="MNT"),
+                
+                #modify(c_model=0, desc="MDL"),
+                #modify(c_model=0.01, desc="MDL"),
+                #modify(c_model=0.05, desc="MDL"),
+                #modify(c_model=0.1, desc="MDL"),
+                #modify(c_model=0.2, desc="MDL"), 
+            ])
+    ]
+    return CombSaliencyCreator(runs)
+
+
 def get_mwcomp_cnn_sal_creator():
     baselines = [ZeroBaseline()]
     return MultiCompExpCreator(desc="MWComp", segsize=[40], nmasks=[500],  baselines = baselines, 
@@ -173,91 +269,7 @@ def get_mbench_sal_creator():
         #                    )
     ]
     return CombSaliencyCreator(runs)
-
     
-def get_abl_sal_creator(segsize=40, nmasks=500):
-
-    baselines = [ZeroBaseline()]
-
-    basic = dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
-                c_activation="",  epochs=300, select_from=150)
-
-    def modify(**kwargs):
-        args = basic.copy()
-        args.update(**kwargs)
-        return args
-
-
-    runs = [
-        #MultiCompExpCreator(
-        #    desc="SEG",
-        #    segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
-        #    baselines = baselines,
-        #    groups=[
-        #        basic
-        #    ]),
-        #MultiCompExpCreator(
-        #    desc="MSK",
-        #    segsize=[segsize], nmasks=[10, 100, 250, 500, 1000, 1500, 2000], 
-        #    baselines = baselines,
-        #    groups=[
-        #        basic,
-        #    ]),
-        #MultiCompExpCreator(
-        #    desc="MComp",
-        ##    segsize=[segsize], nmasks=nmasks, 
-        #   baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
-        #    groups=[basic]),
-
-        MultiCompExpCreator(
-            desc="MComp",
-            segsize=[segsize], nmasks=nmasks, 
-            baselines = baselines,
-            groups=[
-                modify(desc="CPONLY", c_tv=0, c_magnitude=0),        
-                #modify(c_model=0.01, desc="MDLA", c_mask_completeness=0),
-                #modify(c_model=0.05, desc="MDLA", c_mask_completeness=0),
-
-                #modify(c_mask_completeness=0, desc="NCP"),
-                #modify(c_mask_completeness=0.01, desc="NCP"),
-                ##modify(c_mask_completeness=0.1, desc="NCP"),
-                #modify(c_mask_completeness=1.0, desc="NCP"),
-
-                #modify(c_tv=0, desc="TVL"),
-                #modify(c_tv=0.1, desc="TVL"),
-                #modify(c_tv=0.2, desc="TVL"),
-                #modify(c_tv=0.5, desc="TVL"),
-                #modify(c_tv=1, desc="TVL"), ## 2
-                
-                #modify(c_magnitude=0, desc="MAG"),
-                #modify(c_magnitude=0.01, desc="MAG"),
-                #modify(c_magnitude=0.05, desc="MAG"),
-                #modify(c_magnitude=0.1, desc="MAG"),
-                #modify(c_magnitude=0.25, desc="MAG"),                
-                #modify(c_magnitude=0.5, desc="MAG"),
-                #modify(c_magnitude=1, desc="MAG"), 
-
-                #modify(epochs=100, desc="EPC"),
-                #modify(epochs=200, desc="EPC"),
-                #modify(epochs=300, desc="EPC"),
-                #modify(epochs=400, desc="EPC"),
-                #modify(epochs=500, desc="EPC"),
-                
-                #modify(epochs=100),
-                #modify(epochs=100, select_from=None, desc="MNT"),
-                #modify(epochs=200, select_from=None, desc="MNT"),
-                #modify(epochs=300, select_from=None, desc="MNT"),
-                #modify(epochs=400, select_from=None, desc="MNT"),
-                ##modify(epochs=500, select_from=None, desc="MNT"),
-                
-                #modify(c_model=0, desc="MDL"),
-                #modify(c_model=0.01, desc="MDL"),
-                #modify(c_model=0.05, desc="MDL"),
-                #modify(c_model=0.1, desc="MDL"),
-                #modify(c_model=0.2, desc="MDL"), 
-            ])
-    ]
-    return CombSaliencyCreator(runs)
 
 def get_ablvit_sal_creator():
     return get_abl_sal_creator(segsize=16, nmasks=1000)
