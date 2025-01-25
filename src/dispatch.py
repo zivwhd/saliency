@@ -109,13 +109,13 @@ def get_abl_sal_creator(nmasks=1000):
             ]),
         MultiCompExpCreator(
             desc="BSLN",
-            mask_groups=
+            mask_groups=basic_mask_groups,
             baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
             groups=[basic]),
 
         MultiCompExpCreator(
             desc="MComp",
-            segsize=[segsize], nmasks=nmasks, 
+            mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
                 #modify(desc="CPONLY", c_tv=0, c_magnitude=0),        
