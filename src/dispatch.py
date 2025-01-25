@@ -73,6 +73,7 @@ def get_mrcomp_vit_sal_creator():
 
 def get_abl_sal_creator(nmasks=1000):
 
+    logging.info("ablation sals")
     baselines = [ZeroBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
