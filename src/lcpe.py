@@ -628,6 +628,7 @@ class CompExpCreator:
 class MultiCompExpCreator:
 
     def __init__(self, nmasks=500, mask_groups={"":{16:500,48:500}}, baselines=[ZeroBaseline()],
+                 batch_size=32,
                  desc="MComp",
                  groups=[]):        
         self.mask_groups = mask_groups
