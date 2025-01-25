@@ -93,8 +93,7 @@ def get_abl_sal_creator(nmasks=1000):
     runs = [
         MultiCompExpCreator(
             desc="SEG",
-            mask_groups={f"_{seg}_":{seg:nmasks} for segsize in [8,16,32,40,48,56,64]},
-            segsize=[8,16,32,40,48,56,64], nmasks=nmasks, 
+            mask_groups={f"_{seg}_":{seg:nmasks} for seg in [8,16,32,40,48,56,64]},            
             baselines = baselines,
             groups=[
                 basic
