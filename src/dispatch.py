@@ -564,6 +564,7 @@ def create_model_summary_all(model_name):
     main = create_model_summary(model_name)
     ext = create_model_summary(model_name, extended=True)
     merged = pd.merge(main, ext, on=['model', 'variant'], how='left')
+    base_csv_path = os.path.join("results", model_name)
     merged.to_csv(f'{base_csv_path}/all_summary.csv', index=False)
 
 
