@@ -650,7 +650,7 @@ if __name__ == '__main__':
             for name in model_names:
                 create_model_summary(name, extended=args.ext)
         elif args.action == "asummary":
-            create_model_summary_all(args.model, extended=args.ext)
+            create_model_summary_all(args.model)
         elif args.action == "create_sals":        
             model_name = args.model
             sal_names = args.sal
