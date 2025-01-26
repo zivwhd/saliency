@@ -558,6 +558,15 @@ def create_model_summary(model_name, extended=False):
     df.to_csv(f'{base_csv_path}/{emark}results.csv', index=False)
     smry = summarize_scores_df(df, extended=extended)
     smry.to_csv(f'{base_csv_path}/{emark}summary.csv', index=False)
+    return smry
+
+def create_model_summary_all(model_name):
+    main = create_model_summary(model_name)
+    ext = create_model_summary(model_name, extended=True)
+    merged = pd.merge(main, ext, on=['model', 'variant'], how='left')
+    merged.to_csv(f'{base_csv_path}/all_summary.csv', index=False)
+
+
 
 def get_creators():
     ptrn = re.compile("get_(.*)_sal_creator")
@@ -570,7 +579,7 @@ ALL_MODELS = CNN_MODELS + VIT_MODELS
 def get_args(): 
     creators = get_creators() + ['any','all']
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "all"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "asummary", "all"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
@@ -639,6 +648,8 @@ if __name__ == '__main__':
                 model_names = [args.model]
             for name in model_names:
                 create_model_summary(name, extended=args.ext)
+        elif args.action == "asummary":
+            create_model_summary_all(arg.model, extended=args.ext)
         elif args.action == "create_sals":        
             model_name = args.model
             sal_names = args.sal
