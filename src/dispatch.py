@@ -54,7 +54,7 @@ def get_mrcomp_cnn_sal_creator():
         c_activation="",  epochs=300, select_from=150
     )
 
-def get_mrcomp_vit_sal_creator():
+def get_mrcomp_sal_creator():
     ## desc="MrCompA", segsize=[500,250,250], nmasks=[16,24,32],
     ## desc="MrCompB", segsize=[16,48], nmasks=[500,500],
     ## desc="MrCompC", segsize=[16,48], nmasks=[500,500], lr=0.01, epochs=500, ## this one is good
