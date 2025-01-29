@@ -34,21 +34,21 @@ parser.add_argument('--batch_size', default=32, type=int,
 parser.add_argument('--nr_itrs', default=2501, type=int,
                     help='batch size for protocols that do not require custom BS such as accuracy')
                     
-parser.add_argument('--accuracy', default=False, action='store_true',
+parser.add_argument('--accuracy', default=True, action='store_true',
                     help='compute accuracy')
-parser.add_argument('--controlled_synthetic_data_check', default=False, action='store_true',
+parser.add_argument('--controlled_synthetic_data_check', default=True, action='store_true',
                     help='compute controlled synthetic data check')
-parser.add_argument('--single_deletion', default=False, action='store_true',
+parser.add_argument('--single_deletion', default=True, action='store_true',
                     help='compute single deletion')
-parser.add_argument('--preservation_check', default=False, action='store_true',
+parser.add_argument('--preservation_check', default=True, action='store_true',
                     help='compute preservation check')
-parser.add_argument('--deletion_check', default=False, action='store_true',
+parser.add_argument('--deletion_check', default=True, action='store_true',
                     help='compute deletion check')
-parser.add_argument('--target_sensitivity', default=False, action='store_true',
+parser.add_argument('--target_sensitivity', default=True, action='store_true',
                     help='compute target sensitivity')
-parser.add_argument('--distractibility', default=False, action='store_true',
+parser.add_argument('--distractibility', default=True, action='store_true',
                     help='compute distractibility')
-parser.add_argument('--background_independence', default=False, action='store_true',
+parser.add_argument('--background_independence', default=True, action='store_true',
                     help='compute background dependence')
 
 
