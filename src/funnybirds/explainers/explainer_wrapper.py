@@ -133,8 +133,8 @@ class STEWrapper:
         sd = self.inner(self.me, input, target)
         assert(len(sd) == 1)
         rv = list(sd.values())[0]        
-        print("####", rv.shape)
-        return rv
+        print("####", rv.shape)        
+        return rv.cpu()
 
 class STEAttributionExplainer(AbstractAttributionExplainer):
 

@@ -89,9 +89,9 @@ def main():
     ######
     me = ModelEnv(model_name)
     me.model = model.model
-    print("=====================")
-    print(model)
-    print("=====================")
+    #print("=====================")
+    #print(model)
+    #print("=====================")
 
     # create explainer
     if args.explainer == 'InputXGradient':
