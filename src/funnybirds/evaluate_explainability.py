@@ -88,7 +88,7 @@ def main():
 
     ######
     me = ModelEnv(model_name)
-    me.model = model
+    me.model = model.model
     print("=====================")
     print(model)
     print("=====================")
