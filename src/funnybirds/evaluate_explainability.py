@@ -63,6 +63,7 @@ def main():
     torch.manual_seed(args.seed)
 
     # create model
+    model_name = args.model
     if args.model == 'resnet50':
         model = resnet50(num_classes = 50)
         model = StandardModel(model)
@@ -70,6 +71,7 @@ def main():
         model = vgg16(num_classes = 50)
         model = StandardModel(model)
     elif args.model == 'vit_b_16':
+        model_name = "vit_base_patch16_224"
         if args.explainer == 'CheferLRP':
             model = vit_LRP(num_classes=50)
         else:
@@ -84,8 +86,8 @@ def main():
     model.eval()
 
     ######
-    me = ModelEnv()
-    me.model = model
+    me = ModelEnv(model_name)
+    me.model = model()
 
     # create explainer
     if args.explainer == 'InputXGradient':
