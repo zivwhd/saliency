@@ -131,9 +131,11 @@ class CaptumAttributionExplainer(AbstractAttributionExplainer):
     """
     def explain(self, input, target=None, baseline=None):
         if self.explainer_name == 'InputXGradient': 
-            return self.explainer.attribute(input, target=target)
+            return self.explainer.attribute(input, target=target)        
         elif self.explainer_name == 'IntegratedGradients':
-            return self.explainer.attribute(input, target=target, baselines=self.baseline, n_steps=50)
+            rv =  self.explainer.attribute(input, target=target, baselines=self.baseline, n_steps=50)
+            print("###", type(input), input.shape, target, type(rv), rv.shape)
+            return rv
 
 class ViTGradCamExplainer(AbstractAttributionExplainer):
     def __init__(self, model):

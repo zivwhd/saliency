@@ -99,6 +99,8 @@ def main():
     else:
         print('Explainer not implemented')
 
+    import time
+    start_time = time.time()
     accuracy, csdc, pc, dc, distractibility, sd, ts = -1, -1, -1, -1, -1, -1, -1
 
     if args.accuracy:
@@ -151,5 +153,7 @@ def main():
     print('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(accuracy, round(csdc[best_threshold],5), round(pc[best_threshold],5), round(dc[best_threshold],5), round(distractibility[best_threshold],5), background_independence, sd, ts))
     print('Best threshold:', best_threshold)
 
+    end_time = time.time()
+    print(f"Total time: {end_time-start_time}")
 if __name__ == '__main__':
     main()
