@@ -92,6 +92,7 @@ class AbstractAttributionExplainer(AbstractExplainer):
             color_available = torch.all(part_map == torch_color, dim = 1, keepdim=True).float()
             
             color_available_dilated = dilation1(color_available)
+            print("$$$", attribution.device, color_available_dilated, image.device)
             attribution_in_part = attribution * color_available_dilated
             attribution_in_part = attribution_in_part.sum()
 
@@ -134,6 +135,7 @@ class STEWrapper:
         assert(len(sd) == 1)
         rv = list(sd.values())[0]        
         print("####", rv.shape)        
+        #torch.Size([1, 256, 256])
         return rv.cpu()
 
 class STEAttributionExplainer(AbstractAttributionExplainer):
