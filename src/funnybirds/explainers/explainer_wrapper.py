@@ -136,6 +136,14 @@ class STEWrapper:
         print("####", rv.shape)
         return rv
 
+class STEAttributionExplainer(AbstractAttributionExplainer):
+
+    def __init__(self, inner, me):
+        super().__init__(STEWrapper(inner, me))
+
+    def explain(self, input, target=None, baseline=None):
+        return self.explainer.explain(input, target)
+
 class CaptumAttributionExplainer(AbstractAttributionExplainer):
     
     """
