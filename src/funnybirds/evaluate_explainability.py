@@ -62,6 +62,7 @@ def main():
     random.seed(args.seed)
     torch.manual_seed(args.seed)
 
+    print(f"### args: {args}")
     # create model
     model_name = args.model
     if args.model == 'resnet50':
@@ -87,7 +88,7 @@ def main():
 
     ######
     me = ModelEnv(model_name)
-    me.model = model()
+    me.model = model
 
     # create explainer
     if args.explainer == 'InputXGradient':
