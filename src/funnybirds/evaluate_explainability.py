@@ -11,7 +11,8 @@ from models.ViT.ViT_LRP import vit_base_patch16_224 as vit_LRP
 from models.model_wrapper import StandardModel, ViTModel
 from evaluation_protocols import accuracy_protocol, controlled_synthetic_data_check_protocol, single_deletion_protocol, preservation_check_protocol, deletion_check_protocol, target_sensitivity_protocol, distractibility_protocol, background_independence_protocol
 from explainers.explainer_wrapper import CaptumAttributionExplainer, ViTGradCamExplainer, ViTRolloutExplainer, ViTCheferLRPExplainer, CustomExplainer
-
+from explainers.explainer_wrapper import STEWrapper, AbstractAttributionExplainer
+from benchmark import ModelEnv
 
 parser = argparse.ArgumentParser(description='FunnyBirds - Explanation Evaluation')
 parser.add_argument('--data', metavar='DIR', required=True,
@@ -82,6 +83,10 @@ def main():
     model = model.to(device)
     model.eval()
 
+    ######
+    me = ModelEnv()
+    me.model = model
+
     # create explainer
     if args.explainer == 'InputXGradient':
         explainer = InputXGradient(model)
@@ -94,6 +99,10 @@ def main():
         explainer = ViTRolloutExplainer(model)
     elif args.explainer == 'CheferLRP':
         explainer = ViTCheferLRPExplainer(model)
+    elif args.explainer == "xGC":
+        from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
+        salc = CaptumCamSaliencyCreator([CMethod.GradCAM])
+        explainer = AbstractAttributionExplainer(STEWrapper(salc, me))
     elif args.explainer == 'CustomExplainer':
         ...
     else:

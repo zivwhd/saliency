@@ -122,6 +122,20 @@ class AbstractAttributionExplainer(AbstractExplainer):
     def get_p_thresholds(self):
         return np.linspace(0.01, 0.50, num=80)
     
+
+class STEWrapper:
+
+    def __init__(self, inner, me):
+        self.inner = inner
+        self.me = me
+
+    def explain(self, input, target):
+        sd = self.inner(self.me, input, target)
+        assert(len(sd) == 1)
+        rv = list(sd.values())[0]        
+        print("####", rv.shape)
+        return rv
+
 class CaptumAttributionExplainer(AbstractAttributionExplainer):
     
     """
@@ -134,7 +148,8 @@ class CaptumAttributionExplainer(AbstractAttributionExplainer):
             return self.explainer.attribute(input, target=target)        
         elif self.explainer_name == 'IntegratedGradients':
             rv =  self.explainer.attribute(input, target=target, baselines=self.baseline, n_steps=50)
-            print("###", type(input), input.shape, target, type(rv), rv.shape)
+            # #print("###", type(input), input.shape, target, type(rv), rv.shape)
+            ### <class 'torch.Tensor'> torch.Size([1, 3, 256, 256]) tensor([0], device='cuda:0') <class 'torch.Tensor'> torch.Size([1, 3, 256, 256])
             return rv
 
 class ViTGradCamExplainer(AbstractAttributionExplainer):
