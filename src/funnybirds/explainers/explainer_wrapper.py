@@ -6,6 +6,7 @@ import numpy as np
 from abc import abstractmethod
 from captum.attr import LayerAttribution
 from PIL import Image
+import sys
 
 from models.ViT.ViT_explanation_generator import Baselines, LRP
 
@@ -92,7 +93,7 @@ class AbstractAttributionExplainer(AbstractExplainer):
             color_available = torch.all(part_map == torch_color, dim = 1, keepdim=True).float()
             
             color_available_dilated = dilation1(color_available)
-            print("$$$", attribution.device, color_available_dilated, image.device)
+            print("EEE", attribution.device, color_available_dilated, image.device, file=sys.stderr)
             attribution_in_part = attribution * color_available_dilated
             attribution_in_part = attribution_in_part.sum()
 
