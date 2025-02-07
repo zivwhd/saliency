@@ -104,7 +104,7 @@ def main():
         explainer = ViTCheferLRPExplainer(model)
     elif args.explainer == "xGC":
         from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
-        salc = CaptumCamSaliencyCreator([CMethod.GradCAM])
+        salc = CamSaliencyCreator([CMethod.GradCAM])
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == 'CustomExplainer':
         ...
