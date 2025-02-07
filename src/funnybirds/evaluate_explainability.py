@@ -14,6 +14,7 @@ from explainers.explainer_wrapper import CaptumAttributionExplainer, ViTGradCamE
 from explainers.explainer_wrapper import STEWrapper, AbstractAttributionExplainer, STEAttributionExplainer
 from benchmark import ModelEnv
 
+
 parser = argparse.ArgumentParser(description='FunnyBirds - Explanation Evaluation')
 parser.add_argument('--data', metavar='DIR', required=True,
                     help='path to dataset (default: imagenet)')
@@ -21,7 +22,8 @@ parser.add_argument('--model', required=True,
                     choices=['resnet50', 'vgg16', 'vit_b_16'],
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
-                    choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer','xGC'],
+                    choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
+                             'xGC', 'xLSC'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -109,6 +111,15 @@ def main():
         from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
         salc = CamSaliencyCreator([CMethod.GradCAM])
         explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xLSC":
+        from lcpe import CompExpCreator
+        salc = CompExpCreator(
+            desc="MrCompJ", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, 
+            epochs=101, ##select_from=10, select_freq=3, select_del=1.0,
+            c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+            c_activation="")
+        explainer = STEAttributionExplainer(salc, me)
+
     elif args.explainer == 'CustomExplainer':
         ...
     else:
