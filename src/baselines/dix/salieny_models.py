@@ -51,7 +51,7 @@ class GradModel(nn.Module):
             if GradModel.model is not None:
                 model = GradModel.model
                 print("===============")
-                print(model))
+                print(model)
                 print("===============")
             else:
                 model = create_resnet50_module(requires_grad=True, pretrained=True)
