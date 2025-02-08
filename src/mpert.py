@@ -117,7 +117,8 @@ class IEMPertSaliencyCreator:
         
         mask = torch.ones((1, 1, 28, 28), dtype = torch.float32, requires_grad=True, device=inp.device)
         #mask = torch.randn(1,1,28,28).to(inp.device) * 0.1 + 1.0
-        upsample = torch.nn.UpsamplingBilinear2d(size=(224, 224)).to(inp.device)
+        shape = tuple(inp.shape[-2:])
+        upsample = torch.nn.UpsamplingBilinear2d(size=shape).to(inp.device)
         optimizer = torch.optim.Adam([mask], lr=learning_rate)
 
         #target = torch.nn.Softmax()(model(img))
