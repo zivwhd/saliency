@@ -284,7 +284,7 @@ def get_by_class_saliency_dix(inp,
 
     t = tensor2cv(last_image.detach().cpu())
     shape = inp.shape[-2:]
-    print("[5]", shape)
+    print("[5]", shape, t.shape)
     im, score, heatmap_cv, blended_img_mask, img_cv = blend_image_and_heatmap(t, heatmap, use_mask=use_mask, H=shape[0], W=shape[1])
 
     return t, im, heatmap_cv, blended_img_mask, last_image, score, heatmap
