@@ -333,7 +333,8 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
                          c_activation=None, c_norm=False,                         
                          **kwargs):
     # Initialize the model with the given initial explanation
-    mexp = MaskedExplanationSum(initial_value=initial_explanation)
+    shape = inp.shape[-2:]    
+    mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1])
     mexp = mexp.to(data.device)
 
     if not c_activation:
@@ -551,7 +552,7 @@ class CompExpCreator:
 
         parts = list(zip(self.segsize, self.nmasks))
         for segsize, nmasks in parts:
-            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline)            
+            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape)            
             logging.debug(f"generating {nmasks} masks and responses")
             print(f"generating {nmasks} masks and responses segsize={segsize}")
             mgen.gen(fmdl, inp, nmasks, batch_size=self.batch_size)        
@@ -602,7 +603,7 @@ class CompExpCreator:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
             #initial = (torch.randn(224,224)*0.2+1).abs()
             print("setting initial")
-            initial = (torch.randn(224,224)*0.2+3)
+            initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
         
