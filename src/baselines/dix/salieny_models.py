@@ -50,6 +50,9 @@ class GradModel(nn.Module):
         elif model_name == 'resnet50':            
             if GradModel.model is not None:
                 model = GradModel.model
+                print("===============")
+                print(model))
+                print("===============")
             else:
                 model = create_resnet50_module(requires_grad=True, pretrained=True)
             self.features = model[:feature_layer]
