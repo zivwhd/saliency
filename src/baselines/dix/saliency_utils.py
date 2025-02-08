@@ -45,7 +45,7 @@ def get_similarity_func(metric):
         return torch.dot
 
 
-def blend_image_and_heatmap(img_cv, heatmap, use_mask=False):
+def blend_image_and_heatmap(img_cv, heatmap, use_mask=False, H=224, W=224):
     heatmap -= np.min(heatmap)
 
     if heatmap.max() != torch.tensor(0.):
@@ -56,7 +56,7 @@ def blend_image_and_heatmap(img_cv, heatmap, use_mask=False):
     if use_mask:
         score = cv2.resize(heatmap, (img_cv.shape[1], img_cv.shape[0]))
         heatmap_cv = np.uint8(score)
-        blended_img_mask = np.uint8((np.repeat(score.reshape(224, 224, 1), 3, axis=2) * img_cv))
+        blended_img_mask = np.uint8((np.repeat(score.reshape(H, W, 1), 3, axis=2) * img_cv))
 
     heatmap = np.max(heatmap) - heatmap
     if np.max(heatmap) < 255.:

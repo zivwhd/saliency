@@ -143,7 +143,7 @@ def main():
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xEP":
         from extpert import ExtPertSaliencyCreator        
-        salc = ExtPertSaliencyCreator()
+        salc = ExtPertSaliencyCreator(single=True)
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xIG":
         from adaptors_gig import IGSaliencyCreator

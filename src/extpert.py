@@ -17,8 +17,8 @@ def qmet(smdl, inp, sal, steps):
 
 class ExtPertSaliencyCreator:
 
-    def __init__(self):
-        pass
+    def __init__(self, single=False):
+        self.single=single
 
     def __call__(self, me, inp, catidx):   
         start_time = time.time()
@@ -62,5 +62,7 @@ class ExtPertSaliencyCreator:
                 res[f'ExtPertM'] = cmask
         duration = time.time() - start_time
         logging.info(f"run-time: {duration}")
+        if self.single:
+            res = {'ExtPertM' : res[f'ExtPertM']}
         return res
 
