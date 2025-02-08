@@ -1,6 +1,6 @@
 from torchray.attribution.extremal_perturbation import extremal_perturbation, contrastive_reward
 from torchray.utils import get_device
-import logging, time
+import logging, time, sys
 import torch
 
 
@@ -28,6 +28,7 @@ class ExtPertSaliencyCreator:
         desc = f"ExtPert"        
         areas = [0.05, 0.1, 0.2, 0.4, 0.6, 0.8]
 
+        print("Category:", catidx, file=sys.stderr)
         masks, _ = extremal_perturbation(
             me.model, inp, catidx,
             reward_func=contrastive_reward,
