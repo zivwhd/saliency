@@ -132,6 +132,8 @@ class STEWrapper:
         self.me = me
 
     def explain(self, input, target):
+        if type(target) != int:
+            target = int(target[0].item())
         sd = self.inner(self.me, input, target)
         assert(len(sd) == 1)
         rv = list(sd.values())[0]        
