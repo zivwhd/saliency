@@ -278,24 +278,25 @@ def get_by_class_saliency_dix(inp,
                                             mode='trilinear',
                                             align_corners=False).squeeze()
     integrated_heatmaps = integrated_heatmaps11
-    heatmap = make_resize_norm(integrated_heatmaps)
+    shape = inp.shape[-2:]
+    heatmap = make_resize_norm(integrated_heatmaps, H=shape[0], W=shape[1])
 
     last_image = images[-1]
 
     t = tensor2cv(last_image.detach().cpu())
-    shape = inp.shape[-2:]
+    
     print("[5]", shape, t.shape)
     im, score, heatmap_cv, blended_img_mask, img_cv = blend_image_and_heatmap(t, heatmap, use_mask=use_mask, H=shape[0], W=shape[1])
-
+    
     return t, im, heatmap_cv, blended_img_mask, last_image, score, heatmap
 
 
 
-def make_resize_norm(act_grads):
+def make_resize_norm(act_grads, H=224, W=224):
     heatmap = torch.sum(act_grads.squeeze(0), dim=0)
     heatmap = heatmap.unsqueeze(0).unsqueeze(0)
 
-    heatmap = F.interpolate(heatmap, size=(224, 224), mode='bicubic', align_corners=False)
+    heatmap = F.interpolate(heatmap, size=(H, W), mode='bicubic', align_corners=False)
     heatmap -= heatmap.min()
     heatmap /= heatmap.max()
     heatmap = heatmap.squeeze().cpu().data.numpy()
