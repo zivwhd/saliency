@@ -58,6 +58,7 @@ class GradModel(nn.Module):
                                               model.layer1, model.layer2, model.layer3, model.layer4
                                               )
                 self.post_features = model.avgpool
+                self.avgpool = model.avgpool
                 self.classifier = model.fc
             else:
                 model = create_resnet50_module(requires_grad=True, pretrained=True)
