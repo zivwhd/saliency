@@ -139,7 +139,7 @@ def main():
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xDIX":
         from dix_cnn import DixCnnSaliencyCreator
-        salc = DixCnnSaliencyCreator()
+        salc = DixCnnSaliencyCreator(alt_model=True)
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xEP":
         from extpert import ExtPertSaliencyCreator        

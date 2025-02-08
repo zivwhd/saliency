@@ -330,9 +330,12 @@ def gen_dix(me, inp, catidx):
     return heatmap
 
 class DixCnnSaliencyCreator:
-    def __init__(self):
-        pass
+    def __init__(self, alt_model=False):
+        self.alt_model = alt_model
+
     def __call__(self, me, inp, catidx):           
+        if self.alt_model:
+            GradModel.model = me.model
         sal = gen_dix(me,inp,catidx)
         return {"DixCnn" : torch.tensor(sal).unsqueeze(0)}
     

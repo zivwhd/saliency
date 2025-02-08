@@ -35,19 +35,23 @@ def create_resnet101_module(pretrained=True, requires_grad=False):
 
 
 class GradModel(nn.Module):
+    model = None
     def __init__(self, model_name='resnet50', feature_layer=8):
         print("GradModel", model_name, feature_layer)
         super(GradModel, self).__init__()
         self.post_features = None
         self.model_str = 'None'
-        if model_name == 'resnet101':
-            model = create_resnet101_module(requires_grad=True, pretrained=True)
+        if model_name == 'resnet101':            
+            model = create_resnet101_module(requires_grad=True, pretrained=True)            
             self.features = model[:feature_layer]
             self.post_features = model[feature_layer:-1]
             self.avgpool = model[-1:]
             self.classifier = torchvision.models.resnet101(pretrained=True).fc
         elif model_name == 'resnet50':            
-            model = create_resnet50_module(requires_grad=True, pretrained=True)
+            if GradModel.model is not None:
+                model = GradModel.model
+            else:
+                model = create_resnet50_module(requires_grad=True, pretrained=True)
             self.features = model[:feature_layer]
             self.post_features = model[feature_layer:8] ## model[feature_layer:-1]
             self.avgpool = model[8:] ##model[feature_layer:]
