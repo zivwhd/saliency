@@ -53,12 +53,18 @@ class GradModel(nn.Module):
                 print("===============")
                 print(model)
                 print("===============")
+
+                self.features = nn.Sequential(model.conv1, model.bn1, model.relu, model.maxpool, 
+                                              model.layer1, model.layer2, model.layer3, model.layer4
+                                              )
+                self.post_features = model.avgpool
+                self.classifier = model.fc
             else:
                 model = create_resnet50_module(requires_grad=True, pretrained=True)
-            self.features = model[:feature_layer]
-            self.post_features = model[feature_layer:8] ## model[feature_layer:-1]
-            self.avgpool = model[8:] ##model[feature_layer:]
-            self.classifier = torchvision.models.resnet50(pretrained=True).fc
+                self.features = model[:feature_layer]
+                self.post_features = model[feature_layer:8] ## model[feature_layer:-1]
+                self.avgpool = model[8:] ##model[feature_layer:]
+                self.classifier = torchvision.models.resnet50(pretrained=True).fc
         elif model_name == 'resnet18':
             model = create_resnet18_module(requires_grad=True, pretrained=True)
             self.features = model[:feature_layer]
