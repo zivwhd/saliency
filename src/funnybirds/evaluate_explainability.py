@@ -151,7 +151,7 @@ def main():
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xGIG":
         from adaptors_gig import IGSaliencyCreator
-        salc = IGSaliencyCreator(methods=["IG"])        
+        salc = IGSaliencyCreator(methods=["GIG"])        
         explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xRISE":
         from RISE import RiseSaliencyCreator        
