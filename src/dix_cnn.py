@@ -337,5 +337,6 @@ class DixCnnSaliencyCreator:
         if self.alt_model:
             GradModel.model = me.model
         sal = gen_dix(me,inp,catidx)
+        print("###", sal.shape)
         return {"DixCnn" : torch.tensor(sal).unsqueeze(0)}
     
