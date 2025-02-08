@@ -145,6 +145,10 @@ def main():
         from extpert import ExtPertSaliencyCreator        
         salc = ExtPertSaliencyCreator(single=True)
         explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xMP":
+        from mpert import IEMPertSaliencyCreator 
+        salc = IEMPertSaliencyCreator()
+        explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xIG":
         from adaptors_gig import IGSaliencyCreator
         salc = IGSaliencyCreator(methods=["IG"])        
