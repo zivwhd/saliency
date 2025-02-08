@@ -23,7 +23,7 @@ parser.add_argument('--model', required=True,
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
-                             'xGC', 'xLSC'],
+                             'xGC', 'xLSC', 'xLC', 'xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -112,6 +112,23 @@ def main():
         from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
         salc = CamSaliencyCreator([CMethod.GradCAM])
         explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xGC++":
+        from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
+        salc = CamSaliencyCreator([CMethod.GradCAMPlusPlus])
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xFG":
+        from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
+        salc = CamSaliencyCreator([CMethod.FullGrad])
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xLC":
+        from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
+        salc = CamSaliencyCreator([CMethod.LayerCAM])
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xAC":
+        from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, CMethod
+        salc = CamSaliencyCreator([CMethod.AblationCAM])
+        explainer = STEAttributionExplainer(salc, me)
+        
     elif args.explainer == "xLSC":
         from lcpe import CompExpCreator
         salc = CompExpCreator(
@@ -119,6 +136,26 @@ def main():
             epochs=101, ##select_from=10, select_freq=3, select_del=1.0,
             c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
             c_activation="")
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xDIX":
+        from dix_cnn import DixCnnSaliencyCreator
+        salc = DixCnnSaliencyCreator()
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xEP":
+        from extpert import ExtPertSaliencyCreator        
+        salc = ExtPertSaliencyCreator()
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xIG":
+        from adaptors_gig import IGSaliencyCreator
+        salc = IGSaliencyCreator(methods=["IG"])        
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xGIG":
+        from adaptors_gig import IGSaliencyCreator
+        salc = IGSaliencyCreator(methods=["IG"])        
+        explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xRISE":
+        from RISE import RiseSaliencyCreator        
+        salc = RiseSaliencyCreator()
         explainer = STEAttributionExplainer(salc, me)
 
     elif args.explainer == 'CustomExplainer':
@@ -134,37 +171,45 @@ def main():
         print('Computing accuracy...')
         accuracy = accuracy_protocol(model, args)
         accuracy = round(accuracy, 5)
+        print(f'Result - Accuracy: {accuracy}')
 
     if args.controlled_synthetic_data_check:
         print('Computing controlled synthetic data check...')
         csdc = controlled_synthetic_data_check_protocol(model, explainer, args)
+        print(f'Result - CSDC: {csdc}')
 
     if args.target_sensitivity:
         print('Computing target sensitivity...')
         ts = target_sensitivity_protocol(model, explainer, args)
         ts = round(ts, 5)
+        print(f'Result - TS: {ts}')
 
     if args.single_deletion:
         print('Computing single deletion...')
         sd = single_deletion_protocol(model, explainer, args)
         sd = round(sd, 5)
+        print(f'Result - SD: {sd}')
 
     if args.preservation_check:
         print('Computing preservation check...')
         pc = preservation_check_protocol(model, explainer, args)
+        print(f'Result - PC: {pc}')
 
     if args.deletion_check:
         print('Computing deletion check...')
         dc = deletion_check_protocol(model, explainer, args)
+        print(f'Result - DC: {dc}')
 
     if args.distractibility:
         print('Computing distractibility...')
         distractibility = distractibility_protocol(model, explainer, args)
+        print(f'Result - dist: {distractibility}')
 
     if args.background_independence:
         print('Computing background independence...')
         background_independence = background_independence_protocol(model, args)
         background_independence = round(background_independence, 5)
+        print(f'Result - BI: {background_independence}')
     
     # select completeness and distractability thresholds such that they maximize the sum of both
     max_score = 0
