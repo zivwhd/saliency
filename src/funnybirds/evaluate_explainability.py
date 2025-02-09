@@ -91,7 +91,8 @@ def main():
     ######
     me = ModelEnv(model_name)
     me.model = model.model
-    me.shape = (256,256)
+    if args.model == "resnet50":
+        me.shape = (256,256)
     #print("=====================")
     #print(model)
     #print("=====================")
