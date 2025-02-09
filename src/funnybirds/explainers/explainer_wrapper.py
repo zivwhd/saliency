@@ -147,6 +147,7 @@ class STEAttributionExplainer(AbstractAttributionExplainer):
         super().__init__(STEWrapper(inner, me))
 
     def explain(self, input, target=None, baseline=None):
+        print("### inp:", input.shape)
         return self.explainer.explain(input, target)
 
 class CaptumAttributionExplainer(AbstractAttributionExplainer):
