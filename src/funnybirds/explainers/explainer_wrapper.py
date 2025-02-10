@@ -137,7 +137,7 @@ class STEWrapper:
         sd = self.inner(self.me, input, target)
         assert(len(sd) == 1)
         rv = list(sd.values())[0]        
-        #print("####", rv.shape)        
+        print("#### exp:", rv.shape)        
         #torch.Size([1, 256, 256])
         return rv.to(self.me.device)
 
