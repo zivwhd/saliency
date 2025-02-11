@@ -258,7 +258,7 @@ def compute_rollout_attention(all_layer_matrices, start_layer=0):
 
 
 def blend_transformer_heatmap(image, x1, resize=False):
-    print("### shape", image.shape)
+    #print("### shape", image.shape)
     shape = image.shape[-2:]
 
     
