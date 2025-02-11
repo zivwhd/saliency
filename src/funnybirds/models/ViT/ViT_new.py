@@ -84,7 +84,7 @@ class Attention(nn.Module):
     def get_attention_map(self):
         return self.attention_map
 
-    def forward(self, x, register_hook=False):
+    def forward(self, x, register_hook=False, attn_prob=None):
         b, n, _, h = *x.shape, self.num_heads
 
         # self.save_output(x)
@@ -95,8 +95,11 @@ class Attention(nn.Module):
 
         dots = torch.einsum('bhid,bhjd->bhij', q, k) * self.scale
 
-        attn = dots.softmax(dim=-1)
-        attn = self.attn_drop(attn)
+        if attn_prob is not None:
+            attn = attn_prob
+        else:
+            attn = dots.softmax(dim=-1)
+            attn = self.attn_drop(attn)
 
         out = torch.einsum('bhij,bhjd->bhid', attn, v)
 
@@ -121,10 +124,15 @@ class Block(nn.Module):
         mlp_hidden_dim = int(dim * mlp_ratio)
         self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
 
-    def forward(self, x, register_hook=False):
-        x = x + self.attn(self.norm1(x), register_hook=register_hook)
+    def forward(self, x, register_hook=False, attn_prob=None):
+        x = x + self.attn(self.norm1(x), register_hook=register_hook, attn_prob=attn_prob)
         x = x + self.mlp(self.norm2(x))
         return x
+
+    #def forward(self, x, register_hook=False):
+    #    x = x + self.attn(self.norm1(x), register_hook=register_hook)
+    #    x = x + self.mlp(self.norm2(x))
+    #    return x
 
 
 class PatchEmbed(nn.Module):
@@ -192,7 +200,7 @@ class VisionTransformer(nn.Module):
     def no_weight_decay(self):
         return {'pos_embed', 'cls_token'}
 
-    def forward(self, x, register_hook=False):
+    def forward(self, x, register_hook=False, attn_prob=None, layer_num=1):
         B = x.shape[0]
         x = self.patch_embed(x)
 
@@ -201,8 +209,18 @@ class VisionTransformer(nn.Module):
         x = x + self.pos_embed
         x = self.pos_drop(x)
 
-        for blk in self.blocks:
-            x = blk(x, register_hook=register_hook)
+        block_num = len(self.blocks)
+        if attn_prob is not None:
+            first = self.blocks[:-layer_num]
+            last = self.blocks[(block_num - layer_num + 1):]
+            for blk in first:
+                x = blk(x, register_hook=register_hook)
+            x = self.blocks[-layer_num](x, register_hook=register_hook, attn_prob=attn_prob)
+            for blk in last:
+                x = blk(x, register_hook=register_hook)
+        else:
+            for blk in self.blocks:
+                x = blk(x, register_hook=register_hook)
 
         x = self.norm(x)
         x = x[:, 0]
