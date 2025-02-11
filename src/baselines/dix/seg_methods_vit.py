@@ -9,6 +9,7 @@ from tqdm import tqdm
 from saliency_utils import *
 from salieny_models import *
 from torchvision.datasets import VOCDetection
+import torch.nn.functional as F
 
 ROOT_IMAGES = "{0}/data/ILSVRC2012_img_val"
 
@@ -256,15 +257,25 @@ def compute_rollout_attention(all_layer_matrices, start_layer=0):
     return joint_attention
 
 
-def blend_transformer_heatmap(image, x1):
+def blend_transformer_heatmap(image, x1, resize=False):
+    print("### shape", image.shape)
+    shape = image.shape[-2:]
+
+    
     heatmap = x1.unsqueeze(0).unsqueeze(0)
-    heatmap = torch.nn.functional.interpolate(heatmap, scale_factor=16, mode='bilinear')
+    if resize:
+        print("###0", heatmap.shape)
+        heatmap = F.interpolate(heatmap, size=tuple(shape), mode='bilinear', align_corners=False)
+        print("###1", heatmap.shape)
+        heatmap2 = torch.nn.functional.interpolate(heatmap, scale_factor=16, mode='bilinear')
+        print("###2", heatmap.shape)
+    else:
+        heatmap = torch.nn.functional.interpolate(heatmap, scale_factor=16, mode='bilinear')
+    
     heatmap -= heatmap.min()
     heatmap /= heatmap.max()
     heatmap = heatmap.squeeze().cpu().data.numpy()
     t = tensor2cv(image, is_transformer=True)
-    print("### shape", image.shape)
-    shape = image.shape[-2:]
     im, score, heatmap_cv, blended_img_mask, img_cv = blend_image_and_heatmap(t, heatmap, use_mask=True, H=shape[0], W=shape[1])
 
     return im, score, heatmap_cv, blended_img_mask, heatmap, t
