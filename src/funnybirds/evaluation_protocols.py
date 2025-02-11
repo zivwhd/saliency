@@ -88,6 +88,7 @@ def accuracy_protocol(model, args):
 
         # compute output
         output = model(images)
+        print("## acc", images.shape, output.shape)
 
         # measure accuracy and record loss
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
