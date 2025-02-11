@@ -116,6 +116,8 @@ def get_dix_vit(vit_ours_model, feature_extractor, device, index, image, layer_n
     imgs = image
     attention_probs = []
     attention_grads = []
+
+    inner = getattr(vit_ours_model, "model", vit_ours_model)
     for image in imgs:
         output = vit_ours_model(image.unsqueeze(0).cuda(), register_hook=True)
         if index == None:
@@ -129,7 +131,7 @@ def get_dix_vit(vit_ours_model, feature_extractor, device, index, image, layer_n
         one_hot.backward(retain_graph=True)
         cams = []
         block_attn = []
-        for blk in vit_ours_model.blocks:
+        for blk in inner.blocks:
             grad = blk.attn.get_attn_gradients()
             cam = blk.attn.get_attention_map()
             block_attn.append(cam)
@@ -158,7 +160,7 @@ def get_dix_vit(vit_ours_model, feature_extractor, device, index, image, layer_n
             with torch.no_grad():
                 block_cams = []
                 block_grads = []
-                for blk in vit_ours_model.blocks:
+                for blk in inner.blocks:
                     grad = blk.attn.get_attn_gradients()
                     cam = blk.attn.get_attention_map()
                     if AGGREGATE_BEFORE:
