@@ -268,7 +268,7 @@ def blend_transformer_heatmap(image, x1, resize=False):
         heatmap = F.interpolate(heatmap, size=tuple(shape), mode='bilinear', align_corners=False)
         print("###1", heatmap.shape)
         heatmap2 = torch.nn.functional.interpolate(heatmap, scale_factor=16, mode='bilinear')
-        print("###2", heatmap.shape)
+        print("###2", heatmap2.shape)
     else:
         heatmap = torch.nn.functional.interpolate(heatmap, scale_factor=16, mode='bilinear')
     
