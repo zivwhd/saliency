@@ -55,9 +55,9 @@ class ViTModel(AbstractModel):
         model: PyTorch neural network model
     """
 
-    def forward(self, input):
+    def forward(self, input, register_hook=False):
         input = nn.functional.interpolate(input, (224,224)) # ViT expects input of size 224x224
-        return self.model(input)
+        return self.model(input, register_hook=register_hook)
 
     def load_state_dict(self, state_dict):
         self.model.load_state_dict(state_dict)
