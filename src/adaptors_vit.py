@@ -33,9 +33,9 @@ class AttrVitSaliencyCreator:
 
 
 class DimplVitSaliencyCreator:
-    def __init__(self, methods = ["dix", "t-attr", "gae"]):
+    def __init__(self, methods = ["dix", "t-attr", "gae"], alt_model=None):
         self.methods = methods
-        
+        self.alt_model = alt_model
 
     def __call__(self, me, inp, catidx):
         from baselines.dix import setup
@@ -46,7 +46,10 @@ class DimplVitSaliencyCreator:
         from seg_methods_vit import blend_transformer_heatmap, transformer_attribution,  get_dix_vit, generate_map_gae
 
         device = inp.device
-        if me.arch == "vit_small_patch16_224":
+
+        if self.alt_model is not None:
+            model = self.alt_model
+        elif me.arch == "vit_small_patch16_224":
             #print("### small vit")
             model = ViTmodel.vit_small_patch16_224(pretrained=True).to(device)
         elif me.arch == "vit_base_patch16_224":

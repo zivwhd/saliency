@@ -23,7 +23,8 @@ parser.add_argument('--model', required=True,
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
-                             'xGC', 'xLSC', 'xLC', 'xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP'],
+                             'xGC', 'xLSC', 'xLC', 'xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
+                             'xDIXv'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -145,6 +146,11 @@ def main():
         from dix_cnn import DixCnnSaliencyCreator
         salc = DixCnnSaliencyCreator(alt_model=True)
         explainer = STEAttributionExplainer(salc, me)
+    elif args.explainer == "xDIXv":
+        from adaptors_vit import DimplVitSaliencyCreator        
+        salc = DimplVitSaliencyCreator(['dix'], alt_model=model)
+        explainer = STEAttributionExplainer(salc, me)
+     
     elif args.explainer == "xEP":
         from extpert import ExtPertSaliencyCreator        
         salc = ExtPertSaliencyCreator(single=True)
