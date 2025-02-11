@@ -90,8 +90,11 @@ def main():
 
     ######
     me = ModelEnv(model_name)
-    me.model = model.model
-    #if args.model == "resnet50":
+    if args.model == "resnet50":
+        me.model = model.model
+    else:
+        me.model = model
+    
     me.shape = (256,256)
     #print("=====================")
     #print(model)
