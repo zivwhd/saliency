@@ -137,7 +137,7 @@ class STEWrapper:
         sd = self.inner(self.me, input, target)
         assert(len(sd) == 1)
         rv = list(sd.values())[0]        
-        print("#### exp:", rv.shape)        
+        #print("#### exp:", rv.shape)        
         #torch.Size([1, 256, 256])
         return rv.to(self.me.device)
 
@@ -147,7 +147,7 @@ class STEAttributionExplainer(AbstractAttributionExplainer):
         super().__init__(STEWrapper(inner, me))
 
     def explain(self, input, target=None, baseline=None):
-        print("### inp:", input.shape)
+        #print("### inp:", input.shape)
         return self.explainer.explain(input, target)
 
 class CaptumAttributionExplainer(AbstractAttributionExplainer):
