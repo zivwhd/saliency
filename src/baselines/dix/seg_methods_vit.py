@@ -263,8 +263,9 @@ def blend_transformer_heatmap(image, x1):
     heatmap /= heatmap.max()
     heatmap = heatmap.squeeze().cpu().data.numpy()
     t = tensor2cv(image, is_transformer=True)
+    print("### shape", image.shape)
     shape = image.shape[-2:]
-    im, score, heatmap_cv, blended_img_mask, img_cv = blend_image_and_heatmap(t, heatmap, use_mask=True)
+    im, score, heatmap_cv, blended_img_mask, img_cv = blend_image_and_heatmap(t, heatmap, use_mask=True, H=shape[0], W=shape[1])
 
     return im, score, heatmap_cv, blended_img_mask, heatmap, t
 
