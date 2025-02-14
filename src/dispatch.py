@@ -597,7 +597,7 @@ def get_args():
     parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
     parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
-    parser.add_argument('--quantos', action='store_true', default=False, help="Enable extended mode")    
+    parser.add_argument('--equant', action='store_true', default=False, help="Enable extended mode")    
 
     args = parser.parse_args()    
     return args
@@ -660,7 +660,7 @@ if __name__ == '__main__':
             else:
                 model_names = [args.model]
             for name in model_names:
-                create_model_summary(name, extended=args.ext)
+                create_model_summary(name, extended=args.ext, equant=args.equant)
         elif args.action == "asummary":
             create_model_summary_all(args.model)
         elif args.action == "create_sals":        
@@ -674,7 +674,7 @@ if __name__ == '__main__':
                 model_names = [args.model]
             for model_name in model_names:
                 logging.info(f"##### scores {model_name} ######")
-                create_model_scores(model_name, args.marker, extended=args.ext, subset=all_image_names)
+                create_model_scores(model_name, args.marker, extended=args.ext, subset=all_image_names, equant=args.equant)
         elif args.action == "all":
             for model_name in ALL_MODELS:
                 logging.info(f"##### saliency {model_name} ######")
