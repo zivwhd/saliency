@@ -550,19 +550,20 @@ def include_result(x):
     
     return True
 
-def create_model_scores(model_name, marker="c1", extended=False, subset=None):
+def create_model_scores(model_name, marker="c1", extended=False, equant=False, subset=None):
     me = ModelEnv(model_name)            
     result_paths = get_all_results(model_name, subset=subset)
     result_paths = [x for x in result_paths if include_result(x)]
     logging.info(f"found {len(result_paths)} saliency maps")
-    ext_mark = ("e" if extended else "")
+    ext_mark = get_ext_mark(extended=extended, equant=equant)
+    
     progress_path = os.path.join("progress", model_name, f"{ext_mark}scores_any_{marker}")
     result_prog = Coord(result_paths, progress_path, getname=get_score_name)            
-    create_scores(me, result_prog, all_images_dict, update=True, extended=extended)
+    create_scores(me, result_prog, all_images_dict, update=True, extended=extended, equant=equant)
 
-def create_model_summary(model_name, extended=False):
-    logging.info("summary for {model_name} {extended}")
-    emark = "e" * extended
+def create_model_summary(model_name, extended=False, equant=False):
+    logging.info("summary for {model_name} {extended} {equant}")
+    emark = get_ext_mark(extended=extended, equant=equant)
     base_csv_path = os.path.join("results", model_name)
     df = load_scores_df(model_name, filter_func=include_result, extended=extended)
     df.to_csv(f'{base_csv_path}/{emark}results.csv', index=False)
@@ -596,6 +597,7 @@ def get_args():
     parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
     parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
+    parser.add_argument('--quantos', action='store_true', default=False, help="Enable extended mode")    
 
     args = parser.parse_args()    
     return args

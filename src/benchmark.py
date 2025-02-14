@@ -147,12 +147,10 @@ def save_saliency(obj, model_name, variant, image_name, run=0):     ## PPAA
     os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save(obj, path)
 
-def save_scores(scores_dict, model_name, image_name, run=0, update=False, extended=False):
+def save_scores(scores_dict, model_name, image_name, run=0, update=False, extended=False, equant=False):
     for variant, scores in scores_dict.items():
-        if extended:
-            result_type="escores"
-        else:
-            result_type="scores"
+        result_type = get_ext_mark(extended=extended, equant=equant) + "scores"
+
         path = get_result_path(model_name,variant, image_name, run, result_type=result_type)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         if update and os.path.exists(path):
@@ -258,8 +256,14 @@ def create_saliency_data(me, algo, all_images, run_idx=0, with_scores=False, ski
         scores_dict = get_sal_scores(me, inp, img, info, sal_dict)
         save_scores(scores_dict, me.arch, image_name, run=run_idx, update=True)
 
-def get_sal_scores(me, inp, img, info, sal_dict, extended=False):
+def get_sal_scores(me, inp, img, info, sal_dict, extended=False, equant=False):
     metrics = Metrics()    
+    if equant:
+        return {
+            name: metrics.get_quantus_metrics(me, inp, img, sal, info)            
+            for name, sal in sal_dict.items()
+        }    
+
     if extended:
         return {
             name : metrics.get_ext_metrics(me, inp, img, sal, info)
@@ -310,7 +314,7 @@ def get_sal_scores_(me, inp, info, sal_dict, with_breakdown=True):
 def get_score_name(path):
     return (os.path.basename(os.path.dirname(path)) + "/" + os.path.basename(path))
 
-def create_scores(me, result_paths, images, update=True, extended=False):
+def create_scores(me, result_paths, images, update=True, extended=False, equant=False):
     for path in result_paths:
         
         image_name = os.path.basename(path)
@@ -325,13 +329,21 @@ def create_scores(me, result_paths, images, update=True, extended=False):
 
         img, inp = me.get_image_ext(info.path)
         sal_dict = {variant : torch.load(path).float()}
-        scores_dict = get_sal_scores(me, inp, img, info, sal_dict, extended=extended)
-        save_scores(scores_dict, me.arch, image_name, update=update, extended=extended)
+        scores_dict = get_sal_scores(me, inp, img, info, sal_dict, extended=extended, equant=equant)
+        save_scores(scores_dict, me.arch, image_name, update=update, extended=extended, equant=equant)
 
 
-def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True, extended=False):
+def get_ext_mark(extended=False, equant=False):
+    if equant:
+        return "q"
+    elif extended:
+        return "e"
+    else:
+        return ""
+
+def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=None, dist=True, extended=False, equant=False):
     if base_path is None:
-        emark = "e" * extended
+        emark = get_ext_mark(extended=extended, equant=equant)        
         base_path = os.path.join("results", model_name, f"{emark}scores")
 
     if variant_names is None:

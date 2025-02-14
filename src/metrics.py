@@ -5,6 +5,8 @@ from saliency.metrics import pic
 from PIL import Image
 import time
 import logging
+import quantus
+
 class Metrics:
 
     CONVENT_NORMALIZATION_MEAN = [0.485, 0.456, 0.406]
@@ -18,6 +20,97 @@ class Metrics:
         return tensor
 
     
+    def get_quantus_metrics(self, me, inp, img, saliency, info, nsteps=20, pred_only=True):
+        model = me.model
+        logits = model(inp).cpu()
+        topidx = int(torch.argmax(logits))
+        
+        res = dict()
+        def qply(mmt):
+            rmet = mmt(
+                model=me.model, 
+                x_batch=inp.cpu().numpy(), 
+                y_batch=np.array([topidx]),
+                a_batch=saliency.cpu().numpy(),
+                device=me.device)
+            return float(rmet[0])
+
+        res['FaithfulnessCorrelation'] = qply(quantus.FaithfulnessCorrelation(
+            nr_runs=100,  
+            subset_size=224,  
+            perturb_baseline="black",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            similarity_func=quantus.similarity_func.correlation_pearson,  
+            abs=False,  
+            return_aggregate=False,
+        ))
+
+        res['FaithfulnessEstimate'] = qply(quantus.FaithfulnessEstimate(
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            similarity_func=quantus.similarity_func.correlation_pearson,
+            features_in_step=224,  
+            perturb_baseline="black",
+        ))
+
+        res['Monotonicity'] = qply(quantus.Monotonicity(
+            features_in_step=224,
+            perturb_baseline="black",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+        ))
+        
+        res['MonotonicityCorrelation'] = qply(quantus.MonotonicityCorrelation(
+           nr_samples=10,
+            features_in_step=3136,
+            perturb_baseline="uniform",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            similarity_func=quantus.similarity_func.correlation_spearman,
+        ))
+
+
+        res['IROF'] = qply(quantus.IROF(
+            segmentation_method="slic",
+            perturb_baseline="mean",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            return_aggregate=False,
+            ))
+        
+        res['Infidelity'] = qply(quantus.Infidelity(
+            perturb_baseline="uniform",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            n_perturb_samples=5,
+            perturb_patch_sizes=[56], 
+            display_progressbar=True,
+        ))
+
+        res['Sufficiency'] = qply(quantus.Sufficiency(
+            threshold=0.6,
+            return_aggregate=False,
+        ))
+
+        res['Consistency'] = qply(quantus.Consistency(
+            discretise_func=quantus.discretise_func.top_n_sign,
+            return_aggregate=False,
+        ))
+
+        res['Sparseness'] = qply(quantus.Sparseness())
+
+        res['Complexity'] = qply(quantus.Complexity())
+        res['EffectiveComplexity'] = qply(quantus.EffectiveComplexity(eps=1e-5))
+
+        res['Completeness'] = qply(quantus.Completeness(abs=False, disable_warnings=True))
+
+        res['NonSensitivity'] = qply(quantus.NonSensitivity(
+            abs=True,
+            eps=1e-5,
+            n_samples=10, 
+            perturb_baseline="black",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            features_in_step=6272,
+        ))
+
+        return res
+
+
     def get_ext_metrics(self, me, inp, img, saliency, info, nsteps=20, pred_only=True):
         model = me.model
         logits = model(inp).cpu()
