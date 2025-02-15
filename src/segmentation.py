@@ -116,7 +116,12 @@ def get_dataset(me, dataset_name):
 
 def get_creators_vit():
     baselines = [ZeroBaseline()]
-    
+
+    return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
+        dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+            c_activation="",  epochs=300, select_from=None)
+            ]),
+
 
     runs = [
         MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
@@ -292,7 +297,7 @@ def create_scores(model_name, dataset_name, marker="m"):
             write_stats(stats, sf)
 
 def write_stats(stats, out):
-    print(f'variant,mIoU,mAp, pixAcc,mF1', file=out)
+    print(f'variant,mIoU,mAp,pixAcc,mF1', file=out)
     for variant, vstat in stats.items():
         pixAcc = np.float64(1.0) * vstat.total_correct / (np.spacing(1, dtype=np.float64) + vstat.total_label)
         IoU = np.float64(1.0) * vstat.total_inter / (np.spacing(1, dtype=np.float64) + vstat.total_union)
