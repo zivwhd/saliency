@@ -384,7 +384,7 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
             
     return pd.DataFrame(res)
 
-def summarize_scores_df(df, extended=False):
+def summarize_scores_df(df, extended=False, equant=False):
     meta_cols = ["model","image","variant"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
     if extended:
