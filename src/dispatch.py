@@ -565,7 +565,7 @@ def create_model_summary(model_name, extended=False, equant=False):
     logging.info(f"summary for {model_name} {extended} {equant}")
     emark = get_ext_mark(extended=extended, equant=equant)
     base_csv_path = os.path.join("results", model_name)
-    df = load_scores_df(model_name, filter_func=include_result, extended=extended, equant=False)
+    df = load_scores_df(model_name, filter_func=include_result, extended=extended, equant=equant)
     df.to_csv(f'{base_csv_path}/{emark}results.csv', index=False)
     smry = summarize_scores_df(df, extended=extended, equant=equant)
     smry.to_csv(f'{base_csv_path}/{emark}summary.csv', index=False)
