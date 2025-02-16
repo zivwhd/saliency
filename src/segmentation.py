@@ -130,7 +130,7 @@ def get_creators_vit():
         args.update(**kwargs)
         return args
 
-    return MultiCompExpCreator(
+    lsc = MultiCompExpCreator(
             desc="MComp",
             mask_groups=basic_mask_groups,            
             baselines = baselines,
@@ -147,10 +147,11 @@ def get_creators_vit():
 
 
     runs = [
-        MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
-                            dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
-                                 c_activation="",  epochs=300, select_from=150)
-                                 ]),
+        #MultiCompExpCreator(desc="MWComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
+        #                    dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+        #                         c_activation="",  epochs=300, select_from=150)
+        #                         ]),
+        lsc,
         LTXSaliencyCreator(),
         IEMPertSaliencyCreator(),        
         RiseSaliencyCreator(),
