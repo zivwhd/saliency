@@ -120,7 +120,8 @@ def get_creators_vit():
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
                  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
                  #select_from=10, select_freq=3, select_del=1.0,
-                c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+                 select_from=None,
+                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
     basic_mask_groups = {"":{16:1000}}
 
@@ -139,10 +140,10 @@ def get_creators_vit():
                 modify(c_magnitude=0.1, c_tv=0.1, desc="LSCc"),
             ])
 
-    return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
-        dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.7, c_model=0.0, c_norm=False, 
-            c_activation="",  epochs=300, select_from=None)
-            ]),
+    #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
+    #    dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.7, c_model=0.0, c_norm=False, 
+    #        c_activation="",  epochs=300, select_from=None)
+    #        ]),
 
 
     runs = [
