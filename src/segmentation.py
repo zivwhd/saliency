@@ -123,7 +123,7 @@ def get_creators_vit():
                  select_from=None,
                  c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
-    basic_mask_groups = {"":{16:1000}}
+    basic_mask_groups = {"":{16:500,64:500}}
 
     def modify(**kwargs):
         args = basic.copy()
@@ -135,9 +135,9 @@ def get_creators_vit():
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
-                modify(desc="LSCa"),
-                modify(c_magnitude=0.05, c_tv=0.07, desc="LSCb"),
-                modify(c_magnitude=0.1, c_tv=0.1, desc="LSCc"),
+                modify(desc="LSCxa"),
+                modify(c_magnitude=0.05, c_tv=0.07, desc="LSCxb"),
+                modify(c_magnitude=0.1, c_tv=0.1, desc="LSCxc"),
             ])
 
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
