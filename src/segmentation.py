@@ -134,9 +134,9 @@ def get_creators_vit():
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
-                modify(desc="Basic"),
-                modify(c_magnitude=0.05, c_tv=0.07, desc="Basic"),
-                modify(c_magnitude=0.1, c_tv=0.1, desc="Basic"),
+                modify(desc="LSCa"),
+                modify(c_magnitude=0.05, c_tv=0.07, desc="LSCb"),
+                modify(c_magnitude=0.1, c_tv=0.1, desc="LSCc"),
             ])
 
     return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
