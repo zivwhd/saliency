@@ -279,7 +279,7 @@ def create_scores(model_name, dataset_name, marker="m"):
         res_path = f"results/{model_name}/saliency/*/{idx}"
         sal_paths = glob(res_path)
         logging.info(f"found: {res_path}: {sal_paths}")
-        result_prog = Coord(sal_paths, progress_path, getname=get_score_name)
+        result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
         for path in result_prog:
             image_idx = os.path.basename(path)
             variant = os.path.basename(os.path.dirname(path))
