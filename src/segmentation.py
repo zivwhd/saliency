@@ -301,6 +301,8 @@ def create_scores(model_name, dataset_name, marker="m"):
             vstat.total_union += union.astype('int64')
             vstat.total_ap += [ap]
             vstat.total_f1 += [f1]
+
+            logging.info(f"::STATS,{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64'))},{int(union.astype('int64'))}")
             ###
             #pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
             #IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
