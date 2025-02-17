@@ -35,6 +35,13 @@ class Metrics:
                 device=me.device)
             return float(rmet[0])
 
+        res['IROF'] = qply(quantus.IROF(
+            segmentation_method="slic",
+            perturb_baseline="mean",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            return_aggregate=False,
+            ))
+
         res['FaithfulnessCorrelation'] = qply(quantus.FaithfulnessCorrelation(
             nr_runs=100,  
             subset_size=224,  
@@ -66,13 +73,6 @@ class Metrics:
             similarity_func=quantus.similarity_func.correlation_spearman,
         ))
 
-
-        res['IROF'] = qply(quantus.IROF(
-            segmentation_method="slic",
-            perturb_baseline="mean",
-            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
-            return_aggregate=False,
-            ))
         
         res['Infidelity'] = qply(quantus.Infidelity(
             perturb_baseline="uniform",
