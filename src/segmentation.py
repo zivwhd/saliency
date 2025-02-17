@@ -302,7 +302,7 @@ def create_scores(model_name, dataset_name, marker="m"):
             vstat.total_ap += [ap]
             vstat.total_f1 += [f1]
 
-            logging.info(f"::STATS,{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64')[0])},{int(union.astype('int64')[0])},{int(inter.astype('int64')[1])},{int(union.astype('int64')[1])}")
+            logging.info(f"::STATS,{image_idx},{variant},{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64')[0])},{int(union.astype('int64')[0])},{int(inter.astype('int64')[1])},{int(union.astype('int64')[1])}")
             ###
             #pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
             #IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
