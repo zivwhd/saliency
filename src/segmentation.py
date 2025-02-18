@@ -288,7 +288,8 @@ def create_scores(model_name, dataset_name, marker="m"):
         for path in result_prog:
             image_idx = os.path.basename(path)
             variant = os.path.basename(os.path.dirname(path))
-            
+            if variant.startswith('_'):
+                continue
             logging.debug(f"checking: {path} name={image_idx} variant={variant}")
             vstat = stats[variant]
             
