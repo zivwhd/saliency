@@ -56,12 +56,12 @@ class SegMaskGen:
 
 class MaskedRespGen:
     def __init__(self, segsize=48, ishape = (224,224),
-                 mgen=None, baseline=None):
+                 mgen=None, baseline=None, prob=0.5):
 
         self.segsize = segsize
         self.ishape = ishape
         if mgen is None:
-            self.mgen = SqMaskGen(segsize, mshape=ishape)
+            self.mgen = SqMaskGen(segsize, mshape=ishape, prob=prob)
         else:
             self.mgen = mgen
 
@@ -82,6 +82,11 @@ class MaskedRespGen:
         
         for idx in tqdm(range(itr)):            
             masks = self.mgen.gen_masks(batch_size)
+            is_valid = (masks.flatten(start_dim=1).sum(dim=1) > 0)
+            #print(is_valid.shape, masks.shape)
+            if (not any(is_valid)):
+                continue
+            masks = masks[ is_valid ]
             dmasks = masks.to(inp.device).float()
 
             pert_inp = inp * dmasks.unsqueeze(1) + baseline * (1.0-dmasks.unsqueeze(1))
@@ -452,6 +457,7 @@ class CompExpCreator:
                  c_opt="Adam",
                  mgen=None,
                  desc = "MComp",                 
+                 pprob = 0.5,
                  baseline_gen = ZeroBaseline(),                 
                  **kwargs):
         
@@ -462,6 +468,7 @@ class CompExpCreator:
         assert len(segsize) == len(nmasks)
 
         self.segsize = segsize
+        self.pprob = pprob
         self.nmasks = nmasks
         self.batch_size = batch_size
         self.c_completeness = c_completeness
@@ -552,7 +559,7 @@ class CompExpCreator:
 
         parts = list(zip(self.segsize, self.nmasks))
         for segsize, nmasks in parts:
-            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape)            
+            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape, prob=self.pprob)            
             logging.debug(f"generating {nmasks} masks and responses")
             print(f"generating {nmasks} masks and responses segsize={segsize}")
             mgen.gen(fmdl, inp, nmasks, batch_size=self.batch_size)        

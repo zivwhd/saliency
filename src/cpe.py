@@ -61,12 +61,13 @@ def mask_step(model, inp, gen_masks, itr, batch_size=32):
 
 class SqMaskGen:
 
-    def __init__(self, segsize, mshape, efactor=4):
+    def __init__(self, segsize, mshape, efactor=4, prob=0.5):
         base = np.zeros((mshape[0] * efactor, mshape[1] * efactor ,3), np.int32)
         n_segments = base.shape[0] * base.shape[1] / (segsize * segsize)
         self.setsize = n_segments
         self.segments = torch.tensor(slic(base,n_segments=n_segments,compactness=1000,sigma=1), dtype=torch.int32)
         self.nelm = torch.unique(self.segments).numel()
+        self.prob = prob
         self.mshape = mshape
     
     def gen_masks_(self, nmasks):
@@ -75,8 +76,9 @@ class SqMaskGen:
     def gen_masks_cont_(self, nmasks):
         return gen_seg_masks_cont(self.segments, nmasks, width=self.mshape[1], height=self.mshape[0])
 
-    def gen_masks(self, nmasks):
-        return (self.gen_masks_cont(nmasks) < 0.5)
+    def gen_masks(self, nmasks):        
+        masks = (self.gen_masks_cont(nmasks) < self.prob)        
+        return masks
     
     def gen_masks_cont(self, nmasks):
         

@@ -115,13 +115,14 @@ def get_dataset(me, dataset_name):
 
 
 def get_creators_vit():
-    baselines = [ZeroBaseline()]
+    #baselines = [ZeroBaseline()]
+    baselines = [RandBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
-                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=151, 
                  #select_from=10, select_freq=3, select_del=1.0,
                  select_from=None,
-                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=1, c_model=0.0, c_norm=False, c_activation="")
     
     basic_mask_groups = {"":{16:500,64:500}}
 
@@ -135,9 +136,9 @@ def get_creators_vit():
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
-                modify(desc="LSCxa"),
-                modify(c_magnitude=0.05, c_tv=0.07, desc="LSCxb"),
-                modify(c_magnitude=0.1, c_tv=0.1, desc="LSCxc"),
+                modify(desc="LSCya"),
+                modify(c_magnitude=0.05, c_tv=1, desc="LSCyb"),
+                modify(c_magnitude=0.1, c_tv=1, desc="LSCyc"),
             ])
 
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
