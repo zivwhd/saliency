@@ -115,8 +115,8 @@ def get_dataset(me, dataset_name):
 
 
 def get_creators_vit():
-    #baselines = [ZeroBaseline()]
-    baselines = [RandBaseline()]
+    baselines = [ZeroBaseline()]
+    #baselines = [RandBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
                  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=151, 
@@ -137,9 +137,9 @@ def get_creators_vit():
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
-                modify(desc="LSCya"),
-                modify(c_magnitude=0.05, c_tv=1, desc="LSCyb"),
-                modify(c_magnitude=0.1, c_tv=1, desc="LSCyc"),
+                modify(desc="LSCza"),
+                modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
+                modify(c_magnitude=0.1, c_tv=1, desc="LSCzc"),
             ])
     return lsc
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
@@ -265,6 +265,7 @@ class Stats:
     def __init__(self):
         self.total_inter, self.total_union, self.total_correct, self.total_label = np.int64(0), np.int64(0), np.int64(0), np.int64(0)
         self.total_ap, self.total_f1 = [], []
+        self.count = 0
     
 
 def create_scores(model_name, dataset_name, marker="m"):
@@ -303,6 +304,7 @@ def create_scores(model_name, dataset_name, marker="m"):
             vstat.total_union += union.astype('int64')
             vstat.total_ap += [ap]
             vstat.total_f1 += [f1]
+            vstat.count += 1
 
             logging.info(f"::STATS,{image_idx},{variant},{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64')[0])},{int(union.astype('int64')[0])},{int(inter.astype('int64')[1])},{int(union.astype('int64')[1])}")
             ###
@@ -321,12 +323,12 @@ def create_scores(model_name, dataset_name, marker="m"):
         if idx >= LIMIT_DS:
             logging.info("DONE")
             break
-        dump_obj(stats, f"results/{model_name}/stats.obj")
-        with open(f"results/{model_name}/stats.txt", "wt") as sf:
-            write_stats(stats, sf)
+    dump_obj(stats, f"results/{model_name}/stats.obj")
+    with open(f"results/{model_name}/stats.txt", "wt") as sf:
+        write_stats(stats, sf)
 
 def write_stats(stats, out):
-    print(f'variant,mIoU,mAp,pixAcc,mF1', file=out)
+    print(f'variant,nsamples,mIoU,mAp,pixAcc,mF1', file=out)
     for variant, vstat in stats.items():
         pixAcc = np.float64(1.0) * vstat.total_correct / (np.spacing(1, dtype=np.float64) + vstat.total_label)
         IoU = np.float64(1.0) * vstat.total_inter / (np.spacing(1, dtype=np.float64) + vstat.total_union)
@@ -334,7 +336,7 @@ def write_stats(stats, out):
         mAp = np.mean(vstat.total_ap)
         mF1 = np.mean(vstat.total_f1)
 
-        print(f'{variant},{mIoU},{mAp},{pixAcc},{mF1}', file=out)
+        print(f'{variant},{vstat.count},{mIoU},{mAp},{pixAcc},{mF1}', file=out)
 
 def get_args(): 
     
