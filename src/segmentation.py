@@ -140,7 +140,7 @@ def get_creators_vit():
                 modify(c_magnitude=0.05, c_tv=1, desc="LSCyb"),
                 modify(c_magnitude=0.1, c_tv=1, desc="LSCyc"),
             ])
-
+    return lsc
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
     #    dict(c_mask_completeness=1.0, c_magnitude=0.05, c_completeness=0, c_tv=0.7, c_model=0.0, c_norm=False, 
     #        c_activation="",  epochs=300, select_from=None)
