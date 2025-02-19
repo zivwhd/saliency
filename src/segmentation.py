@@ -282,19 +282,24 @@ def create_scores(model_name, dataset_name, marker="m"):
     dump_obj(stats, f"results/{model_name}/bs.obj")
     progress_path = os.path.join("progress", model_name, f"scores_{marker}")
 
-    for idx, (img, tgt) in enumerate(ds):
-        logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
-        res_path = f"results/{model_name}/saliency/*/{idx}"
-        sal_paths = glob(res_path)
-        logging.info(f"found: {res_path}: {sal_paths}")
+    variant_paths = glob(f"results/{model_name}/saliency/*")
+    variant_list = [os.path.basename(x) for x in variant_paths]
+
+    for variant_name in Coord(variant_list, progress_path, getname=lambda x: str(x)):
+        for idx, (img, tgt) in enumerate(ds):
+            logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
+            res_path = f"results/{model_name}/saliency/{variant_name}/{idx}"
+            sal_paths = glob(res_path)
+            assert len(sal_paths) <= 1
+            if not sal_paths:
+                continue
+            path = sal_paths[0]
+            logging.info(f"found: {res_path}: {sal_paths}")
         
-        variant_paths = defaultdict(list)
-        for path in sal_paths:
-            variant = os.path.basename(os.path.dirname(path))
-            variant_paths[variant].append(path)
-        result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
-        for variant_name in Coord(list(variant_paths.keys()), progress_path, getname=lambda x: str(x)):
-            for path in variant_paths[variant_name]:
+        #result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
+            #for variant_name in Coord(list(variant_paths.keys()), progress_path, getname=lambda x: str(x)):
+            #for path in variant_paths[variant_name]:
+            if True:
                 image_idx = os.path.basename(path)
                 variant = os.path.basename(os.path.dirname(path))
                 assert variant_name == variant_name
@@ -330,15 +335,17 @@ def create_scores(model_name, dataset_name, marker="m"):
                 #scores[f'pixAcc'] = pixAcc
                 #scores[f'mF1'] = mF1
 
+            if idx > 3:
+                break
 
             #if idx >= LIMIT_DS:
             #    logging.info("DONE")
             #    break
             #dump_obj(stats, f"results/{model_name}/stats.obj")
-            stats_path = f"results/{model_name}/{variant_name}"
-            os.makedirs(os.path.dirname(stats_path), exist_ok=True)
-            with open(stats_path, "wt") as sf:
-                write_stats(stats, sf)
+        stats_path = f"results/{model_name}/{variant_name}"
+        os.makedirs(os.path.dirname(stats_path), exist_ok=True)
+        with open(stats_path, "wt") as sf:
+            write_stats({variant_name : stats[variant_name]}, sf)
 
 def write_stats(stats, out):
     print(f'variant,nsamples,mIoU,mAp,pixAcc,mF1', file=out)
