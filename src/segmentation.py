@@ -115,7 +115,7 @@ def get_dataset(me, dataset_name):
 
 
 def get_creators_vit():
-    baselines = [ZeroBaseline()]
+    baselines = [ZeroBaseline(), RandBaseline()]
     #baselines = [RandBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
@@ -137,9 +137,14 @@ def get_creators_vit():
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
-                modify(desc="LSCza"),
-                modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
-                modify(c_magnitude=0.1, c_tv=1, desc="LSCzc"),
+                modify(desc="LSCqa", prob=0.1),
+                modify(c_magnitude=0.01, c_tv=1, desc="LSCqc", prob=0.1),
+                modify(desc="LSCwa", prob=0.5),
+                modify(c_magnitude=0.1, c_tv=1, desc="LSCwc", prob=0.5),
+
+                #modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
+                
+
             ])
     return lsc
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[

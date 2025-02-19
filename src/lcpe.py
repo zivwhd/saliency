@@ -459,6 +459,7 @@ class CompExpCreator:
                  desc = "MComp",                 
                  pprob = 0.5,
                  baseline_gen = ZeroBaseline(),                 
+                 ext_desc = ""
                  **kwargs):
         
         assert type(segsize) == type(nmasks)
@@ -497,13 +498,14 @@ class CompExpCreator:
         if self.model_epochs == 0 or self.c_model == 0:
             self.model_epochs = 0
             self.c_model = 0
+        self.ext_desc = ext_desc
 
 
     def description(self):
         if len(self.nmasks) == 1:
-            desc = f"{self.desc}_{self.nmasks[0]}_{self.segsize[0]}_{self.epochs}"
+            desc = f"{self.desc}{self.ext_desc}_{self.nmasks[0]}_{self.segsize[0]}_{self.epochs}"
         else:
-            desc = f"{self.desc}_Mr_{self.epochs}"
+            desc = f"{self.desc}{self.ext_desc}_Mr_{self.epochs}"
 
         if self.model_epochs:
             desc += f":{self.model_epochs}"
@@ -672,7 +674,7 @@ class MultiCompExpCreator:
                 for kwargs in self.groups:
                     group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
                     group_args.update(kwargs)
-                    algo = CompExpCreator(**group_args)
+                    algo = CompExpCreator(**group_args, ext_desc=bgen.desc)
                     res = algo(me, inp, catidx, data=data)
                     all_sals.update(res)
 
