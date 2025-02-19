@@ -681,7 +681,7 @@ class MultiCompExpCreator:
                     # self.last_data = data
                     for kwargs in self.groups:
                         group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
-                        group_args.update(kwargs)
+                        group_args.update(kwargs)                        
                         algo = CompExpCreator(**group_args, ext_desc=f"{bgen.desc}{pprob}")
                         res = algo(me, inp, catidx, data=data)
                         all_sals.update(res)

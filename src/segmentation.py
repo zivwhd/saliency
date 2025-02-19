@@ -132,12 +132,12 @@ def get_creators_vit():
         return args
 
     lsc = MultiCompExpCreator(
-            desc="MComp",
+            desc="LSC",
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             pprob = [0.5],
             groups=[
-                modify(desc="LSCfa"),
+                modify(),
             ])
     return lsc
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
