@@ -115,17 +115,16 @@ def get_dataset(me, dataset_name):
 
 
 def get_creators_vit():
-    baselines = [ZeroBaseline(), RandBaseline()]
+    baselines = [ZeroBaseline()]
     #baselines = [RandBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
                  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=151, 
                  #select_from=10, select_freq=3, select_del=1.0,
                  select_from=None,
-                 pprob = 0.1,
                  c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=1, c_model=0.0, c_norm=False, c_activation="")
     
-    basic_mask_groups = {"":{16:500,64:500}}
+    basic_mask_groups = {"Mix":{16:500,48:500}, "Sing":{48:1000}}
 
     def modify(**kwargs):
         args = basic.copy()
@@ -136,14 +135,9 @@ def get_creators_vit():
             desc="MComp",
             mask_groups=basic_mask_groups,            
             baselines = baselines,
-            pprob = [0.1,0.5],
+            pprob = [0.5],
             groups=[
-                modify(desc="LSCea", pprob=0.1),
-                modify(c_magnitude=0.1, c_tv=1, desc="LSCeb", pprob=0.1),
-
-                #modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
-                
-
+                modify(desc="LSCfa"),
             ])
     return lsc
     #return MultiCompExpCreator(desc="MYComp", segsize=[16], nmasks=[1000],  baselines = baselines,  groups=[
