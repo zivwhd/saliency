@@ -279,7 +279,7 @@ def create_scores(model_name, dataset_name, marker="m"):
     #total_ap, total_f1 = [], []
     
     stats = defaultdict(Stats)
-    dump_obj(stats, f"results/{model_name}/bs.obj")
+    #dump_obj(stats, f"results/{model_name}/bs.obj")
     progress_path = os.path.join("progress", model_name, f"scores_{marker}")
 
     variant_paths = glob(f"results/{model_name}/saliency/*")
@@ -335,14 +335,12 @@ def create_scores(model_name, dataset_name, marker="m"):
                 #scores[f'pixAcc'] = pixAcc
                 #scores[f'mF1'] = mF1
 
-            if idx > 3:
-                break
 
             #if idx >= LIMIT_DS:
             #    logging.info("DONE")
             #    break
             #dump_obj(stats, f"results/{model_name}/stats.obj")
-        stats_path = f"results/{model_name}/{variant_name}"
+        stats_path = f"results/{model_name}/stats/{variant_name}"
         os.makedirs(os.path.dirname(stats_path), exist_ok=True)
         with open(stats_path, "wt") as sf:
             write_stats({variant_name : stats[variant_name]}, sf)
