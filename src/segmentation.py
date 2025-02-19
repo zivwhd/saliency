@@ -284,8 +284,8 @@ def create_scores(model_name, dataset_name, marker="m"):
 
     variant_paths = glob(f"results/{model_name}/saliency/*")
     variant_list = [os.path.basename(x) for x in variant_paths]
-
-    for variant_name in Coord(variant_list, progress_path, getname=lambda x: str(x)):
+    variant_list = [x for x in variant_list if not x.startswith('_')]
+    for variant_name in Coord(variant_list, progress_path, getname=lambda x: str(x)):        
         for idx, (img, tgt) in enumerate(ds):
             logging.info(f"[{idx}], {img.shape}, {tgt.shape}") ## torch.Size([3, 224, 224]), torch.Size([224, 224])
             res_path = f"results/{model_name}/saliency/{variant_name}/{idx}"
