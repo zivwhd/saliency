@@ -136,11 +136,10 @@ def get_creators_vit():
             desc="MComp",
             mask_groups=basic_mask_groups,            
             baselines = baselines,
+            pprob = [0.1,0.5],
             groups=[
-                modify(desc="LSCqa", prob=0.1),
-                modify(c_magnitude=0.01, c_tv=1, desc="LSCqc", prob=0.1),
-                modify(desc="LSCwa", prob=0.5),
-                modify(c_magnitude=0.1, c_tv=1, desc="LSCwc", prob=0.5),
+                modify(desc="LSCea", pprob=0.1),
+                modify(c_magnitude=0.01, c_tv=1, desc="LSCeb", pprob=0.1),
 
                 #modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
                 
