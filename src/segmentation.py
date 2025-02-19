@@ -166,8 +166,7 @@ def get_creators_vit():
 def get_creators_cnn():
     #return get_creators_vit()
     #return ExtPertSaliencyCreator()
-    baselines = [ZeroBaseline()]
-    
+    baselines = [ZeroBaseline()]    
 
     runs = [
         MultiCompExpCreator(desc="MWComp", segsize=[48], nmasks=[1000],  baselines = baselines,  groups=[
