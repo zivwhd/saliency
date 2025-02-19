@@ -459,7 +459,7 @@ class CompExpCreator:
                  desc = "MComp",                 
                  pprob = 0.5,
                  baseline_gen = ZeroBaseline(),                 
-                 ext_desc = ""
+                 ext_desc = "",
                  **kwargs):
         
         assert type(segsize) == type(nmasks)
