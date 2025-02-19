@@ -51,6 +51,7 @@ def dump_obj(obj, path):
         pickle.dump(obj, obf)
 
 LIMIT_DS = 1000
+LIMIT_DS = 1697
 
 class Imagenet_Segmentation(data.Dataset):
     CLASSES = 2
@@ -92,7 +93,7 @@ class Imagenet_Segmentation(data.Dataset):
 
     def __len__(self):
         # return len(self.h5py['/value/img'])
-        return self.data_length
+        #return self.data_length
         return min(self.data_length, LIMIT_DS)
 
 VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224","vit_base_patch16_224.mae"]
