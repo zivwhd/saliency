@@ -214,9 +214,9 @@ def create_sals(model_name, dataset_name, marker="m"):
             for variant, sal in sals.items():
                 save_saliency(sal, model_name, variant, str(idx), run=0)
 
-        if idx >= LIMIT_DS:
-            logging.info("DONE")
-            break
+        #if idx >= LIMIT_DS:
+        #    logging.info("DONE")
+        #    break
 
 def eval_batch(Res, labels):
     Res = (Res - Res.min()) / (Res.max() - Res.min())
@@ -287,49 +287,58 @@ def create_scores(model_name, dataset_name, marker="m"):
         res_path = f"results/{model_name}/saliency/*/{idx}"
         sal_paths = glob(res_path)
         logging.info(f"found: {res_path}: {sal_paths}")
-        result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
-        for path in result_prog:
-            image_idx = os.path.basename(path)
+        
+        variant_paths = defaultdict(list)
+        for path in sal_paths:
             variant = os.path.basename(os.path.dirname(path))
-            if variant.startswith('_'):
-                continue
-            logging.debug(f"checking: {path} name={image_idx} variant={variant}")
-            vstat = stats[variant]
-            
-            sal = torch.load(path)
+            variant_paths[variant].append(path)
+        result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
+        for variant_name in Coord(list(variant_paths.keys()), progress_path):
+            for path in variant_paths[variant_name]:
+                image_idx = os.path.basename(path)
+                variant = os.path.basename(os.path.dirname(path))
+                assert variant_name == variant_name
+                if variant.startswith('_'):
+                    continue
+                logging.debug(f"checking: {path} name={image_idx} variant={variant}")
+                vstat = stats[variant]
+                
+                sal = torch.load(path)
 
-            correct, labeled, inter, union, ap, f1, pred, target = eval_batch(
-                torch.tensor(sal).unsqueeze(0), #.unsqueeze(0),
-                torch.tensor(tgt).unsqueeze(0))
+                correct, labeled, inter, union, ap, f1, pred, target = eval_batch(
+                    torch.tensor(sal).unsqueeze(0), #.unsqueeze(0),
+                    torch.tensor(tgt).unsqueeze(0))
 
-            vstat.total_correct += correct.astype('int64')
-            vstat.total_label += labeled.astype('int64')
-            vstat.total_inter += inter.astype('int64')
-            vstat.total_union += union.astype('int64')
-            vstat.total_ap += [ap]
-            vstat.total_f1 += [f1]
-            vstat.count += 1
+                vstat.total_correct += correct.astype('int64')
+                vstat.total_label += labeled.astype('int64')
+                vstat.total_inter += inter.astype('int64')
+                vstat.total_union += union.astype('int64')
+                vstat.total_ap += [ap]
+                vstat.total_f1 += [f1]
+                vstat.count += 1
 
-            logging.info(f"::STATS,{image_idx},{variant},{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64')[0])},{int(union.astype('int64')[0])},{int(inter.astype('int64')[1])},{int(union.astype('int64')[1])}")
-            ###
-            #pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
-            #IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
-            #mIoU = IoU.mean()
-            #mAp = np.mean(total_ap)
-            #mF1 = np.mean(total_f1)
-            #scores = {}
-            #scores[f'IoU'] = mIoU
-            #scores[f'mAP'] = mAp
-            #scores[f'pixAcc'] = pixAcc
-            #scores[f'mF1'] = mF1
+                logging.info(f"::STATS,{image_idx},{variant},{int(correct.astype('int64'))},{int(labeled.astype('int64'))},{int(inter.astype('int64')[0])},{int(union.astype('int64')[0])},{int(inter.astype('int64')[1])},{int(union.astype('int64')[1])}")
+                ###
+                #pixAcc = np.float64(1.0) * total_correct / (np.spacing(1, dtype=np.float64) + total_label)
+                #IoU = np.float64(1.0) * total_inter / (np.spacing(1, dtype=np.float64) + total_union)
+                #mIoU = IoU.mean()
+                #mAp = np.mean(total_ap)
+                #mF1 = np.mean(total_f1)
+                #scores = {}
+                #scores[f'IoU'] = mIoU
+                #scores[f'mAP'] = mAp
+                #scores[f'pixAcc'] = pixAcc
+                #scores[f'mF1'] = mF1
 
 
-        if idx >= LIMIT_DS:
-            logging.info("DONE")
-            break
-    dump_obj(stats, f"results/{model_name}/stats.obj")
-    with open(f"results/{model_name}/stats.txt", "wt") as sf:
-        write_stats(stats, sf)
+            #if idx >= LIMIT_DS:
+            #    logging.info("DONE")
+            #    break
+            #dump_obj(stats, f"results/{model_name}/stats.obj")
+            stats_path = f"results/{model_name}/{variant_name}"
+            os.makedirs(os.path.dirname(stats_path), exist_ok=True)
+            with open(stats_path, "wt") as sf:
+                write_stats(stats, sf)
 
 def write_stats(stats, out):
     print(f'variant,nsamples,mIoU,mAp,pixAcc,mF1', file=out)
