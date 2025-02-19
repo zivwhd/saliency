@@ -79,7 +79,8 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
     
     if with_mask:
         plt.subplot(1, slots, 4)
-        masked_img = (mask.unsqueeze(-1).numpy() *img).astype(int)
+        msk = mask.unsqueeze(-1).numpy()
+        masked_img = ((msk > msk.mean()) *img).astype(int)
         plt.imshow(masked_img)
         plt.xticks([])  
         plt.yticks([])
