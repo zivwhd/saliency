@@ -169,6 +169,7 @@ def get_creators_vit():
 
 
 def get_creators_cnn():
+    return get_creators_vit()
     return ExtPertSaliencyCreator()
     baselines = [ZeroBaseline()]
     
