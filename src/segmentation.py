@@ -293,7 +293,7 @@ def create_scores(model_name, dataset_name, marker="m"):
             variant = os.path.basename(os.path.dirname(path))
             variant_paths[variant].append(path)
         result_prog = sal_paths #Coord(sal_paths, progress_path, getname=get_score_name)
-        for variant_name in Coord(list(variant_paths.keys()), progress_path):
+        for variant_name in Coord(list(variant_paths.keys()), progress_path, getname=lambda x: str(x)):
             for path in variant_paths[variant_name]:
                 image_idx = os.path.basename(path)
                 variant = os.path.basename(os.path.dirname(path))
