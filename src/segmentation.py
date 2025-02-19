@@ -337,9 +337,9 @@ def create_scores(model_name, dataset_name, marker="m"):
                 #scores[f'mF1'] = mF1
 
 
-            #if idx >= LIMIT_DS:
-            #    logging.info("DONE")
-            #    break
+            if idx >= LIMIT_DS:
+                logging.info("DONE")
+                break
             #dump_obj(stats, f"results/{model_name}/stats.obj")
         stats_path = f"results/{model_name}/stats/{variant_name}"
         os.makedirs(os.path.dirname(stats_path), exist_ok=True)
