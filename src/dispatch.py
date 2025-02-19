@@ -74,9 +74,10 @@ def get_mrcomp_sal_creator():
     ## desc="MrCompH", segsize=[16,48], nmasks=[300,700],  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3,
     ## desc="MrCompI", segsize=[16,48], nmasks=[700,300], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3, ## select-freq didn't pass
     ## desc="MrCompJ", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=10, select_freq=3, select_del=1.0,
+    # desc="MrCompK", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=151, select_from=10, select_freq=3, select_del=1.0, pprob=0.1,c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
     return CompExpCreator(
-        desc="MrCompJ", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, 
-        epochs=101, select_from=10, select_freq=3, select_del=1.0,
+        desc="MrCompK", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, 
+        epochs=151, select_from=10, select_freq=3, select_del=1.0, pprob=0.1,
         c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
         c_activation="",
     )
