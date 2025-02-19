@@ -139,7 +139,7 @@ def get_creators_vit():
             pprob = [0.1,0.5],
             groups=[
                 modify(desc="LSCea", pprob=0.1),
-                modify(c_magnitude=0.01, c_tv=1, desc="LSCeb", pprob=0.1),
+                modify(c_magnitude=0.1, c_tv=1, desc="LSCeb", pprob=0.1),
 
                 #modify(c_magnitude=0.05, c_tv=1, desc="LSCzb"),
                 
