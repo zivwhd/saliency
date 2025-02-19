@@ -179,11 +179,11 @@ def get_creators_cnn():
                                 c_norm=False, c_activation="" )
                                  ]),
         CamSaliencyCreator(),
-        DixCnnSaliencyCreator(),
-        IGSaliencyCreator(),                                 
-        LTXSaliencyCreator(),
+        #DixCnnSaliencyCreator(),
+        #IGSaliencyCreator(),                                 
+        #LTXSaliencyCreator(),
         IEMPertSaliencyCreator(),        
-        RiseSaliencyCreator(),
+        #RiseSaliencyCreator(),
     ]
 
     return CombSaliencyCreator(runs)
