@@ -72,6 +72,7 @@ class MaskedRespGen:
 
         self.all_masks = []
         self.all_pred = []
+        self.num_masks = 0
 
     def gen_(self, model, inp, itr=125, batch_size=32):
         
@@ -95,14 +96,18 @@ class MaskedRespGen:
             
             self.all_masks.append(masks.cpu())
             self.all_pred.append(mout.cpu())
+            self.num_masks += int(is_valid.sum())
 
 
     def gen(self, model, inp, nmasks, batch_size=32, **kwargs):        
         with torch.no_grad():
-            self.gen_(model=model, inp=inp, itr=nmasks//batch_size, batch_size=batch_size, **kwargs)
-            if nmasks % batch_size:
-                self.gen_(model=model, inp=inp, itr=1, batch_size=nmasks % batch_size, **kwargs)
-
+            while self.num_masks < nmasks:                
+                remaining = nmasks - self.num_masks
+                #print(f"## {nmasks} - {self.num_masks} = {remaining}")
+                self.gen_(model=model, inp=inp, itr=remaining//batch_size, batch_size=batch_size, **kwargs)
+                if remaining % batch_size:
+                    self.gen_(model=model, inp=inp, itr=1, batch_size=remaining % batch_size, **kwargs)
+            #print(f"## {self.num_masks}")
 
 
 class TotalVariationLoss(nn.Module):
