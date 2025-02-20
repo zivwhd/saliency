@@ -27,11 +27,12 @@ class Metrics:
         
         res = dict()
         def qply(mmt):
+            sal = saliency.cpu().numpy()
             rmet = mmt(
                 model=me.model, 
                 x_batch=inp.cpu().numpy(), 
                 y_batch=np.array([topidx]),
-                a_batch=saliency.cpu().numpy(),
+                a_batch=sal - sal.min(),
                 device=me.device)
             return float(rmet[0])
 
