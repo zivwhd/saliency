@@ -46,6 +46,11 @@ class ISource:
 
         return images
 
+    def get_image_name(self, path):
+        image_file_name = os.path.basename(path)
+        image_name = image_file_name[0:image_file_name.find(".")]
+        return image_name    
+
 
 class VOCSource(ISource):
     def __init__(self,
@@ -83,10 +88,6 @@ class ImagenetSource(ISource):
                 rv[image_name] = target
         return rv
 
-    def get_image_name(self, path):
-        image_file_name = os.path.basename(path)
-        image_name = image_file_name[0:image_file_name.find(".")]
-        return image_name    
 
 class CustomImageNetDataset:
 
