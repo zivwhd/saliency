@@ -3,7 +3,7 @@
 print("## dispatch.py ")
 
 import argparse, logging, os, re
-from dataset import ImagenetSource, Coord
+from dataset import ImagenetSource, VOCSource, Coord
 from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
 from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from adaptors_gig import IGSaliencyCreator
@@ -594,6 +594,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "asummary", "all"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
+    parser.add_argument("--dataset", choices=["imagenet","voc"], default="imagenet", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
     parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
@@ -638,7 +639,12 @@ if __name__ == '__main__':
                    
     logging.debug(args)
     logging.debug(f"pid: {os.getpid()}; task: {task_id}/{ntasks}")
-    isrc = ImagenetSource(selection_name=args.selection)
+    if args.dataset == "imagenet":
+        isrc = ImagenetSource(selection_name=args.selection)
+    elif args.dataset == "voc":
+        isrc = VOCSource(selection_name=args.selection)
+    else:
+        assert False, "unexpected dataset"
     
     all_images_dict = isrc.get_all_images()
     all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)

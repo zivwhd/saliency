@@ -16,17 +16,7 @@ class ImageInfo:
 
 BASE_IMAGENET_PATH="/home/weziv5/work/data/imagenet"
 
-class ImagenetSource:
-
-    def __init__(self, 
-                 base_path=BASE_IMAGENET_PATH, 
-                 image_dir_ptrn="validation",
-                 selection_name=None):
-        self.base_path = base_path
-        self.image_dir_ptrn = image_dir_ptrn
-        self.targets_path = os.path.join(self.base_path, "imagenet_validation_ground_truth.txt")
-        self.selection_name = selection_name
-
+class ISource:
     @lru_cache(maxsize=None)     
     def read_selection(self):
         logging.debug("loading selection")
@@ -55,6 +45,32 @@ class ImagenetSource:
             images = {name : img for name, img in images.items() if name in selection}
 
         return images
+
+
+class VOCSource(ISource):
+    def __init__(self,
+                 base_path="/home/weziv5/work/data/voc/VOC2012_test", 
+                 image_dir_ptrn="JPEGImages",
+                 selection_name=None):
+        self.base_path = base_path
+        self.image_dir_ptrn = image_dir_ptrn
+        self.selection_name = selection_name
+
+    def get_image_targets(self):
+        return {}
+
+class ImagenetSource(ISource):
+
+    def __init__(self, 
+                 base_path=BASE_IMAGENET_PATH, 
+                 image_dir_ptrn="validation",
+                 selection_name=None):
+        self.base_path = base_path
+        self.image_dir_ptrn = image_dir_ptrn
+        self.targets_path = os.path.join(self.base_path, "imagenet_validation_ground_truth.txt")
+        self.selection_name = selection_name
+
+
 
     @lru_cache(maxsize=None)
     def get_image_targets(self):
