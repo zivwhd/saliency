@@ -120,8 +120,8 @@ class Metrics:
         target = info.target
         #logging.info(f"pred: {target} {probs[0,target]}")    
 
-        pred_sic = self.get_sic(me, inp, img, saliency, target)
-        pred_aic = self.get_aic(me, inp, img, saliency, target)
+        pred_sic = self.get_sic(me, inp, img, saliency, topidx)
+        pred_aic = self.get_aic(me, inp, img, saliency, topidx)
         
         return dict(
                 pred_aic=pred_aic,
@@ -240,7 +240,7 @@ class Metrics:
                 saliency_map=saliency[0].numpy(),
                 random_mask=random_mask,
                 pred_func=pred_func,
-                min_pred_value=0.1, ## 0.5
+                min_pred_value=0.5, ## 0.5
                 saliency_thresholds=saliency_thresholds,
                 keep_monotonous=True,
                 num_data_points=num_data_points)            
