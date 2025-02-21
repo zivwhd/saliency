@@ -240,7 +240,7 @@ class Metrics:
                 saliency_map=saliency[0].numpy(),
                 random_mask=random_mask,
                 pred_func=pred_func,
-                min_pred_value=0.2, ## 0.5
+                min_pred_value=0.1, ## 0.5
                 saliency_thresholds=saliency_thresholds,
                 keep_monotonous=True,
                 num_data_points=num_data_points)            
