@@ -179,7 +179,13 @@ def get_abl_sal_creator(nmasks=1000):
 
 
 def get_mwcomp_cnn_sal_creator():
+
     baselines = [ZeroBaseline()]
+    return CompExpCreator(
+        desc="MWComp", segsize=[40], nmasks=[500], c_opt="Adam", epochs=300, select_from=150,
+        c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+        c_activation="")
+
     return MultiCompExpCreator(desc="MWComp", segsize=[40], nmasks=[500],  baselines = baselines, 
                         groups=[
                             dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
@@ -189,6 +195,11 @@ def get_mwcomp_cnn_sal_creator():
 
 def get_mwcomp_vit_sal_creator():
     baselines = [ZeroBaseline()]
+    return CompExpCreator(
+        desc="MWComp", segsize=[16], nmasks=[1000], c_opt="Adam", epochs=300, select_from=150,
+        c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+        c_activation="")
+
     return MultiCompExpCreator(desc="MWComp", segsize=[24, 32, 40], nmasks=[1000],  baselines = baselines, 
                         groups=[
                             dict(c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
