@@ -24,10 +24,13 @@ class ISource:
         with open(selection_path, "rt") as sf:
             return [self.get_image_name(x.strip()) for x in sf]
 
+    def get_image_file_ptrn(self):
+        return "*.JPEG"
+    
     @lru_cache(maxsize=None)     
     def get_all_images(self):
         logging.debug(f"imagenet base path: {self.base_path}")
-        ptrn = os.path.join(self.base_path, self.image_dir_ptrn, "*.JPEG")
+        ptrn = os.path.join(self.base_path, self.image_dir_ptrn, self.get_image_file_ptrn())
         all_images = glob.glob(ptrn)
         logging.debug(f"found {len(all_images)} images at {ptrn}")
         image_targets = self.get_image_targets()
@@ -63,6 +66,9 @@ class VOCSource(ISource):
 
     def get_image_targets(self):
         return {}
+
+    def get_image_file_ptrn(self):
+        return "*.jpg"
 
 class ImagenetSource(ISource):
 
