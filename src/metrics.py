@@ -247,7 +247,8 @@ class Metrics:
             return metric.auc * 100.0
     
         except pic.ComputePicMetricError as e:        
-            logging.info("skipping image")
+            logging.info(f"skipping image {e}")
+            raise e
             return -10000.0
 
 
