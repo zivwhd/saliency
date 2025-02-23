@@ -67,7 +67,7 @@ def get_mrcomp_vit_sal_creator():
     return CompExpCreator(
         desc="MrCompJv", segsize=[16,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, 
         epochs=301, select_from=200, select_freq=3, select_del=1.0,
-        c_mask_completeness=1.0, c_magnitude=1, c_positive=1, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+        c_mask_completeness=1.0, c_magnitude=1, c_positive=True, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
         c_activation="",
     )
 
@@ -87,7 +87,7 @@ def get_mrcomp_sal_creator():
     return CompExpCreator(
         desc="MrCompL", segsize=[48], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, 
         epochs=301, select_from=200, select_freq=3, select_del=1.0,
-        c_mask_completeness=1.0, c_magnitude=1, c_positive=1, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
+        c_mask_completeness=1.0, c_magnitude=1, c_positive=True, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, 
         c_activation="",
     )
 
