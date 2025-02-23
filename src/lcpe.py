@@ -177,6 +177,7 @@ def optimize_explanation_i(
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
+        c_positive=False,
         c_activation=None,
         c_norm=False,
         renorm=False, baseline=None, 
@@ -195,11 +196,11 @@ def optimize_explanation_i(
 
     #print(list(model.parameters()))
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
-    print(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation}; c_model={c_model}; c_opt={c_opt};")
+    print(f"## lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_positive={c_positive}, c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation}; c_model={c_model}; c_opt={c_opt};")
 
     print("###", dict(epochs=epochs, lr=lr, score=score, 
         c_mask_completeness=c_mask_completeness, c_smoothness=c_smoothness, c_completeness=c_completeness, c_selfness=c_selfness,
-        c_magnitude=c_magnitude,
+        c_magnitude=c_magnitude, c_positive=c_positive,
         c_tv=c_tv, avg_kernel_size=avg_kernel_size, c_model=c_model,
         c_activation=c_activation, c_norm=c_norm, renorm=renorm,
         select_from=select_from, select_freq=select_freq, select_del=select_del))
@@ -275,7 +276,10 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            magnitude_loss = (mexp.explanation.abs()).mean()
+            if c_positive:
+                magnitude_loss = ((mexp.explanation < 0) * mexp.explanation.abs()).mean() #### PUSH_ASSERT
+            else:
+                magnitude_loss = mexp.explanation.abs().mean()
         else:
             magnitude_loss = 0
 
@@ -453,7 +457,7 @@ class CompExpCreator:
                  lr = 0.05, lr_step=0, lr_step_decay=0,
                  c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
-                 c_magnitude=0, c_norm=False, c_activation=False,
+                 c_magnitude=0, c_positive=False, c_norm=False, c_activation=False,
                  c_logit = False,
                  avg_kernel_size=(5,5),
                  select_from=100, select_freq=10, select_del=0.5,
@@ -487,6 +491,7 @@ class CompExpCreator:
         self.c_activation = c_activation
         self.c_logit = c_logit
         self.c_magnitude = c_magnitude
+        self.c_positive = c_positive
         self.c_opt = c_opt
         self.lr = lr
         self.lr_step = lr_step
@@ -537,6 +542,8 @@ class CompExpCreator:
 
         if self.c_magnitude:
             desc += f"_mgn{self.c_magnitude}"
+            if self.c_positive:
+                desc += "p"
 
         if self.c_model:
             desc += f"_mdl{self.c_model}"
@@ -631,6 +638,7 @@ class CompExpCreator:
                                    c_mask_completeness=self.c_mask_completeness,
                                    c_model=self.c_model,
                                    c_magnitude=self.c_magnitude,
+                                   c_positive = self.c_positive,
                                    c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline, callback=callback)
         
