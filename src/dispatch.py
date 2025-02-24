@@ -91,6 +91,23 @@ def get_mrcomp_sal_creator():
         c_activation="",
     )
 
+def get_lscnm_sal_creator():
+
+    return MultiCompExpCreator(
+        desc="LSC",
+        mask_groups={f"xL":{48:500}, f"xS":{48:1000},},            
+            baselines = [ZeroBaseline()],
+            groups=[
+                dict(c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  epochs=101, select_from=None, 
+                     c_mask_completeness=1.0, c_magnitude=0.01, c_positive=True, c_completeness=0, c_tv=0.1, 
+                     c_model=0.0, c_norm=False,  c_activation=""),
+                dict(c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  epochs=101, select_from=None, 
+                     c_mask_completeness=1.0, c_magnitude=0.01, c_positive=False, c_completeness=0, c_tv=0.1, 
+                     c_model=0.0, c_norm=False,  c_activation=""),
+
+            ]),
+
+
 def get_abl_sal_creator(nmasks=1000):
 
     logging.info("ablation sals")
