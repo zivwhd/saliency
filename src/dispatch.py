@@ -105,7 +105,7 @@ def get_lscnm_sal_creator():
                      c_mask_completeness=1.0, c_magnitude=0.01, c_positive=False, c_completeness=0, c_tv=0.1, 
                      c_model=0.0, c_norm=False,  c_activation=""),
 
-            ]),
+            ])
 
 
 def get_abl_sal_creator(nmasks=1000):
