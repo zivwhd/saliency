@@ -257,6 +257,7 @@ class Metrics:
         probs = torch.softmax(logits, dim=1)
 
         nsal = saliency
+        nsal = nsal * (nsal > 0)
         salmax, salmin = nsal.max(), nsal.min()
         if salmax > salmin:
             mask = (nsal - salmin) / (salmax-salmin)
