@@ -54,10 +54,10 @@ class DimplVitSaliencyCreator:
             model = ViTmodel.vit_small_patch16_224(pretrained=True).to(device)
         elif me.arch == "vit_base_patch16_224":
             model = ViTmodel.vit_base_patch16_224(pretrained=True).to(device)
-        elif me.arch in ["resnet50"]:
+        elif me.arch in ["resnet50","densenet201"]:
             model = me.model
         else:
-            raise Exception(f"unexpected arch {arch}")
+            raise Exception(f"unexpected arch {me.arch}")
         
         input_predictions = me.model(inp) ##, register_hook=True)
         #predicted_label = torch.max(input_predictions, 1).indices[0].item()

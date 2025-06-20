@@ -49,10 +49,11 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, save_path=None):
+def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, with_pos=False,  save_path=None):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
-    slots = 3+ with_mask
+    slots = 3 + with_mask + with_pos
+    osal = sal
     mask = (sal - sal.min()) / (sal.max()-sal.min())
     if mag:
         sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
@@ -82,6 +83,14 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
         msk = mask.unsqueeze(-1).numpy()
         masked_img = ((msk > msk.mean()) *img).astype(int)
         plt.imshow(masked_img)
+        plt.xticks([])  
+        plt.yticks([])
+
+    if with_pos:
+        plt.subplot(1, slots, 4)
+        msk = mask.unsqueeze(-1).numpy()
+        pos = (osal > 0)
+        plt.imshow(pos, cmap='jet')
         plt.xticks([])  
         plt.yticks([])
 

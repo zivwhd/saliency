@@ -177,7 +177,7 @@ def optimize_explanation_i(
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
-        c_positive=False,
+        c_positive=0,
         c_activation=None,
         c_norm=False,
         renorm=False, baseline=None, 
@@ -276,12 +276,15 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            if c_positive:
-                magnitude_loss = ((mexp.explanation < 0) * mexp.explanation.abs()).mean() #### PUSH_ASSERT
-            else:
-                magnitude_loss = mexp.explanation.abs().mean()
+            magnitude_loss = mexp.explanation.abs().mean()
         else:
             magnitude_loss = 0
+
+        
+        if c_positive != 0:
+            positive_loss = ((mexp.explanation < 0) * mexp.explanation.abs()).mean() 
+        else:
+            positive_loss = 0
 
         ## tar loss
         if c_selfness != 0:
@@ -300,7 +303,8 @@ def optimize_explanation_i(
             c_tv * tv_loss +
             c_selfness * tar_loss +
             c_model * model_loss + 
-            c_magnitude * magnitude_loss
+            c_magnitude * magnitude_loss + 
+            c_positive * positive_loss
             )
         
         total_loss.backward()
@@ -321,7 +325,7 @@ def optimize_explanation_i(
         if epoch % 100 == 0 and renorm:
             mexp.normalize(score)
         
-        if epoch % 10 == 0:
+        if epoch % 100 == 0:
             pdesc = (f"Epoch {epoch+1}/{epochs} Loss={total_loss.item()}; ES={explanation.sum()}; comp_loss={comp_loss}; "
                     f"exp_loss={explanation_loss}; conv_loss={conv_loss}; tv_loss={tv_loss}; model_loss={model_loss};"
                     f"magnitude_loss={magnitude_loss}")
@@ -382,13 +386,14 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
 
 
 class MaskedRespData:
-    def __init__(self, baseline_score, label_score, added_score, all_masks, all_pred, baseline):
+    def __init__(self, baseline_score, label_score, added_score, all_masks, all_pred, baseline, all_pred_raw=None):
         self.baseline_score = baseline_score
         self.label_score = label_score
         self.added_score = added_score
         self.all_masks = all_masks
         self.all_pred = all_pred
         self.baseline = baseline
+        self.all_pred_raw = all_pred_raw
 
     def subset(self, nmasks):
         assert nmasks <= self.all_masks.shape[0]
@@ -411,6 +416,31 @@ class MaskedRespData:
             all_pred=torch.concat([x.all_pred for x in data]),
             baseline=data[0].baseline
         )
+    
+    def to(self, device):
+        return MaskedRespData(
+            baseline_score = self.baseline_score.to(device),
+            label_score = self.label_score.to(device),
+            added_score=self.added_score.to(device),
+            all_masks=self.all_masks.to(device),
+            all_pred=self.all_pred.to(device),
+            baseline=self.baseline.to(device)
+        )
+
+    def cpu(self):
+        return self.to(torch.device("cpu"))
+    
+    def shuffle(self):
+        perm = torch.randperm(self.all_pred.shape[0]).to(self.all_pred.device)
+        return MaskedRespData(
+            baseline_score = self.baseline_score,
+            label_score = self.label_score,
+            added_score=self.added_score,
+            all_masks=self.all_masks[perm],
+            all_pred=self.all_pred[perm],
+            baseline=self.baseline
+        )
+
 
 
 class ZeroBaseline:
@@ -457,7 +487,7 @@ class CompExpCreator:
                  lr = 0.05, lr_step=0, lr_step_decay=0,
                  c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
-                 c_magnitude=0, c_positive=False, c_norm=False, c_activation=False,
+                 c_magnitude=0, c_positive=0, c_norm=False, c_activation=False,
                  c_logit = False,
                  avg_kernel_size=(5,5),
                  select_from=100, select_freq=10, select_del=0.5,
@@ -475,7 +505,10 @@ class CompExpCreator:
         if type(segsize) == int:
             segsize = [segsize]
             nmasks = [nmasks]
+            pprob = [pprob]
+
         assert len(segsize) == len(nmasks)
+        assert len(segsize) == len(pprob)
 
         self.segsize = segsize
         self.pprob = pprob
@@ -490,8 +523,8 @@ class CompExpCreator:
         self.c_norm = c_norm
         self.c_activation = c_activation
         self.c_logit = c_logit
-        self.c_magnitude = c_magnitude
-        self.c_positive = c_positive
+        self.c_magnitude = c_magnitude        
+        self.c_positive = c_positive        
         self.c_opt = c_opt
         self.lr = lr
         self.lr_step = lr_step
@@ -542,8 +575,9 @@ class CompExpCreator:
 
         if self.c_magnitude:
             desc += f"_mgn{self.c_magnitude}"
-            if self.c_positive:
-                desc += "p"
+
+        if self.c_positive:
+            desc += f"_p{self.c_positive}"
 
         if self.c_model:
             desc += f"_mdl{self.c_model}"
@@ -571,9 +605,9 @@ class CompExpCreator:
         all_masks_list = []
         all_pred_list = []
 
-        parts = list(zip(self.segsize, self.nmasks))
-        for segsize, nmasks in parts:
-            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape, prob=self.pprob)            
+        parts = list(zip(self.segsize, self.nmasks, self.pprob))
+        for segsize, nmasks, pprob  in parts:
+            mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape, prob=pprob)            
             logging.debug(f"generating {nmasks} masks and responses")
             print(f"generating {nmasks} masks and responses segsize={segsize}")
             mgen.gen(fmdl, inp, nmasks, batch_size=self.batch_size)        
@@ -609,6 +643,7 @@ class CompExpCreator:
             added_score = added_score,
             all_masks = all_masks,
             all_pred = all_pred,
+            all_pred_raw = (torch.concat(all_pred_list).to(device).squeeze()),
             baseline = baseline
         )
 
@@ -697,3 +732,35 @@ class MultiCompExpCreator:
         logging.info(f"generated: {list(all_sals.keys())}")
         return all_sals
 
+
+class AutoCompExpCreator:
+
+    def __init__(self, nmasks=1000, segsize=32, **kwargs):
+        self.nmasks = nmasks
+        self.segsize = segsize
+        self.kwargs = kwargs
+    
+    def __call__(self, me, inp, catidx):
+        pprob = self.tune_pprob(me, inp, catidx)
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
+        return algo(me, inp, catidx)
+
+    def get_prob_score(pprob, me, inp, catidx, sampsize=64):
+        algo = CompExpCreator(desc="gen", segsize=self.segsize, nmasks=sampsize, pprob=pprob)    
+        data = algo.generate_data(me, inp, catidx)         
+        rv = float(data.all_pred.std().cpu())
+        return rv
+
+    def tune_pprob(self, me, inp, catidx):
+        pscore = lambda x: self.get_prob_score(x, me, inp, catidx)
+        main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
+        main_scores = torch.tensor([pscore(x) for x in main_probs])
+        foc = main_probs[int(main_scores.argmax())]
+        extra_probs = [0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8]
+        aux_probs = [x for x in extra_probs if (foc - 0.15 <= x <= foc + 0.15)]    
+        aux_scores = torch.Tensor([pscore(x) for x in aux_probs])
+        all_probs = torch.Tensor(main_probs + aux_probs)
+        all_scores = torch.concat([main_scores, aux_scores])
+
+        rv = float(all_probs[int(all_scores.argmax())])
+        return rv

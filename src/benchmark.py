@@ -13,7 +13,8 @@ import numpy as np
 import pdb
 from collections import defaultdict
 
-import timm
+import timm, torchray
+import torchray.benchmark
 
 from saleval import *
 from metrics import *
@@ -28,7 +29,11 @@ class ModelEnv:
         self.shape = (224,224)
 
     def load_model(self, arch, dev):
-        if arch == 'vgg16NT':
+        if arch.startswith('voc_'):
+            model_arch = arch.replace('voc_','')
+            model = torchray.benchmark.models.get_model(arch=model_arch, dataset="voc", convert_to_fully_convolutional=False)
+
+        elif arch == 'vgg16NT':
             model = torchvision.models.vgg16(pretrained=False)
         elif arch == 'vgg16RT':            
             model = torchvision.models.vgg16(pretrained=False)
@@ -50,10 +55,16 @@ class ModelEnv:
         return model
 
     def narrow_model(self, catidx, with_softmax=False):
-        modules = (
-            [self.model] + 
-            ([nn.Softmax(dim=1)] if with_softmax else []) +
-            [SelectKthLogit(catidx)])
+        if "voc" in self.arch:
+            modules = (
+                [self.model] + 
+                #([nn.Sigmoid()] if with_softmax else []) +
+                [SelectKthLogit(catidx)])
+        else:
+            modules = (
+                [self.model] + 
+                ([nn.Softmax(dim=1)] if with_softmax else []) +
+                [SelectKthLogit(catidx)])
 
         return nn.Sequential(*modules)
         
@@ -94,7 +105,14 @@ class ModelEnv:
         return device
 
     def get_transform(self):    
-        if 'resnet' in self.arch or 'vgg' in self.arch or 'convnext' in self.arch or 'densenet' in self.arch:
+        if "voc" in self.arch:
+            #print("voc transform 3")
+            transform = transforms.Compose([
+                transforms.Resize((224, 224)),  # Resize to (224, 224)
+                transforms.ToTensor(),  # Convert to tensor (scales to [0,1])
+                transforms.Lambda(lambda x: x * 255.0)  # Multiply by 255
+            ])
+        elif 'resnet' in self.arch or 'vgg' in self.arch or 'convnext' in self.arch or 'densenet' in self.arch:
             transform = torchvision.transforms.Compose([
                 torchvision.transforms.Resize(self.shape),
                 torchvision.transforms.CenterCrop(self.shape),
@@ -116,7 +134,7 @@ class ModelEnv:
     def get_image_ext(self, path):
         img = Image.open(path)
         # Pre-process the image and convert into a tensor
-        ## TODO: for which models are these transformation relevant
+        ## TODO: for which models are these transformation relevant        
         transform = self.get_transform()
         x = transform(img).unsqueeze(0)
         return img, x.to(self.device)
