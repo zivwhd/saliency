@@ -747,12 +747,14 @@ class AutoCompExpCreator:
         return algo(me, inp, catidx)
 
     def get_prob_score(pprob, segsize, me, inp, catidx, sampsize=64):
+        logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
         algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
         rv = float(data.all_pred.std().cpu())
         return rv
 
     def tune_pprob(self, segsize, me, inp, catidx):
+        logging.info(f"tune_pprob: {segsize}")        
         pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)
         main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
         main_scores = torch.tensor([pscore(x) for x in main_probs])
