@@ -496,7 +496,7 @@ class CompExpCreator:
                  c_opt="Adam",
                  mgen=None,
                  desc = "MComp",                 
-                 pprob = 0.5,
+                 pprob = [0.5],
                  baseline_gen = ZeroBaseline(),                 
                  ext_desc = "",
                  **kwargs):
@@ -742,6 +742,7 @@ class AutoCompExpCreator:
     
     def __call__(self, me, inp, catidx):
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
+        logging.info(f"selected probs: {pprob}")
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
