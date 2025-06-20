@@ -735,24 +735,24 @@ class MultiCompExpCreator:
 
 class AutoCompExpCreator:
 
-    def __init__(self, nmasks=1000, segsize=32, **kwargs):
+    def __init__(self, nmasks=[1000], segsize=[32], **kwargs):
         self.nmasks = nmasks
         self.segsize = segsize
         self.kwargs = kwargs
     
     def __call__(self, me, inp, catidx):
-        pprob = self.tune_pprob(me, inp, catidx)
+        pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
-    def get_prob_score(pprob, me, inp, catidx, sampsize=64):
-        algo = CompExpCreator(desc="gen", segsize=self.segsize, nmasks=sampsize, pprob=pprob)    
+    def get_prob_score(pprob, segsize, me, inp, catidx, sampsize=64):
+        algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
         rv = float(data.all_pred.std().cpu())
         return rv
 
-    def tune_pprob(self, me, inp, catidx):
-        pscore = lambda x: self.get_prob_score(x, me, inp, catidx)
+    def tune_pprob(self, segsize, me, inp, catidx):
+        pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)
         main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
         main_scores = torch.tensor([pscore(x) for x in main_probs])
         foc = main_probs[int(main_scores.argmax())]
