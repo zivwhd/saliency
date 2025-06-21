@@ -742,7 +742,7 @@ class AutoCompExpCreator:
     
     def __call__(self, me, inp, catidx):
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
-        logging.info(f"selected probs: AA,{me.arch},{pprob}")
+        logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,pprob))},PROB,{','.join(map(str,pprob))}")
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
