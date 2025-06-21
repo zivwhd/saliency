@@ -101,20 +101,60 @@ def get_autocomp_sal_creator():
     return CombSaliencyCreator([
         AutoCompExpCreator(
             desc="AutoCompBs", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
-            epochs=100, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),
         AutoCompExpCreator(
             desc="AutoCompEs", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
-            epochs=100, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            epochs=101, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )])
+
+def get_ocomp_sal_creator():    
+    return CombSaliencyCreator([
+        CompExpCreator(
+            desc="CompBs5", segsize=[32], nmasks=[1000], pprobs=[0.5], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompEs5", segsize=[32], nmasks=[1000], pprobs=[0.5], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompBs2", segsize=[32], nmasks=[1000], pprobs=[0.2], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompEs2", segsize=[32], nmasks=[1000], pprobs=[0.2], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompBs8", segsize=[32], nmasks=[1000], pprobs=[0.2], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompEs8", segsize=[32], nmasks=[1000], pprobs=[0.2], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CompExpCreator(
+            desc="CompJb", segsize=[16,48], nmasks=[500,500], pprobs=[0.5,0.5], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        )
+        ])
 
 
 def get_lscnm_sal_creator():
 
     return MultiCompExpCreator(
         desc="LSC",
+
         mask_groups={f"xL":{48:500}, f"xS":{48:1000},},            
             baselines = [ZeroBaseline()],
             groups=[
