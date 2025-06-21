@@ -419,7 +419,7 @@ def bootstrap_ci(series, B=1000, alpha_low=5, alpha_high=95):
 
 def summarize_scores_df(df, extended=False, equant=False):
     meta_cols = ["model","image","variant"]
-    conifdence_cols = ["pred_ins","pred_del"]
+    confidence_cols = ["pred_ins","pred_del"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
     confidence_cols = [x for x in metric_cols if x in confidence_cols]
 
