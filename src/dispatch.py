@@ -120,6 +120,28 @@ def get_lscnm_sal_creator():
             ])
 
 
+def get_epochcheck_sal_creator():
+    baselines = [ZeroBaseline()]
+    basic_mask_groups = {"":{16:500, 48:500}}
+
+    basic = dict(
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
+                 select_from=None,#select_from=10, select_freq=3, select_del=1.0,
+                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+    
+    return MultiCompExpCreator(
+            desc="SEG",
+            mask_groups=basic_mask_groups,
+            baselines = baselines,
+            groups=[
+                modify(epochs=x) for x in [fac*10 for fac in range(1,300)]
+            ])
+
+
 def get_abl_sal_creator(nmasks=1000):
 
     logging.info("ablation sals")
@@ -127,7 +149,7 @@ def get_abl_sal_creator(nmasks=1000):
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
                  c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
-                 #select_from=10, select_freq=3, select_del=1.0,
+                 #select_from=10, select_freq=3, select_del=1.0,                 
                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
     basic_mask_groups = {"":{16:500, 48:500}}
