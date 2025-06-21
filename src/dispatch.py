@@ -138,7 +138,7 @@ def get_epochcheck_sal_creator():
             mask_groups=basic_mask_groups,
             baselines = baselines,
             groups=[
-                modify(epochs=x) for x in [fac*10 for fac in range(1,300)]
+                modify(epochs=x) for x in [fac*10 for fac in range(1,30)]
             ])
 
 
