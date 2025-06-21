@@ -402,14 +402,38 @@ def load_scores_df(model_name, variant_names=None, base_path=None, filter_func=N
             
     return pd.DataFrame(res)
 
+
+def bootstrap_ci(series, B=1000, alpha_low=5, alpha_high=95):
+    data = series.to_numpy()
+    N = len(data)
+    if N == 0:
+        return pd.Series([np.nan, np.nan])  # handle empty groups
+
+    means = np.array([
+        np.mean(np.random.choice(data, size=N, replace=True))
+        for _ in range(B)
+    ])
+    lower = np.percentile(means, alpha_low)
+    upper = np.percentile(means, alpha_high)
+    return pd.Series([lower, upper])
+
 def summarize_scores_df(df, extended=False, equant=False):
     meta_cols = ["model","image","variant"]
+    conifdence_cols = ["pred_ins","pred_del"]
     metric_cols = [x for x in df.columns if x not in meta_cols]
+    confidence_cols = [x for x in metric_cols if x in confidence_cols]
+
     if extended:
         metrics = {f"mean_{x}" : (x, lambda x: x[x >= 0].mean()) for x in metric_cols}
         metrics.update({f"count_{x}" : (x, lambda x: (x >=0).sum()) for x in metric_cols})
     else:
-        metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}   
+        metrics = {f"mean_{x}" : (x, 'mean') for x in metric_cols}
+        for mcol in confidence_cols:
+            metrics.update({
+                f"ci05_{mcol}" : (mcol, lambda x:  bootstrap_ci(x)[0]),
+                f"ci95_{mcol}" : (mcol, lambda x:  bootstrap_ci(x)[1])
+                })
+
     smry =df.groupby(['model', 'variant']).agg(
         n_valid=('variant', 'size'),
         **metrics
