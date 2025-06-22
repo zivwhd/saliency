@@ -746,7 +746,7 @@ class AutoCompExpCreator:
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
-    def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=64):
+    def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=50):
         logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
         algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
@@ -767,3 +767,23 @@ class AutoCompExpCreator:
 
         rv = float(all_probs[int(all_scores.argmax())])
         return rv
+
+class MProbCompExpCreator:
+
+    def __init__(self, nmasks=[1000], segsize=[32], **kwargs):
+        self.kwargs = kwargs        
+        self.nmasks = nmasks
+        self.segsize = segsize
+
+    def __call__(self, me, inp, catidx):
+        if 'vit' in me.arch:
+            pprob = [0.2]
+        elif me.arch == 'resnet50':
+            pprob = [0.8]
+        elif me.arch == 'densenet201':
+            pprob = [0.5]
+        else:
+            assert False, f"Unexpected arch {me.arch}"
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
+        return algo(me, inp, catidx)
+
