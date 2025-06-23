@@ -219,7 +219,7 @@ def main():
     
     coord = Coord(part_list, progress_path, getname=lambda x: str(x))
 
-    for part in part_list:
+    for part in coord:
 
         if part == "HEADER":
             report(f'Explainer: {args.explainer}')
