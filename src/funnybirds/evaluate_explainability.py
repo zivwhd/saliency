@@ -23,7 +23,7 @@ parser.add_argument('--model', required=True,
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
-                             'xGC', 'xLSC', 'xLC', 'aLC', 'xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
+                             'xGC', 'xLSC', 'xLC', 'aLSC', 'xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
                              'xDIXv'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
