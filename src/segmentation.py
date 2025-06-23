@@ -15,7 +15,7 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator, MultiCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
+from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
@@ -184,6 +184,14 @@ def get_creators_cnn():
         #LTXSaliencyCreator(),
         IEMPertSaliencyCreator(),        
         #RiseSaliencyCreator(),
+    ]
+
+    runs = [
+        AutoCompExpCreator(
+            desc="AutoComp", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        )
     ]
 
     return CombSaliencyCreator(runs)
