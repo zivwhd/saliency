@@ -189,9 +189,9 @@ def main():
     start_time = time.time()
     accuracy, csdc, pc, dc, distractibility, sd, ts = -1, -1, -1, -1, -1, -1, -1
 
-    progress_path = os.path.join("progress", model.arch, args.explainer)
+    progress_path = os.path.join("progress", model_name, args.explainer)
     os.makedirs(progress_path, exist_ok=True)
-    results_path = os.path.join("results", model.arch, f"{args.explainer}")
+    results_path = os.path.join("results", model_name, f"{args.explainer}")
     os.makedirs(results_path, exist_ok=True)
 
     def res_path(res):
