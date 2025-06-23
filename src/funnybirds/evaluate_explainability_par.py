@@ -204,7 +204,7 @@ def main():
     
     def save(obj, res):        
         with open(res_path(res),"wb") as of:
-            pickle.dump(res, of)
+            pickle.dump(obj, of)
     
     def load(res):        
         with open(res_path(res),"rb") as of:
