@@ -296,6 +296,7 @@ def main():
 
     print("Done all")
     res_list = ["accuracy","csdc","ts","sd","pc","dc","distractibility","background_independence"]
+    time.sleep(10)
     if all([rexists(x) for x in res_list]):            
         sargs = { k : load(k) for k in res_list}
         summarize(**sargs)
