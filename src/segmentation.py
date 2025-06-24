@@ -242,7 +242,7 @@ def create_sals(model_name, dataset_name, marker="m"):
 def eval_batch(Res, labels):
     Res = (Res - Res.min()) / (Res.max() - Res.min())
 
-    ret = np.quantile(Res, 0.75)  ##Res.mean()
+    ret = np.quantile(Res, 0.9)  ##Res.mean()
 
     Res_1 = Res.gt(ret).type(Res.type())
     Res_0 = Res.le(ret).type(Res.type())
