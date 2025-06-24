@@ -755,7 +755,7 @@ class AutoCompExpCreator:
         return algo(me, inp, catidx)
 
     def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=50):
-        logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
+        #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
         algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
         rv = float(data.all_pred.std().cpu())
