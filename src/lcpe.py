@@ -688,7 +688,7 @@ class MultiCompExpCreator:
     def __init__(self, nmasks=500, mask_groups={"":{16:500,48:500}}, baselines=[ZeroBaseline()],
                  batch_size=32,
                  desc="MComp",
-                 pprob = [0.5],
+                 pprob = [None],
                  groups=[]):        
         self.mask_groups = mask_groups
         self.batch_size = batch_size
@@ -712,8 +712,13 @@ class MultiCompExpCreator:
                 
                 seg_masks = {}
                 for segsize, mlimit in seglimit.items():
-                    dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
-                                        baseline_gen=bgen, pprob=pprob)
+                    if pprob is None:
+                        dc = AutoCompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
+                                           baseline_gen=bgen)
+                    else:
+                        dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
+                                           baseline_gen=bgen, pprob=pprob)
+                    
                     seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
                 
                 for nm, maskspec in self.mask_groups.items():

@@ -202,24 +202,23 @@ def get_abl_sal_creator(nmasks=1000):
     baselines = [ZeroBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
-                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, 
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=None,
                  #select_from=10, select_freq=3, select_del=1.0,                 
                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
-    basic_mask_groups = {"":{16:500, 48:500}}
+    basic_mask_groups = {"":{32:1000}}
 
     def modify(**kwargs):
         args = basic.copy()
         args.update(**kwargs)
         return args
 
-
-    segsizes = [16,48]
     
     runs = [
         MultiCompExpCreator(
             desc="SEG",
-            mask_groups={f"_{seg}_":{seg:nmasks} for seg in [8,16,32,40,48,56,64]},            
+            pprob=[None],
+            mask_groups={f"_{seg}_":{seg:1000} for seg in [8,16,32,40,48,56,64]},            
             baselines = baselines,
             groups=[
                 basic
@@ -227,19 +226,30 @@ def get_abl_sal_creator(nmasks=1000):
 
         MultiCompExpCreator(
             desc="MSK",
-            mask_groups={f"_{nmasks}_": {sg: nmasks for sg in segsizes} for nmasks in [10,100,250,500,750,1000]},            
+            pprob=[None],
+            mask_groups={f"_{nmasks}_": { 32 : nmasks } for nmasks in [10,100,250,500,750,1000, 1250, 1500, 2000]},
             baselines = baselines,
             groups=[
                 basic,
             ]),
+
         MultiCompExpCreator(
             desc="BSLN",
+            pprob=[None],
             mask_groups=basic_mask_groups,
             baselines = [ZeroBaseline(),BlurBaseline(),RandBaseline()],
             groups=[basic]),
 
         MultiCompExpCreator(
+            desc="PROB",
+            pprob=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9],
+            mask_groups=basic_mask_groups,
+            baselines = baselines,
+            groups=[basic]),
+
+        MultiCompExpCreator(
             desc="MComp",
+            pprob=[None],
             mask_groups=basic_mask_groups,            
             baselines = baselines,
             groups=[
@@ -263,9 +273,9 @@ def get_abl_sal_creator(nmasks=1000):
                 modify(c_magnitude=0.01, desc="MAG"),
                 modify(c_magnitude=0.05, desc="MAG"),
                 modify(c_magnitude=0.1, desc="MAG"),
-                #modify(c_magnitude=0.25, desc="MAG"),                
-                #modify(c_magnitude=0.5, desc="MAG"),
-                #modify(c_magnitude=1, desc="MAG"), 
+                modify(c_magnitude=0.25, desc="MAG"),                
+                modify(c_magnitude=0.5, desc="MAG"),
+                modify(c_magnitude=1, desc="MAG"), 
 
                 modify(epochs=25, desc="EPC"),
                 modify(epochs=50, desc="EPC"),
