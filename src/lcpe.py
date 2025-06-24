@@ -713,11 +713,14 @@ class MultiCompExpCreator:
                 seg_masks = {}
                 for segsize, mlimit in seglimit.items():
                     if pprob is None:
-                        dc = AutoCompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
+                        tn = AutoCompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
                                            baseline_gen=bgen)
+                        selected_pprob = tn.tune_pprob(segsize, me, inp, catidx)                        
                     else:
-                        dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
-                                           baseline_gen=bgen, pprob=pprob)
+                        selected_pprob = pprob
+                    
+                    dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
+                                        baseline_gen=bgen, pprob=selected_pprob)
                     
                     seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
                 
