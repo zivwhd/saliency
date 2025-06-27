@@ -50,7 +50,7 @@ for image_info in all_images:
 
     for method_name, variant in methods:
         logging.info(f"method: {method_name} - {variant}")
-        result_path = os.path.join("results", model_name, "saliency", method_name, image_info.name)
+        result_path = os.path.join("results", variant, "saliency", method_name, image_info.name)
         logging.info(f"loading {result_path}")
         assert os.path.isfile(result_path)
         sal = torch.load(result_path).float()
