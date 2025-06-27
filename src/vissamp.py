@@ -16,7 +16,7 @@ def get_args():
     ALL_MODELS = CNN_MODELS + VIT_MODELS    
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--selection")       
-    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
+    parser.add_argument("--model", choices=ALL_MODELS, default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
     return args
@@ -45,7 +45,7 @@ else:
         ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
         ('GAE', 'Dimpl_gae_0'),        
         ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ( 'RISE','RISE_4000_7_0.5_0')    
+        ( 'RISE','RISE_4000_7_0.5_0'),    
         ('T-Attr', 'Dimpl_t-attr_0'),
     ]
 
