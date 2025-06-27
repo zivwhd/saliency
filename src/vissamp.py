@@ -21,7 +21,8 @@ methods = [
 ]
 
 
-figsize=(10,10), fontsize=7
+figsize=(10,10)
+fontsize=7
 
 all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
