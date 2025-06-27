@@ -58,7 +58,7 @@ for image_info in all_images:
         plt.subplot(1, len(methods)+1, idx)         
         idx += 1
         show_single_sal(img, None, None)
-        show_single_sal(img, sal, method_name) #, alpha=alpha, mag=mag)
+        show_single_sal(img, {method_name : sal}, method_name) #, alpha=alpha, mag=mag)
         plt.title(method_name, fontsize=fontsize)
     
     plt.savefig("visual/{model_name}/{image_name}.png") 
