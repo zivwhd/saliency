@@ -29,7 +29,7 @@ all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
 all_image_names = set(all_images_dict.keys())
 
 for image_info in all_images:
-    logging.info("image: {image_info}")
+    logging.info(f"image: {image_info}")
     image_path = image_info.path
     targetidx = image_info.target
     img=Image.open(image_path)
@@ -41,18 +41,20 @@ for image_info in all_images:
     plt.tight_layout(pad=0)
 
 
-    idx = 0
-    plt.subplot(1, len(methods)+1, idx)         
+    
+    idx = 1
+    plt.subplot(1, len(methods)+1, idx)             
     idx += 1
     show_single_sal(img, None, None)
 
 
     for method_name, variant in methods:
-    
+        logging.info(f"method: {method_name} - {variant}")
         result_path = os.path.join("results", model_name, "saliency", method_name, image_info.name)
+        logging.info(f"loading {result_path}")
         assert os.path.isfile(result_path)
         sal = torch.load(result_path).float()
-
+        logging.info(f"loaded {sal.shape}")
         plt.subplot(1, len(methods)+1, idx)         
         idx += 1
         show_single_sal(img, None, None)
