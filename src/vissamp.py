@@ -24,7 +24,7 @@ def get_args():
 args = get_args()
 
 selection = args.selection
-model_name = args.model_name
+model_name = args.model
 isrc = ImagenetSource(selection_name=selection)
 
 
