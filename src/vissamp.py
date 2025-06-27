@@ -16,7 +16,7 @@ model_name = "resnet50"
 
 methods = [
     ('LSC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
-    ('AC' 'pgc_AblationCAM_0'),
+    ('AC', 'pgc_AblationCAM_0'),
     ('DIX', 'DixCnn_0'),
     ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
     ('GC', 'pgc_GradCAM_0'),        
