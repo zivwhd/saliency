@@ -9,20 +9,45 @@ matplotlib.use('Agg')
 
 logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
 
-selection = "vis20"
+
+def get_args(): 
+    VIT_MODELS = ["vit_small_patch16_224","vit_base_patch16_224","vit_base_patch16_224.mae"]
+    CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201","densenet201NT","densenet201RT","resnet50NT", "resnet50RT", "vgg16NT", "vgg16RT"] ## "resnet18"
+    ALL_MODELS = CNN_MODELS + VIT_MODELS    
+    parser = argparse.ArgumentParser(description="dispatcher")
+    parser.add_argument("--selection")       
+    parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
+
+    args = parser.parse_args()    
+    return args
+
+args = get_args()
+
+selection = args.selection
+model_name = args.model_name
 isrc = ImagenetSource(selection_name=selection)
 
-model_name = "resnet50"
 
-methods = [
-    ('LSC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
-    ('AC', 'pgc_AblationCAM_0'),
-    ('DIX', 'DixCnn_0'),
-    ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-    ('GC', 'pgc_GradCAM_0'),        
-    ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-    ( 'RISE','RISE_4000_7_0.5_0')    
+if 'vit' not in model_name:
+    methods = [
+        ('SLOC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
+        ('AC', 'pgc_AblationCAM_0'),
+        ('DIX', 'DixCnn_0'),
+        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+        ('GC', 'pgc_GradCAM_0'),
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ( 'RISE','RISE_4000_7_0.5_0')
 ]
+else:
+    methods = [
+        ('SLOC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),        
+        ('DIX', 'Dimpl_dix_0'),
+        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+        ('GAE', 'Dimpl_gae_0'),        
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ( 'RISE','RISE_4000_7_0.5_0')    
+        ('T-Attr', 'Dimpl_t-attr_0'),
+    ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
@@ -77,7 +102,6 @@ for imgidx, image_info in enumerate(all_images):
     save_path = f"visual/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)
-    break
+    plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
 
 
