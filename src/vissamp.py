@@ -41,6 +41,7 @@ for imgidx, image_info in enumerate(all_images):
     targetidx = image_info.target
     ## {"0": ["n01440764", "tench"]
     target_name = TARGET_NAMES[str(targetidx)][2]
+    logging.info(f"target: {targetidx} {target_name}")
     img=Image.open(image_path)
     img=img.resize((224,224))  
 
