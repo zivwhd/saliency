@@ -16,9 +16,15 @@ model_name = "resnet50"
 
 methods = [
     ('LSC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('AC' 'pgc_AblationCAM_0'),
     ('DIX', 'DixCnn_0'),
-    ('GC', 'pgc_GradCAM_0')
+    ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+    ('GC', 'pgc_GradCAM_0'),        
+    ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+    ( 'RISE','RISE_4000_7_0.5_0')    
 ]
+
+TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
 
 figsize=(10,10)
@@ -33,6 +39,8 @@ for imgidx, image_info in enumerate(all_images):
     image_path = image_info.path
     image_name = image_info.name
     targetidx = image_info.target
+    ## {"0": ["n01440764", "tench"]
+    target_name = TARGET_NAMES[str(targetidx)][2]
     img=Image.open(image_path)
     img=img.resize((224,224))  
 
@@ -46,7 +54,9 @@ for imgidx, image_info in enumerate(all_images):
     idx = 1
     plt.subplot(1, len(methods)+1, idx)             
     idx += 1
-    show_single_sal(img, None, None)
+    show_single_sal(img, None, None)   
+    plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
+
 
 
     for method_name, variant in methods:
@@ -59,7 +69,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.subplot(1, len(methods)+1, idx)         
         idx += 1
         show_single_sal(img, None, None)
-        show_single_sal(img, {method_name : sal}, method_name) #, alpha=alpha, mag=mag)
+        show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=True)
         plt.title(method_name, fontsize=fontsize)
     
     
@@ -67,4 +77,6 @@ for imgidx, image_info in enumerate(all_images):
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)
+    break
+
 
