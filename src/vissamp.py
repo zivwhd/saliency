@@ -61,8 +61,8 @@ for image_info in all_images:
         show_single_sal(img, {method_name : sal}, method_name) #, alpha=alpha, mag=mag)
         plt.title(method_name, fontsize=fontsize)
     
-    plt.savefig("visual/{model_name}/{image_name}.png") 
-    save_path = "visual/{model_name}/{image_name}.png"
+    
+    save_path = f"visual/{model_name}/{image_name}.png"
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)
 
