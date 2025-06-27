@@ -11,7 +11,7 @@ logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process
 
 selection = "vis20"
 isrc = ImagenetSource(selection_name=selection)
-image_name = "ILSVRC2012_val_00032607"
+
 model_name = "resnet50"
 
 methods = [
@@ -28,9 +28,10 @@ all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
 all_image_names = set(all_images_dict.keys())
 
-for image_info in all_images:
-    logging.info(f"image: {image_info}")
+for imgidx, image_info in enumerate(all_images):
+    logging.info(f"[{imgidx}] image: {image_info}")
     image_path = image_info.path
+    image_name = image_info.name
     targetidx = image_info.target
     img=Image.open(image_path)
     img=img.resize((224,224))  
