@@ -9,7 +9,7 @@ matplotlib.use('Agg')
 
 logging.basicConfig(format='[%(asctime)-15s  %(filename)s:%(lineno)d - %(process)d] %(message)s', level=logging.DEBUG)
 
-selection = "vis"
+selection = "vis20"
 isrc = ImagenetSource(selection_name=selection)
 image_name = "ILSVRC2012_val_00032607"
 model_name = "resnet50"
