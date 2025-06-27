@@ -63,6 +63,7 @@ for image_info in all_images:
     
     
     save_path = f"visual/{model_name}/{image_name}.png"
+    logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)
 
