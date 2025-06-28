@@ -787,14 +787,18 @@ class MulCompExpCreator(AutoCompExpCreator):
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
 
 
-        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
-                              cap_response=self.cap_response, pprob=pprob, c_positive=1, **self.kwargs)
-        
+        algo1 = CompExpCreator(
+            nmasks=[self.nmasks], segsize=[self.segsize[0]], 
+            cap_response=self.cap_response, pprob=[pprob[0]], c_positive=1, **self.kwargs)        
 
-        desc = algo.description()
+        algo2 = CompExpCreator(
+            nmasks=[self.nmasks], segsize=[self.segsize[1]], 
+            cap_response=self.cap_response, pprob=[pprob[1]], c_positive=1, **self.kwargs)        
 
-        exp1 = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
-        exp2 = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
+        desc = algo1.description()
+
+        exp1 = algo1.explain(me,inp, catidx).cpu().unsqueeze(0)
+        exp2 = algo2.explain(me,inp, catidx).cpu().unsqueeze(0)
 
 
         mexp = torch.maximum(exp1, torch.zeros(1)) * torch.maximum(exp2, torch.zeros(1)) 

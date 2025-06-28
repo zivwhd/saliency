@@ -13,7 +13,7 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
+from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, MulCompExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
@@ -216,15 +216,25 @@ def get_abl2_sal_creator(nmasks=1000):
 
     runs = [
         MulCompExpCreator(
-            desc="MulComp", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            desc="MulComp32", segsize=[32,32], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
             epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),        
+        MulCompExpCreator(
+            desc="MulComp32", segsize=[32,56], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        AutoCompExpCreator(
+            desc="AutoCompSlow", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
         MultiCompExpCreator(
             desc="MULTSEG",
             pprob=[None],
-            mask_groups={"M1":{16:1000, 32:1000, 64:1000}, "M2":{16:330, 32:330, 64:330}, 
-                         "M3":{32:1000, 64:1000}, "M4":{16:500, 48:500}},
+            mask_groups={"m16x48":{16:500, 48:500}, "m32x64":{32:500, 56:500}, 
+                         "m32xx56":{32:1000, 56:500}, "m16to56":{16:500, 32:500, 48:500, 56:500}},
             baselines = baselines,
             groups=[
                 basic
