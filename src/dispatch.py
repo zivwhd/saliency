@@ -93,7 +93,7 @@ def get_mrcomp_sal_creator():
 
 def get_altcomp_sal_creator():
     return AutoCompExpCreator(
-        desc="AutoCompS", segsize=[32], nmasks=[4000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+        desc="AutoComp", segsize=[32], nmasks=[4000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
         epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.1, c_positive=0, 
         c_completeness=0, c_tv=1.0, c_model=0.0, c_norm=False,  c_activation="", cap_response=False
     )
@@ -202,6 +202,35 @@ def get_epochcheck_sal_creator():
                 modify(epochs=x) for x in [fac*10 for fac in range(1,30)]
             ])
 
+
+def get_abl2_sal_creator(nmasks=1000):
+
+    logging.info("ablation sals")
+    baselines = [ZeroBaseline()]
+
+    basic = dict(#segsize=[16,48], nmasks=[500,500], 
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=None,
+                c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    
+
+
+    runs = [
+        MulCompExpCreator(
+            desc="MulComp", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),        
+        MultiCompExpCreator(
+            desc="MULTSEG",
+            pprob=[None],
+            mask_groups={"M1":{16:1000, 32:1000, 64:1000}, "M2":{16:330, 32:330, 64:330}, 
+                         "M3":{32:1000, 64:1000}, "M4":{16:500, 48:500}},
+            baselines = baselines,
+            groups=[
+                basic
+            ])
+    ]
+    return CombSaliencyCreator(runs)
 
 def get_abl_sal_creator(nmasks=1000):
 

@@ -780,6 +780,29 @@ class AutoCompExpCreator:
         rv = float(all_probs[int(all_scores.argmax())])
         return rv
 
+class MulCompExpCreator(AutoCompExpCreator):
+
+    def __call__(self, me, inp, catidx):
+        pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
+        logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
+
+
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
+                              cap_response=self.cap_response, pprob=pprob, c_positive=1, **self.kwargs)
+        
+
+        desc = algo.description()
+
+        exp1 = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
+        exp2 = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
+
+
+        mexp = torch.maximum(exp1, torch.zeros(1)) * torch.maximum(exp2, torch.zeros(1)) 
+        sexp = torch.sqrt(mexp)
+
+        return {desc : mexp, f"sq{desc}" : sexp}
+        
+
 class MProbCompExpCreator:
 
     def __init__(self, nmasks=[1000], segsize=[32], **kwargs):
