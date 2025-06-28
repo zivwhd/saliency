@@ -54,6 +54,16 @@ methods =[('SLOCpos','AutoCompPos_1000_32_101_msk1.0_tv0.1_p1_0'),
           ('SLOCm','AutoCompS_4000_32_101_msk1.0_tv1.0_mgn0.1_0')
           ]
 
+methods = [
+    ('SEG_16','SEG_16_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('SEG_32', 'SEG_32_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('SEG_40':'SEG_40_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('SEG_48','SEG_48_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('SEG_56', 'SEG_56_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('SEG_64','SEG_64_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0')
+]
+
+
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
 
