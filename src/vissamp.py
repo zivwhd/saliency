@@ -72,6 +72,15 @@ methods = [
 ('TV_1','TVLZrNone_1000_32_101_msk1.0_tv1_mgn0.01_0')
 ]
 
+
+#methods = [
+    #AutoCompSlow_1000_32_501_msk1.0_tv0.1_mgn0.01_0/
+#MULTSEGm16to56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
+#MULTSEGm16x48ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
+#MULTSEGm32x64ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
+#MULTSEGm32xx56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0    
+#]
+
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
 
