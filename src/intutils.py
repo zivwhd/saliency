@@ -116,7 +116,8 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     sal = allsal[name]
     #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
 
-    nsal = (sal - sal.min()) / (sal.max() - sal.min())
+    nsal = nsal * (nsal > 0)
+    nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
         #nsal = torch.min(nsal, torch.quantile(sal,0.999))
         nsal = torch.max(nsal, torch.quantile(nsal,0.001))
@@ -135,7 +136,6 @@ def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7,
     if type(images) != list:
         images = [images]  
         sals_list = [sals_list]
-
     
     idx = 1
     if figsize:
