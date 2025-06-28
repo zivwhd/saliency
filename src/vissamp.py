@@ -76,6 +76,7 @@ methods = [
 methods = [
     ('Base', 'SEG_32_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
     ('Slow','AutoCompSlow_1000_32_501_msk1.0_tv0.1_mgn0.01_0'),
+    ('VSlow','AutoCompVSlow_1000_32_1001_msk1.0_tv0.1_mgn0.01_0'),
     ('S16to57','MULTSEGm16to56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
     ('S16x48','MULTSEGm16x48ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
     ('S32x56','MULTSEGm32x64ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
@@ -84,6 +85,8 @@ methods = [
     ('Mul32x56','MulComp32x56_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
     ('SqMul32x32','sqMulComp32x32_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
     ('SqMul32x56','sqMulComp32x56_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
+    ('NoReg','AutoCompNoReg_1000_32_501_msk1.0_0'),
+    ('NoL1','AutoCompNoL1_1000_32_501_msk1.0_tv0.1_0'),    
 ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
@@ -136,7 +139,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.title(method_name, fontsize=fontsize)
     
     
-    save_path = f"visvar/{model_name}/{image_name}.png"
+    save_path = f"visvar2/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
