@@ -622,19 +622,16 @@ class CompExpCreator:
         baseline_score = fmdl(baseline).detach().squeeze()
         label_score = fmdl(inp).detach().squeeze()
 
+        device = me.device
+
         if logit:
             norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
         elif self.cap_response:
             norm = lambda x: torch.maximum((x - baseline_score), torch.zeros(1).to(device)) * rfactor
         else:
             norm = lambda x: (x - baseline_score) * rfactor
-                  
-        
                 
         added_score = norm(label_score)
-        #print(label_score, baseline_score, delta_score)
-    
-        device = me.device
         all_masks = torch.concat(all_masks_list).to(device)
         
         all_pred = norm(torch.concat(all_pred_list).to(device).squeeze())
