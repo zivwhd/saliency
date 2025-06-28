@@ -63,6 +63,14 @@ methods = [
     ('SEG_64','SEG_64_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0')
 ]
 
+methods = [
+('TV_0', 'TVLZrNone_1000_32_101_msk1.0_mgn0.01_0'),
+('TV_0.01','TVLZrNone_1000_32_101_msk1.0_tv0.01_mgn0.01_0'),
+('TV_0.1','TVLZrNone_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
+('TV_0.2','TVLZrNone_1000_32_101_msk1.0_tv0.2_mgn0.01_0'),
+('TV_0.5','TVLZrNone_1000_32_101_msk1.0_tv0.5_mgn0.01_0'),
+('TV_1','TVLZrNone_1000_32_101_msk1.0_tv1_mgn0.01_0')
+]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
@@ -114,7 +122,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.title(method_name, fontsize=fontsize)
     
     
-    save_path = f"visual/{model_name}/{image_name}.png"
+    save_path = f"visual2/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
