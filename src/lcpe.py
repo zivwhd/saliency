@@ -625,7 +625,7 @@ class CompExpCreator:
         if logit:
             norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
         elif self.cap_response:
-            norm = lambda x: torch.maximum((x - baseline_score), torch.zeros().to(device)) * rfactor
+            norm = lambda x: torch.maximum((x - baseline_score), torch.zeros(1).to(device)) * rfactor
         else:
             norm = lambda x: (x - baseline_score) * rfactor
                   
