@@ -73,13 +73,18 @@ methods = [
 ]
 
 
-#methods = [
-    #AutoCompSlow_1000_32_501_msk1.0_tv0.1_mgn0.01_0/
-#MULTSEGm16to56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
-#MULTSEGm16x48ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
-#MULTSEGm32x64ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0
-#MULTSEGm32xx56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0    
-#]
+methods = [
+    ('Base', 'SEG_32_ZrZrNone_1000_64_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('Slow','AutoCompSlow_1000_32_501_msk1.0_tv0.1_mgn0.01_0'),
+    ('S16to57','MULTSEGm16to56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('S16x48','MULTSEGm16x48ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('S32x56','MULTSEGm32x64ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),
+    ('S32xx56','MULTSEGm32xx56ZrZrNone_500_56_101_msk1.0_tv0.1_mgn0.01_0'),    
+    ('Mul32x32','MulComp32x32_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
+    ('Mul32x56','MulComp32x56_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
+    ('SqMul32x32','sqMulComp32x32_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
+    ('SqMul32x56','sqMulComp32x56_1000_32_101_msk1.0_tv0.1_mgn0.01_p1_0'),
+]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
