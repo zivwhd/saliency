@@ -50,7 +50,9 @@ else:
     ]
 
 methods =[('SLOCpos','AutoCompPos_1000_32_101_msk1.0_tv0.1_p1_0'),
-          ('SLOCs','AutoCompPosS_1000_32_101_msk1.0_tv0.3_mgn0.01_p1_0')]
+          ('SLOCs','AutoCompPosS_1000_32_101_msk1.0_tv0.3_mgn0.01_p1_0'),
+          ('SLOCm','AutoCompS_4000_32_101_msk1.0_tv1.0_mgn0.1_0')
+          ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
