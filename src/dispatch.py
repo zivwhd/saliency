@@ -209,25 +209,40 @@ def get_abl2_sal_creator(nmasks=1000):
     baselines = [ZeroBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
-                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=None,
+                 c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9, epochs=501, select_from=None,
                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
 
 
     runs = [
         MulCompExpCreator(
-            desc="MulComp32x32", segsize=[32,32], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
-            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
+            desc="MulComp32x32", segsize=[32,32], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),        
         MulCompExpCreator(
-            desc="MulComp32x56", segsize=[32,56], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
-            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
+            desc="MulComp32x56", segsize=[32,56], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),
+        #AutoCompExpCreator(
+        #    desc="AutoCompSlow", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+        #    epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+        #    c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        #),
+    AutoCompExpCreator(
+            desc="AutoCompNoL1", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),        
+    AutoCompExpCreator(
+            desc="AutoCompNoReg", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0, c_positive=0, 
+            c_completeness=0, c_tv=0, c_model=0.0, c_norm=False,  c_activation="",
+        ),        
         AutoCompExpCreator(
-            desc="AutoCompSlow", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
-            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            desc="AutoCompVSlow", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=90, lr_step_decay=0.9,  
+            epochs=1001, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),
         MultiCompExpCreator(
@@ -777,7 +792,7 @@ def get_args():
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--dataset", choices=["imagenet","voc"], default="imagenet", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
-    parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl","abl50"], default="rsample3", help="TBD")       
+    parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl","abl50", "abl20"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
     parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
     parser.add_argument('--equant', action='store_true', default=False, help="Enable extended mode")    
