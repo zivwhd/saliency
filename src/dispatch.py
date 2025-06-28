@@ -93,9 +93,9 @@ def get_mrcomp_sal_creator():
 
 def get_altcomp_sal_creator():
     return AutoCompExpCreator(
-        desc="AutoCompPos", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
-        epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0, c_positive=1, 
-        c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="", cap_response=True
+        desc="AutoCompPosS", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+        epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=1, 
+        c_completeness=0, c_tv=0.3, c_model=0.0, c_norm=False,  c_activation="", cap_response=False
     )
 
 def get_autocomp_sal_creator():
