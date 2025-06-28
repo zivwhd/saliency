@@ -499,6 +499,7 @@ class CompExpCreator:
                  pprob = [0.5],
                  baseline_gen = ZeroBaseline(),                 
                  ext_desc = "",
+                 cap_response = False,
                  **kwargs):
         
         assert type(segsize) == type(nmasks)
@@ -537,6 +538,7 @@ class CompExpCreator:
         self.model_epochs = model_epochs
         self.desc = desc
         self.mgen = mgen        
+        self.cap_response = cap_response
         self.baseline_gen = baseline_gen
         if self.model_epochs == 0 or self.c_model == 0:
             self.model_epochs = 0
@@ -622,9 +624,11 @@ class CompExpCreator:
 
         if logit:
             norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
+        elif self.cap_response:
+            norm = lambda x: torch.maximum((x - baseline_score), torch.zeros().to(device)) * rfactor
         else:
             norm = lambda x: (x - baseline_score) * rfactor
-                
+                  
         
                 
         added_score = norm(label_score)
@@ -743,20 +747,23 @@ class MultiCompExpCreator:
 
 class AutoCompExpCreator:
 
-    def __init__(self, nmasks=[1000], segsize=[32], **kwargs):
+    def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, **kwargs):
         self.nmasks = nmasks
-        self.segsize = segsize
+        self.segsize = segsize        
         self.kwargs = kwargs
+        self.cap_response = cap_response
+        
     
     def __call__(self, me, inp, catidx):
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
-        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
+                              cap_response=self.cap_response, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
     def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=50):
         #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
-        algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, pprob=pprob)    
+        algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, cap_response=self.cap_response, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
         rv = float(data.all_pred.std().cpu())
         return rv
