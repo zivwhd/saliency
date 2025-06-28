@@ -216,6 +216,40 @@ def get_abl2_sal_creator(nmasks=1000):
 
     runs = [
         AutoCompExpCreator(
+            desc="AutoCompSMix32x56", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        AutoCompExpCreator(
+            desc="AutoCompSMixMon32x56", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=50, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        AutoCompExpCreator(
+            desc="AutoCompSMix32x48", segsize=[32,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        AutoCompExpCreator(
+            desc="AutoCompSMixMon32x48", segsize=[32,48], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=50, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        AutoCompExpCreator(
+            desc="AutoCompSMixPos", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0, c_positive=1, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        MulCompExpCreator(
+            desc="MulComp32x56", segsize=[32,56], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+
+
+    ]
+    runs_ext = [
+        AutoCompExpCreator(
             desc="AutoCompSlow", segsize=[32], nmasks=[1000], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
             epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
@@ -225,8 +259,6 @@ def get_abl2_sal_creator(nmasks=1000):
             epochs=501, select_from=100, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         ),
-    ]
-    runs_ext = [
 
         MulCompExpCreator(
             desc="MulComp32x32", segsize=[32,32], nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
