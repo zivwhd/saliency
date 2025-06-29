@@ -166,6 +166,7 @@ def main():
             epochs=501, select_from=None, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )            
+        explainer = STEAttributionExplainer(salc, me)
     elif args.explainer == "xDIX":
         from dix_cnn import DixCnnSaliencyCreator
         salc = DixCnnSaliencyCreator(alt_model=True)
