@@ -240,7 +240,8 @@ def get_creators(model_name):
     if 'resnet' in model_name or 'densenet' in model_name:
         return get_creators_cnn()
     if 'vit' in model_name:
-        return get_creators_vit()
+        return get_creators_cnn()
+        #return get_creators_vit()
     assert False
 
 def create_sals(model_name, dataset_name, marker="m"):
