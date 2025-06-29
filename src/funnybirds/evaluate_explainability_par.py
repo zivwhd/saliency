@@ -23,7 +23,7 @@ parser.add_argument('--model', required=True,
                     help='model architecture')
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
-                             'xGC', 'xLSC', 'xLC', 'aLSC', 'amLSC','xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
+                             'xGC', 'xLSC', 'xLC', 'aLSC', 'amLSC','mixLSC','xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
                              'xDIXv'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
@@ -158,6 +158,14 @@ def main():
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )
         explainer = STEAttributionExplainer(salc, me)
+
+    elif args.explainer == "mixLSC":
+        from lcpe import AutoCompExpCreator
+        salc = AutoCompExpCreator(
+            desc="AutoCompSMix32x56", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        )            
     elif args.explainer == "xDIX":
         from dix_cnn import DixCnnSaliencyCreator
         salc = DixCnnSaliencyCreator(alt_model=True)
