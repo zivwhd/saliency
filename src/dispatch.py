@@ -123,6 +123,38 @@ def get_autocomp_sal_creator():
         ),        
         ])
 
+def get_autoncomp_sal_creator():
+
+    return CombSaliencyCreator([
+        MultiCompExpCreator(
+            desc="SLOC",            
+            mask_groups={f"Mix":{32:500, 56:500}},
+            pprob=[None],
+            baselines = [ZeroBaseline()],
+            groups=[
+                dict(
+                    desc="Auto", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+                    epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+                    c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+                ),
+                dict(
+                    desc="AutoMon", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+                    epochs=501, select_from=50, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+                    c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",                    
+                )
+            ]
+        ),
+        MProbCompExpCreator(
+            desc="SLOCProb", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9,  
+            epochs=101, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+
+    ])
+
+                
+
+
 def get_ocomp_sal_creator():    
     return CombSaliencyCreator([
         #CompExpCreator(
@@ -202,6 +234,22 @@ def get_epochcheck_sal_creator():
                 modify(epochs=x) for x in [fac*10 for fac in range(1,30)]
             ])
 
+
+def get_prob_sal_creator(nmasks=1000):
+    basic = dict(
+        c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9, epochs=501, select_from=None,
+        c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    
+    return MultiCompExpCreator(
+            desc="PROB",
+            pprob=[None],
+            mask_groups={"m32":{32:750}, "m56":{56:750} }                         
+            baselines = [ZeroBaseline()],
+            groups=[
+                dict(
+                    c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9, epochs=501, select_from=None,
+                    c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+            ])
 
 def get_abl2_sal_creator(nmasks=1000):
 
