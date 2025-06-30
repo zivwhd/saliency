@@ -782,29 +782,58 @@ class AutoCompExpCreator:
 
 class MulCompExpCreator(AutoCompExpCreator):
 
+    def __init__(self, add_op=False, seq=False, **kwargs):
+        super.__init__(**kwargs)
+        self.add_op = add_op
+        self.seq = seq
+
+    def flatten(self, items):
+        rv = []
+        for x in items:
+            if type(x) in [list, set]:
+                rv += self.flatten(x)
+            else:
+                rv.append(x)
+        return rv
+
     def __call__(self, me, inp, catidx):
-        pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
-        logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
+        all_segsize = list(set(self.flatten(self.segsize)))
+        pprob_dict = { segsize : self.tune_pprob(segsize, me, inp, catidx) for segsize in all_segsize }
+        #pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
+        #logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
 
 
-        algo1 = CompExpCreator(
-            nmasks=[self.nmasks], segsize=[self.segsize[0]], 
-            cap_response=self.cap_response, pprob=[pprob[0]], c_positive=1, **self.kwargs)        
+        res = {}
+        exp = None
+        for idx, segsize in enumerate(self.segsize):
 
-        algo2 = CompExpCreator(
-            nmasks=[self.nmasks], segsize=[self.segsize[1]], 
-            cap_response=self.cap_response, pprob=[pprob[1]], c_positive=1, **self.kwargs)        
+            pprob = [pprob_dict[x] for x in segsize]
 
-        desc = algo1.description()
+            algo = CompExpCreator(
+                nmasks=[self.nmasks], segsize=segsize, 
+                cap_response=self.cap_response, pprob=pprob, c_positive=(1*(not self.add_op)), **self.kwargs)        
 
-        exp1 = algo1.explain(me,inp, catidx).cpu().unsqueeze(0)
-        exp2 = algo2.explain(me,inp, catidx).cpu().unsqueeze(0)
+            cexp = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
 
+            if exp is None:                
+                if self.add_op:
+                    exp = cexp
+                else:
+                    torch.maximum(cexp, torch.zeros(1)) 
+                
+                desc = algo.description()    
+                res[f"{desc}_{idx}"] = exp
+                continue
 
-        mexp = torch.maximum(exp1, torch.zeros(1)) * torch.maximum(exp2, torch.zeros(1)) 
-        sexp = torch.sqrt(mexp)
+            if self.add_op:
+                exp += cexp
+            else:
+                exp *= torch.maximum(cexp, torch.zeros(1)) 
+            res[f"{desc}_{idx}"] = exp
 
-        return {desc : mexp, f"sq{desc}" : sexp}
+        return res
+        #sexp = torch.sqrt(exp)
+        #return {desc : mexp, f"sq{desc}" : sexp}
         
 
 class MProbCompExpCreator:
