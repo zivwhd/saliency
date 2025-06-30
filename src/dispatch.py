@@ -243,7 +243,7 @@ def get_prob_sal_creator(nmasks=1000):
     return MultiCompExpCreator(
             desc="PROB",
             pprob=[0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8],
-            mask_groups={"m32":{32:750}, "m56":{56:750} }                         
+            mask_groups={"m32":{32:750}, "m56":{56:750} },
             baselines = [ZeroBaseline()],
             groups=[
                 dict(
