@@ -888,7 +888,7 @@ def get_args():
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--dataset", choices=["imagenet","voc"], default="imagenet", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
-    parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample1000", "rsample10K", "rsample5K", "show", "abl","abl50", "abl20"], default="rsample3", help="TBD")       
+    parser.add_argument("--selection", choices=["snty","vis", "rsample3", "rsample10", "rsample100", "rsample500", "rsample1000", "rsample10K", "rsample5K", "show", "abl","abl50", "abl20"], default="rsample3", help="TBD")       
     parser.add_argument("--model", choices=ALL_MODELS + ['all'], default="resnet50", help="TBD")    
     parser.add_argument('--ext', action='store_true', default=False, help="Enable extended mode")
     parser.add_argument('--equant', action='store_true', default=False, help="Enable extended mode")    
