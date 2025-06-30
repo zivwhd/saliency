@@ -52,7 +52,7 @@ def dump_obj(obj, path):
 
 LIMIT_DS = 1000
 LIMIT_DS = 1697
-LIMIT_DS = 200
+LIMIT_DS = 400
 
 class Imagenet_Segmentation(data.Dataset):
     CLASSES = 2
