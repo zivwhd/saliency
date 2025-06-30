@@ -827,7 +827,7 @@ class MulCompExpCreator(AutoCompExpCreator):
                 elif self.mode =="mean":
                     exp = torch.mean(stacked, dim=0)
             elif self.mode == "mul":
-                exp = exp_list[0]:
+                exp = exp_list[0]
                 for cexp in exp_list[1:]:
                     exp = exp * cexp
             res[f"{desc}_{idx+1}"] = exp
