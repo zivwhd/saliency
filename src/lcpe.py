@@ -782,9 +782,9 @@ class AutoCompExpCreator:
 
 class MulCompExpCreator(AutoCompExpCreator):
 
-    def __init__(self, add_op=False, seq=False, **kwargs):
+    def __init__(self, mode="mul", seq=False, **kwargs):
         super().__init__(**kwargs)
-        self.add_op = add_op
+        self.mode = mode
         self.seq = seq
 
     def flatten(self, items):
@@ -804,36 +804,35 @@ class MulCompExpCreator(AutoCompExpCreator):
 
 
         res = {}
-        exp = None
+        exp_list = []
+        desc = None
         for idx, segsize in enumerate(self.segsize):
 
             pprob = [pprob_dict[x] for x in segsize]
-
+            c_positive = (self.mode == "mul")
             algo = CompExpCreator(
                 nmasks=[self.nmasks], segsize=segsize, 
-                cap_response=self.cap_response, pprob=pprob, c_positive=(1*(not self.add_op)), **self.kwargs)        
+                cap_response=self.cap_response, pprob=pprob, c_positive=c_positive, **self.kwargs)        
+            desc = (desc or algo.description())
 
             cexp = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
-
-            if exp is None:                
-                if self.add_op:
-                    exp = cexp
-                else:
-                    exp = torch.maximum(cexp, torch.zeros(1)) 
-                
-                desc = algo.description()    
-                res[f"{desc}_{idx}"] = exp
-                continue
-
-            if self.add_op:
-                exp = exp + cexp
-            else:
-                exp = exp * torch.maximum(cexp, torch.zeros(1)) 
-            res[f"{desc}_{idx}"] = exp
+            if self.mode == "mul":
+                cexp = torch.maximum(cexp, torch.zeros(1))
+            exp_list.append(cexp)
+            
+            if self.mode in ["mean", "median"]:
+                stacked = torch.stack(exp_list, dim=0)
+                if self.mode == "median":
+                    exp, _ = torch.median(stacked, dim=0) 
+                elif self.mode =="mean":
+                    exp = torch.mean(stacked, dim=0)
+            elif self.mode = "mul":
+                exp = exp_list[0]:
+                for cexp in exp_list[1:]:
+                    exp = exp * cexp
+            res[f"{desc}_{idx+1}"] = exp
 
         return res
-        #sexp = torch.sqrt(exp)
-        #return {desc : mexp, f"sq{desc}" : sexp}
         
 
 class MProbCompExpCreator:
