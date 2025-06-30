@@ -783,7 +783,7 @@ class AutoCompExpCreator:
 class MulCompExpCreator(AutoCompExpCreator):
 
     def __init__(self, add_op=False, seq=False, **kwargs):
-        super.__init__(**kwargs)
+        super().__init__(**kwargs)
         self.add_op = add_op
         self.seq = seq
 
