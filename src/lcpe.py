@@ -819,16 +819,16 @@ class MulCompExpCreator(AutoCompExpCreator):
                 if self.add_op:
                     exp = cexp
                 else:
-                    torch.maximum(cexp, torch.zeros(1)) 
+                    exp = torch.maximum(cexp, torch.zeros(1)) 
                 
                 desc = algo.description()    
                 res[f"{desc}_{idx}"] = exp
                 continue
 
             if self.add_op:
-                exp += cexp
+                exp = exp + cexp
             else:
-                exp *= torch.maximum(cexp, torch.zeros(1)) 
+                exp = exp * torch.maximum(cexp, torch.zeros(1)) 
             res[f"{desc}_{idx}"] = exp
 
         return res
