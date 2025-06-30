@@ -17,7 +17,7 @@ def qmet(smdl, inp, sal, steps):
 
 class ExtPertSaliencyCreator:
 
-    def __init__(self, single=False):
+    def __init__(self, single=True):
         self.single=single
 
     def __call__(self, me, inp, catidx):   
