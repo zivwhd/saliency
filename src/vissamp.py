@@ -91,7 +91,7 @@ methods = [
 
 
 methods = [
-    (f'MedianS32_{idx+1}', f' MeanComp32_1000_32_501_msk1.0_tv0.1_mgn0.01_{idx+1}_0')
+    (f'MedianS32_{idx+1}', f'MeanComp32_1000_32_501_msk1.0_tv0.1_mgn0.01_{idx+1}_0')
     for idx in range(10)
 ]
 
