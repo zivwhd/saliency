@@ -246,16 +246,60 @@ def get_creators_cnn():
             desc="MULTSEG",
             pprob=[None],
             mask_groups={"m64":{64:1000}, "m56":{56:1000}, 
-                         "m32":{32:1000}, "m32x64":{32:1000,64:1000}},
+                         "m32":{32:1000}, "m32x64":{32:1000,64:1000},
+                         "m32x64sm":{32:500,64:500}},
             baselines = baselines,
             groups=[
                 basic
             ]),
             ExtPertSaliencyCreator(),
     ]
+
     return CombSaliencyCreator(runs)
 
+def get_creators_abl():
+    baselines = [ZeroBaseline()]
+
+    basic = dict(#segsize=[16,48], nmasks=[500,500], 
+                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=None,
+                 #select_from=10, select_freq=3, select_del=1.0,                 
+                c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    
+    basic_mask_groups = {"":{32:500, 56:500}}
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+    runs = [
+        MultiCompExpCreator(
+            desc="LSCAbl",
+            pprob=[None],
+            mask_groups=basic_mask_groups,            
+            baselines = baselines,
+            groups=[
+
+                modify(c_tv=0, desc="TVL"),
+                modify(c_tv=0.01, desc="TVL"),
+                modify(c_tv=0.1, desc="TVL"),
+                modify(c_tv=0.2, desc="TVL"),
+                modify(c_tv=0.5, desc="TVL"),
+                modify(c_tv=1, desc="TVL"), ## 2
+                
+                modify(c_magnitude=0, desc="MAG"),
+                modify(c_magnitude=0.01, desc="MAG"),
+                modify(c_magnitude=0.05, desc="MAG"),
+                modify(c_magnitude=0.1, desc="MAG"),
+                modify(c_magnitude=0.25, desc="MAG"),                
+                modify(c_magnitude=0.5, desc="MAG"),
+                modify(c_magnitude=1, desc="MAG"), 
+            ])
+    ]
+    return CombSaliencyCreator(runs)
+
+
+
 def get_creators(model_name):
+    return get_creators_abl()
     if 'resnet' in model_name or 'densenet' in model_name:
         return get_creators_cnn()
     if 'vit' in model_name:
