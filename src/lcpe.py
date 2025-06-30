@@ -820,12 +820,14 @@ class MulCompExpCreator(AutoCompExpCreator):
                 cexp = torch.maximum(cexp, torch.zeros(1))
             exp_list.append(cexp)
             
-            if self.mode in ["mean", "median"]:
+            if self.mode in ["mean", "median","min"]:
                 stacked = torch.stack(exp_list, dim=0)
                 if self.mode == "median":
                     exp, _ = torch.median(stacked, dim=0) 
                 elif self.mode =="mean":
                     exp = torch.mean(stacked, dim=0)
+                elif self.mode == "min":
+                    exp, _ = torch.min(stacked, dim=0)
             elif self.mode == "mul":
                 exp = exp_list[0]
                 for cexp in exp_list[1:]:

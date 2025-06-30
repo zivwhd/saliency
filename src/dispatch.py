@@ -215,7 +215,7 @@ def get_abl2_sal_creator(nmasks=1000):
 
     runs = [
         MulCompExpCreator(
-            desc="MedianRomp32", segsize=[[32]]*10, mode="median", nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            desc="MinRomp32", segsize=[[32]]*10, mode="min", nmasks=1000, c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
             epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01,
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )
