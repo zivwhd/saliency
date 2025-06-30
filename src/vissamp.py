@@ -89,6 +89,12 @@ methods = [
     ('NoL1','AutoCompNoL1_1000_32_501_msk1.0_tv0.1_0'),    
 ]
 
+
+methods = [
+    (f'AddS32_{idx}', f'AddComp32_1000_32_501_msk1.0_tv0.1_mgn0.01_{idx-1}_0')
+    for idx in [1,2,3,4,5,6]
+]
+
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
 
@@ -139,7 +145,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.title(method_name, fontsize=fontsize)
     
     
-    save_path = f"visvar2/{model_name}/{image_name}.png"
+    save_path = f"visadd/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
