@@ -846,13 +846,13 @@ class MProbCompExpCreator:
 
     def __call__(self, me, inp, catidx):
         if 'vit_small' in me.arch:
-            pprob = [0.3]
+            pprob = [0.3] * len(self.segsize)
         if 'vit_base' in me.arch:
-            pprob = [0.2]
+            pprob = [0.2] * len(self.segsize)
         elif me.arch == 'resnet50':
-            pprob = [0.6]
+            pprob = [0.6] * len(self.segsize)
         elif me.arch == 'densenet201':
-            pprob = [0.6]
+            pprob = [0.6] * len(self.segsize)
         else:
             assert False, f"Unexpected arch {me.arch}"
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
