@@ -359,11 +359,11 @@ def get_abl_sal_creator(nmasks=1000):
     baselines = [ZeroBaseline()]
 
     basic = dict(#segsize=[16,48], nmasks=[500,500], 
-                 c_opt="Adam", lr=0.1, lr_step=9, lr_step_decay=0.9, epochs=101, select_from=None,
+                 c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9, epochs=501, select_from=None,
                  #select_from=10, select_freq=3, select_del=1.0,                 
                 c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
     
-    basic_mask_groups = {"":{32:1000}}
+    basic_mask_groups = {"":{32:1000, 56:1000}}
 
     def modify(**kwargs):
         args = basic.copy()
@@ -384,7 +384,7 @@ def get_abl_sal_creator(nmasks=1000):
         MultiCompExpCreator(
             desc="MSK",
             pprob=[None],
-            mask_groups={f"_{nmasks}_": { 32 : nmasks } for nmasks in [10,100,250,500,750,1000, 1250, 1500, 2000]},
+            mask_groups={f"_{nmasks}_": { 32 : int(nmasks/2), 56 : int(nmasks/2) } for nmasks in [10,100,250,500,750,1000, 1250, 1500, 2000]},
             baselines = baselines,
             groups=[
                 basic,
@@ -399,7 +399,7 @@ def get_abl_sal_creator(nmasks=1000):
 
         MultiCompExpCreator(
             desc="PROB",
-            pprob=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9],
+            pprob=[[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9]],
             mask_groups=basic_mask_groups,
             baselines = baselines,
             groups=[basic]),
@@ -434,13 +434,15 @@ def get_abl_sal_creator(nmasks=1000):
                 modify(c_magnitude=0.5, desc="MAG"),
                 modify(c_magnitude=1, desc="MAG"), 
 
-                modify(epochs=25, desc="EPC"),
-                modify(epochs=50, desc="EPC"),
-                modify(epochs=75, desc="EPC"),
-                modify(epochs=100, desc="EPC"),
-                modify(epochs=150, desc="EPC"),
-                modify(epochs=175, desc="EPC"),
-                modify(epochs=200, desc="EPC"),
+                modify(epochs=25, lr_step=2, desc="EPC"),
+                modify(epochs=50, lr_step=4, desc="EPC"),
+                modify(epochs=75, lr_step=6, desc="EPC"),
+                modify(epochs=100, lr_step=9, desc="EPC"),                
+                modify(epochs=200, lr_step=18, desc="EPC"),
+                modify(epochs=250, lr_step=22, desc="EPC"),
+                modify(epochs=500, lr_step=45, desc="EPC"),
+                modify(epochs=750, lr_step=67, desc="EPC"),
+                modify(epochs=1000, lr_step=90, desc="EPC"),
                 
                 #modify(epochs=100),
                 #modify(epochs=100, select_from=None, desc="MNT"),
