@@ -399,7 +399,7 @@ def get_abl_sal_creator(nmasks=1000):
 
         MultiCompExpCreator(
             desc="PROB",
-            pprob=[[0.1],[0.2],[0.3],[0.4],[0.5],[0.6],[0.7],[0.8],[0.9]],
+            pprob=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9],
             mask_groups=basic_mask_groups,
             baselines = baselines,
             groups=[basic]),
