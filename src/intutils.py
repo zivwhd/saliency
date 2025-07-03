@@ -117,7 +117,8 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
 
     nsal = sal
-    #if 'LTX' not in name:
+    if 'LTX' in name:
+        nsal = torch.sigmoid(nsal)
     nsal = nsal * (nsal >= 0)
 
         
