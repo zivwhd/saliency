@@ -28,26 +28,6 @@ model_name = args.model
 isrc = ImagenetSource(selection_name=selection)
 
 
-if 'vit' not in model_name:
-    methods = [
-        ('SLOC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),
-        ('AC', 'pgc_AblationCAM_0'),
-        ('DIX', 'DixCnn_0'),
-        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-        ('GC', 'pgc_GradCAM_0'),
-        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ( 'RISE','RISE_4000_7_0.5_0')
-]
-else:
-    methods = [
-        ('SLOC', 'AutoComp_1000_32_101_msk1.0_tv0.1_mgn0.01_0'),        
-        ('DIX', 'Dimpl_dix_0'),
-        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-        ('GAE', 'Dimpl_gae_0'),        
-        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ( 'RISE','RISE_4000_7_0.5_0'),    
-        ('T-Attr', 'Dimpl_t-attr_0'),
-    ]
 
 methods =[('SLOCpos','AutoCompPos_1000_32_101_msk1.0_tv0.1_p1_0'),
           ('SLOCs','AutoCompPosS_1000_32_101_msk1.0_tv0.3_mgn0.01_p1_0'),
@@ -94,6 +74,28 @@ methods = [
     (f'MinXS32_{idx+1}', f'MinRomp32_1000_32_501_msk1.0_tv0.1_mgn0.01_{idx+1}_0')
     for idx in range(10)
 ]
+
+if 'vit' not in model_name:
+    methods = [
+        ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),
+        ('AC', 'pgc_AblationCAM_0'),
+        ('DIX', 'DixCnn_0'),
+        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+        ('GC', 'pgc_GradCAM_0'),
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('RISE','RISE_4000_7_0.5_0')
+]
+else:
+    methods = [
+        ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),        
+        ('DIX', 'Dimpl_dix_0'),
+        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+        ('GAE', 'Dimpl_gae_0'),        
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('RISE','RISE_4000_7_0.5_0'),    
+        ('T-Attr', 'Dimpl_t-attr_0'),
+    ]
+
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
@@ -145,7 +147,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.title(method_name, fontsize=fontsize)
     
     
-    save_path = f"vismin/{model_name}/{image_name}.png"
+    save_path = f"vismany/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
