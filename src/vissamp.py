@@ -130,7 +130,7 @@ for imgidx, image_info in enumerate(all_images):
     idx += 1
     show_single_sal(img, None, None)   
     #plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
-    plt.figtext(0.2, 0.5, target_name.replace('_', ' '),  va='center', ha='right',  rotation='vertical', fontsize=5)
+    plt.figtext(0.11, 0.5, target_name.replace('_', ' '),  va='center', ha='right',  rotation='vertical', fontsize=5)
 
 
     for method_name, variant in methods:
