@@ -118,7 +118,7 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
 
     nsal = sal
     #if 'LTX' not in name:
-    #nsal = nsal * (nsal >= 0)
+    nsal = nsal * (nsal >= 0)
     
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
