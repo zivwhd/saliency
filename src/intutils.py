@@ -116,7 +116,7 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     sal = allsal[name]
     #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
 
-    nsal = sal * (sal > 0)
+    #nsal = sal * (sal > 0)
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
         #nsal = torch.min(nsal, torch.quantile(sal,0.999))
