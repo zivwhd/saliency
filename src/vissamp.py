@@ -129,8 +129,8 @@ for imgidx, image_info in enumerate(all_images):
     plt.subplot(1, len(methods)+1, idx)             
     idx += 1
     show_single_sal(img, None, None)   
-    plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
-
+    #plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
+    plt.figtext(0.02, 0.5, target_name,  va='center', ha='right',  rotation='vertical', fontsize='small')
 
 
     for method_name, variant in methods:
