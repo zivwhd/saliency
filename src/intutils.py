@@ -159,7 +159,7 @@ def show_single_sal_div(img, allsal, name=None, alpha=None, mag=False, grayscale
 
     norm = TwoSlopeNorm(vmin=vmin, vcenter=max(0,vmin), vmax=vmax)
 
-    plt.imshow(data, cmap='coolwarm', norm=norm, alpha=alpha)            
+    plt.imshow(nsal, cmap='coolwarm', norm=norm, alpha=alpha)            
     #plt.imshow(nsal, cmap='jet', alpha=alpha)
 
 
