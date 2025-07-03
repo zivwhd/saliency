@@ -121,7 +121,7 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
         #nsal = torch.min(nsal, torch.quantile(sal,0.999))
-        nsal = torch.max(nsal, torch.quantile(nsal,0.001))
+        nsal = torch.max(nsal, torch.quantile(nsal,0.01))
     nsal = nsal[0]
     
         
