@@ -117,8 +117,8 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
 
     nsal = sal
-    #if 'SLOC' in name:
-    nsal = nsal * (nsal >= 0)
+    #if 'LTX' not in name:
+    #nsal = nsal * (nsal >= 0)
     
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
