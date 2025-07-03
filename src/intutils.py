@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import torch
 import matplotlib.patheffects as path_effects
-
+from matplotlib.colors import TwoSlopeNorm
 
 def show_image(path):
     img=Image.open(path)
@@ -119,8 +119,8 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     nsal = sal
     #if 'LTX' not in name:
     nsal = nsal * (nsal >= 0)
-    
-    
+
+        
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())
     if mag:
         #nsal = torch.min(nsal, torch.quantile(sal,0.999))
@@ -134,7 +134,34 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
         plt.imshow(nsal, cmap='jet', alpha=nsal*0.7)  # Set alpha for transparency
     else:
         plt.imshow(nsal, cmap='jet', alpha=alpha)
+
+
+def show_single_sal_div(img, allsal, name=None, alpha=None, mag=False, grayscale=False):
+    
+    pimg=img.resize((224,224))  
+    plt.imshow(pimg)  
+    plt.xticks([])  
+    plt.yticks([])
+
+    if name is None:
+        return
+    sal = allsal[name]
+    #nsal = F.interpolate(sal.unsqueeze(0), scale_factor=int(224 / 7), mode="bilinear")[0]
+
+    nsal = sal[0]
+    #if 'LTX' not in name:
+    #nsal = nsal * (nsal >= 0)
+
+    vmin = nsal.min()
+    vmax = nsal.max()
         
+    alpha = alpha or 0.7
+
+    norm = TwoSlopeNorm(vmin=vmin, vcenter=max(0,vmin), vmax=vmax)
+
+    plt.imshow(data, cmap='coolwarm', norm=norm, alpha=alpha)            
+    #plt.imshow(nsal, cmap='jet', alpha=alpha)
+
 
 def show_grid_sals(sals_list, images, method_names, figsize=(10,10), fontsize=7, alpha=None, mag=True, get_method_alias=None):
     if type(images) != list:
