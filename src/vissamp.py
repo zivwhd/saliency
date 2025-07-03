@@ -143,7 +143,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.subplot(1, len(methods)+1, idx)         
         idx += 1
         show_single_sal(img, None, None)
-        show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=True)
+        show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=False)
         plt.title(method_name, fontsize=fontsize)
     
     
