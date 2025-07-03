@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import torch
 import matplotlib.patheffects as path_effects
-from matplotlib.colors import TwoSlopeNorm
+from matplotlib.colors import TwoSlopeNorm,Normalize
 
 def show_image(path):
     img=Image.open(path)
@@ -157,7 +157,10 @@ def show_single_sal_div(img, allsal, name=None, alpha=None, mag=False, grayscale
         
     alpha = alpha or 0.7
 
-    norm = TwoSlopeNorm(vmin=vmin, vcenter=max(0,vmin), vmax=vmax)
+    if vmin < 0 < vmax:
+        norm = TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)
+    else:
+        norm = Normalize(vmin=vmin, vmax=vmax)
 
     plt.imshow(nsal, cmap='coolwarm', norm=norm, alpha=alpha)            
     #plt.imshow(nsal, cmap='jet', alpha=alpha)
