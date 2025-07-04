@@ -147,7 +147,7 @@ for imgidx, image_info in enumerate(all_images):
         plt.title(method_name, fontsize=fontsize)
     
     
-    save_path = f"vismany/{model_name}/{image_name}.png"
+    save_path = f"vismany2/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
