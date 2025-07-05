@@ -770,15 +770,31 @@ class AutoCompExpCreator:
         rv = float(data.all_pred.std().cpu())
         return rv
 
+    def get_prob_score_list(self, probs, segsize, me, inp, catidx):
+        pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)        
+        return torch.tensor([pscore(x) for x in probs])
+
+    def get_prob_score_list(self, pprob, segsize, me, inp, catidx, sampsize=50):
+        #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
+        algo = CompExpCreator(desc="gen", segsize=[segsize]*len(pprob), nmasks=[sampsize]*len(pprob), 
+                              pprob=pprob, batch_size=32)    
+        data = algo.generate_data(me, inp, catidx)  
+
+        rv = []
+        for idx, prob in enumerate(pprob):
+            score = float(data.all_pred[(idx*sampsize):((idx+1)*sampsize)].std().cpu())
+            rv.append(score)
+        return torch.Tensor(rv)
+
     def tune_pprob(self, segsize, me, inp, catidx):
         logging.info(f"tune_pprob: {segsize}")        
         pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)
         main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
-        main_scores = torch.tensor([pscore(x) for x in main_probs])
+        main_scores = self.get_prob_score_list(main_probs, segsize, me, inp, catidx)
         foc = main_probs[int(main_scores.argmax())]
         extra_probs = [0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8]
         aux_probs = [x for x in extra_probs if (foc - 0.15 <= x <= foc + 0.15)]    
-        aux_scores = torch.Tensor([pscore(x) for x in aux_probs])
+        aux_scores = self.get_prob_score_list(aux_probs, segsize, me, inp, catidx)
         all_probs = torch.Tensor(main_probs + aux_probs)
         all_scores = torch.concat([main_scores, aux_scores])
 
