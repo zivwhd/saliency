@@ -58,7 +58,7 @@ class ModelEnv:
         if "voc" in self.arch:
             modules = (
                 [self.model] + 
-                #([nn.Sigmoid()] if with_softmax else []) +
+                ([nn.Sigmoid()] if with_softmax else []) +
                 [SelectKthLogit(catidx)])
         else:
             modules = (

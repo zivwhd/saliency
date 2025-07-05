@@ -1,6 +1,6 @@
 
-import torch, logging
-
+import torch, logging, time
+from reports import report_duration
 
 class AttrVitSaliencyCreator:
     def __init__(self):
@@ -65,7 +65,9 @@ class DimplVitSaliencyCreator:
         res = {}
 
         for opr in self.methods:
+            start_time = time.time()
             sal = self.handle_transformers(model, me.arch, opr, inp[0], catidx)
+            report_duration(start_time, me.arch, opr)
             res[f"Dimpl_{opr}"] = torch.tensor(sal).unsqueeze(0)
         return res
     

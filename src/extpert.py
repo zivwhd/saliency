@@ -2,7 +2,7 @@ from torchray.attribution.extremal_perturbation import extremal_perturbation, co
 from torchray.utils import get_device
 import logging, time, sys
 import torch
-
+from reports import report_duration
 
 def qmet(smdl, inp, sal, steps):
     with torch.no_grad():    
@@ -64,5 +64,6 @@ class ExtPertSaliencyCreator:
         logging.info(f"run-time: {duration}")
         if self.single:
             res = {'ExtPertM' : res[f'ExtPertM']}
+        report_duration(start_time, me.arch, "EP")
         return res
 

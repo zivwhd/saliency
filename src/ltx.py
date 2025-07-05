@@ -203,6 +203,7 @@ class LTXSaliencyCreator:
 
         
         report_duration(start_time, me.arch, "LTX", training_steps)
+        report_duration(load_start_time, me.arch, "LTX_WITH_LOAD", training_steps)
         mask_loss_mul=args["mask_loss_mul"]        
         lr = args["lr_finetune"]
         adesc = f'{mask_loss_mul}_{prediction_loss_mul}_{lr}'

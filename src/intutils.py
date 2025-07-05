@@ -55,6 +55,7 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
     slots = 3 + with_mask + with_pos
     osal = sal
     mask = (sal - sal.min()) / (sal.max()-sal.min())
+    #mask = mask * (mask>0)
     if mag:
         sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
     plt.subplot(1, slots, 3)
@@ -95,7 +96,7 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
         plt.yticks([])
 
     if save_path:
-        plt.savefig(save_path, dpi=800, bbox_inches='tight', transparent=False, pad_inches=0)
+        plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)
     else:
         plt.show()    
 

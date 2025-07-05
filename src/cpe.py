@@ -100,7 +100,6 @@ class SqMaskGen:
         return rnd[parts.view(-1)].view(parts.shape)
 
 
-
     
 class IpwGenBase:
     def __init__(self):

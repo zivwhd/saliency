@@ -651,8 +651,9 @@ class CompExpCreator:
     def explain(self, me, inp, catidx, data=None, initial=None, callback=None):
 
         start_time = time.time() 
-        if data is None:            
+        if data is None:                        
             data = self.generate_data(me, inp, catidx, logit=self.c_logit)
+            report_duration(start_time, me.arch, "SLOC_GEN", f'{self.nmasks}_{self.epochs}')
 
         start_time_expl = time.time()
 
@@ -678,7 +679,7 @@ class CompExpCreator:
                                    c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline, callback=callback)
         
-        report_duration(start_time, me.arch, "LSC", f'{self.nmasks}_{self.epochs}')
+        report_duration(start_time_expl, me.arch, "SLOC_OPT", f'{self.nmasks}_{self.epochs}')
         
         
         return sal
@@ -752,11 +753,15 @@ class AutoCompExpCreator:
         
     
     def __call__(self, me, inp, catidx):
+        start_time = time.time()
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
+        report_duration(start_time, me.arch, "SLOC_TUNE")
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
                               cap_response=self.cap_response, pprob=pprob, **self.kwargs)
-        return algo(me, inp, catidx)
+        rv = algo(me, inp, catidx)
+        report_duration(start_time, me.arch, "SLOC")
+        return rv
 
     def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=50):
         #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
