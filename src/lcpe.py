@@ -756,7 +756,8 @@ class ProbSqMaskGen(SqMaskGen):
         total_masks = 0
         while total_masks < nmasks:
             #print("@@@", probs)
-            masks = (self.gen_masks_cont(nmasks) < probs.unsqueeze(1).unsqueeze(1) )
+            remaining_masks = (nmasks - total_masks)
+            masks = (self.gen_masks_cont(remaining_masks) < probs.unsqueeze(1).unsqueeze(1) )
             is_valid = (masks.flatten(start_dim=1).sum(dim=1) > 0)
             num_valid = int(is_valid.sum())
             if num_valid == 0:
@@ -827,17 +828,27 @@ class AutoCompExpCreator:
             rv.append(score)
         return torch.Tensor(rv)
 
-    def tune_pprob(self, segsize, me, inp, catidx):
+    def tune_pprob(self, segsize, me, inp, catidx, single_pass=True):
         logging.info(f"tune_pprob: {segsize}")        
         pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)
         main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
-        main_scores = self.get_prob_score_list(main_probs, segsize, me, inp, catidx)
-        foc = main_probs[int(main_scores.argmax())]
         extra_probs = [0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8]
-        aux_probs = [x for x in extra_probs if (foc - 0.15 <= x <= foc + 0.15)]    
-        aux_scores = self.get_prob_score_list(aux_probs, segsize, me, inp, catidx)
-        all_probs = torch.Tensor(main_probs + aux_probs)
-        all_scores = torch.concat([main_scores, aux_scores])
+
+        if single_pass: 
+            main_probs += extra_probs
+
+        main_scores = self.get_prob_score_list(main_probs, segsize, me, inp, catidx)
+        
+        
+        if single_pass:
+            all_probs = torch.Tensor(main_probs)
+            all_scores = main_scores
+        else:
+            foc = main_probs[int(main_scores.argmax())]
+            aux_probs = [x for x in extra_probs if (foc - 0.15 <= x <= foc + 0.15)]    
+            aux_scores = self.get_prob_score_list(aux_probs, segsize, me, inp, catidx)
+            all_probs = torch.Tensor(main_probs + aux_probs)
+            all_scores = torch.concat([main_scores, aux_scores])
 
         rv = float(all_probs[int(all_scores.argmax())])
         return rv
