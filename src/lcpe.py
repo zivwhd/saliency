@@ -776,8 +776,13 @@ class AutoCompExpCreator:
 
     def get_prob_score_list(self, pprob, segsize, me, inp, catidx, sampsize=50):
         #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
-        algo = CompExpCreator(desc="gen", segsize=[segsize]*len(pprob), nmasks=[sampsize]*len(pprob), 
-                              pprob=pprob, batch_size=32)    
+
+        prob_list = []
+        for x in pprob:
+            prob_list += ([x] * sampsize)
+
+        algo = CompExpCreator(desc="gen", segsize=[segsize], nmasks=[sampsize], 
+                              pprob=[prob_list], batch_size=len(prob_list))    
         data = algo.generate_data(me, inp, catidx)  
 
         rv = []
