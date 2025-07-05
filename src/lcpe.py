@@ -743,6 +743,41 @@ class MultiCompExpCreator:
         return all_sals
 
 
+class ProbSqMaskGen(SqMaskGen):
+
+    def gen_masks(self, nmasks):
+        #print("@@@@@ ProbSqMaskGen", nmasks)
+        probs = self.prob[0:nmasks]
+        self.prob = self.prob[nmasks:]
+        indexes = torch.arange(nmasks)
+        
+        all_masks = []
+        all_indexes = []
+        total_masks = 0
+        while total_masks < nmasks:
+            #print("@@@", probs)
+            masks = (self.gen_masks_cont(nmasks) < probs.unsqueeze(1).unsqueeze(1) )
+            is_valid = (masks.flatten(start_dim=1).sum(dim=1) > 0)
+            num_valid = int(is_valid.sum())
+            if num_valid == 0:
+                continue
+            valid_masks = masks[is_valid]
+            all_masks.append(valid_masks)
+            all_indexes.append(indexes[is_valid])
+            indexes = indexes[~is_valid]
+            probs = probs[~is_valid]
+            total_masks += num_valid
+            #print("done", total_masks)
+        masks = torch.concat(all_masks)
+        act_indexes = torch.concat(all_indexes)
+        _, restore_indices = act_indexes.sort()
+        return masks[restore_indices]
+        
+
+
+
+        return masks
+
 class AutoCompExpCreator:
 
     def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, **kwargs):
@@ -781,8 +816,9 @@ class AutoCompExpCreator:
         for x in pprob:
             prob_list += ([x] * sampsize)
 
-        algo = CompExpCreator(desc="gen", segsize=[segsize], nmasks=[sampsize], 
-                              pprob=[torch.Tensor(prob_list).unsqueeze(1).unsqueeze(1)], batch_size=len(prob_list))    
+        mgen = ProbSqMaskGen(segsize=segsize, mshape=me.shape, prob=torch.Tensor(prob_list))
+        algo = CompExpCreator(desc="gen", segsize=[segsize], nmasks=[sampsize*len(pprob)], mgen=mgen,
+                              pprob=[torch.Tensor(prob_list)], batch_size=len(prob_list))    
         data = algo.generate_data(me, inp, catidx)  
 
         rv = []
