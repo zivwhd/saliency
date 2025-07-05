@@ -782,7 +782,7 @@ class AutoCompExpCreator:
             prob_list += ([x] * sampsize)
 
         algo = CompExpCreator(desc="gen", segsize=[segsize], nmasks=[sampsize], 
-                              pprob=[prob_list], batch_size=len(prob_list))    
+                              pprob=[torch.Tensor(prob_list)], batch_size=len(prob_list))    
         data = algo.generate_data(me, inp, catidx)  
 
         rv = []
