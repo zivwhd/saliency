@@ -951,7 +951,7 @@ class ProbRangeCompExpCreator:
             pprob = self.min_prob + (self.max_prob - self.min_prob) * (torch.arange(nmasks) / (nmasks-1.0))
             mgen = ProbSqMaskGen(segsize=segsize, mshape=me.shape, prob=pprob)
             algo = CompExpCreator(
-                desc="gen", segsize=[segsize], nmasks=nmasks
+                desc="gen", segsize=[segsize], nmasks=nmasks,
                 pprob=[pprob])    
             data = algo.generate_data(me, inp, catidx)  
             all_data.append(data)
