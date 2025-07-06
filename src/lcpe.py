@@ -855,7 +855,7 @@ class AutoCompExpCreator:
 
 class MulCompExpCreator(AutoCompExpCreator):
 
-    def __init__(self, mode="mul", seq=False, **kwargs):
+    def __init__(self, mode=["mean"], seq=False, **kwargs):
         super().__init__(**kwargs)
         self.mode = mode
         self.seq = seq
@@ -882,30 +882,31 @@ class MulCompExpCreator(AutoCompExpCreator):
         for idx, segsize in enumerate(self.segsize):
 
             pprob = [pprob_dict[x] for x in segsize]
-            c_positive = (self.mode == "mul")
+            c_positive = False # (self.mode == "mul")
             algo = CompExpCreator(
                 nmasks=[self.nmasks], segsize=segsize, 
                 cap_response=self.cap_response, pprob=pprob, c_positive=c_positive, **self.kwargs)        
             desc = (desc or algo.description())
 
             cexp = algo.explain(me,inp, catidx).cpu().unsqueeze(0)
-            if self.mode == "mul":
+            if self.mode == "prod":
                 cexp = torch.maximum(cexp, torch.zeros(1))
             exp_list.append(cexp)
             
-            if self.mode in ["mean", "median","min"]:
-                stacked = torch.stack(exp_list, dim=0)
-                if self.mode == "median":
-                    exp, _ = torch.median(stacked, dim=0) 
-                elif self.mode =="mean":
-                    exp = torch.mean(stacked, dim=0)
-                elif self.mode == "min":
-                    exp, _ = torch.min(stacked, dim=0)
-            elif self.mode == "mul":
-                exp = exp_list[0]
-                for cexp in exp_list[1:]:
-                    exp = exp * cexp
-            res[f"{desc}_{idx+1}"] = exp
+            for mode in self.mode:
+                if mode in ["mean", "median","min"]:
+                    stacked = torch.stack(exp_list, dim=0)
+                    if mode == "median":
+                        exp, _ = torch.median(stacked, dim=0) 
+                    elif mode =="mean":
+                        exp = torch.mean(stacked, dim=0)
+                    elif mode == "min":
+                        exp, _ = torch.min(stacked, dim=0)
+                elif mode == "prod":
+                    exp = exp_list[0]
+                    for cexp in exp_list[1:]:
+                        exp = exp * cexp * (exp > 0) * (cexp > 0)
+                res[f"{desc}_{mode}_{idx+1}"] = exp
 
         return res
         
