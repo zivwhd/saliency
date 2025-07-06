@@ -952,7 +952,7 @@ class ProbRangeCompExpCreator:
             mgen = ProbSqMaskGen(segsize=segsize, mshape=me.shape, prob=pprob)
             algo = CompExpCreator(
                 desc="gen", segsize=[segsize], nmasks=[nmasks],
-                pprob=[pprob])    
+                pprob=[pprob], mgen=mgen)    
             data = algo.generate_data(me, inp, catidx)  
             all_data.append(data)
 
