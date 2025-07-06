@@ -932,3 +932,31 @@ class MProbCompExpCreator:
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
         return algo(me, inp, catidx)
 
+
+
+class ProbRangeCompExpCreator:
+
+    def __init__(self, nmasks=[500,500], segsize=[32,56], min_prob=0.2, max_prob=0.8, **kwargs):
+        self.nmasks = nmasks
+        self.segsize = segsize        
+        self.min_prob = min_prob
+        self.max_prob = max_prob
+
+        self.kwargs = kwargs
+
+    def __call__(self, me, inp, catidx):
+
+        all_data = []
+        for nmasks, segsize in zip(self.nmasks, self,segsize):            
+            pprob = self.min_prob + (self.max_prob - self.min_prob) * (torch.arange(nmasks) / (nmasks-1.0))
+            mgen = ProbSqMaskGen(segsize=segsize, mshape=me.shape, prob=pprob)
+            algo = CompExpCreator(
+                desc="gen", segsize=[segsize], nmasks=nmasks
+                pprob=[pprob])    
+            data = algo.generate_data(me, inp, catidx)  
+            all_data.append(data)
+
+        all_data = MaskedRespData.join(all_data)            
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=[0.5]*len(self.nmasks), **self.kwargs)
+        return algo(me,inp,catidx, data=all_data)
+        
