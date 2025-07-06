@@ -884,7 +884,7 @@ class MulCompExpCreator(AutoCompExpCreator):
             pprob = [pprob_dict[x] for x in segsize]
             c_positive = False # (self.mode == "mul")
             algo = CompExpCreator(
-                nmasks=[self.nmasks], segsize=segsize, 
+                nmasks=self.nmasks, segsize=segsize, 
                 cap_response=self.cap_response, pprob=pprob, c_positive=c_positive, **self.kwargs)        
             desc = (desc or algo.description())
 
