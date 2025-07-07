@@ -278,7 +278,7 @@ def get_abl3_sal_creator():
     return MultiCompExpCreator(
         desc="MSK",
         pprob=[None],
-        mask_groups={f"_{nmasks}_": { 32 : int(nmasks/2), 56 : int(nmasks/2) } for nmasks in [1000,2000,3000,4000,5000,6000,8000,9000,10000]},
+        mask_groups={f"_{nmasks}_": { 32 : int(nmasks/2), 56 : int(nmasks/2) } for nmasks in [7000]},
         baselines = baselines,
         groups=[
             basic,
