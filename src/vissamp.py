@@ -103,7 +103,7 @@ TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json'
 
 
 figsize=(10,10)
-fontsize=14
+fontsize=10
 
 all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
@@ -132,10 +132,10 @@ for imgidx, image_info in enumerate(all_images):
     idx += 1
     show_single_sal(img, None, None)   
     #plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
-    caption = target_name
+    caption = target_name.replace('_', ' ')
     if args.variant:
         caption = str(args.variant)
-    plt.figtext(0.124, 0.5, target_name.replace('_', ' '),  va='center', ha='right',  rotation='vertical', fontsize=fontsize)
+    plt.figtext(0.124, 0.5, caption,  va='center', ha='right',  rotation='vertical', fontsize=fontsize)
 
 
     for method_name, variant in methods:
