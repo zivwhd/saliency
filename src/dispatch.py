@@ -259,6 +259,31 @@ def get_pabl_sal_creator():
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )
 
+def get_abl3_sal_creator():
+
+    logging.info("ablation sals")
+    baselines = [ZeroBaseline()]
+
+    basic = dict(#segsize=[16,48], nmasks=[500,500], 
+                 c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9, epochs=501, select_from=None,
+                 #select_from=10, select_freq=3, select_del=1.0,                 
+                c_mask_completeness=1.0, c_magnitude=0.01, c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False, c_activation="")
+    
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+    
+    return MultiCompExpCreator(
+        desc="MSK",
+        pprob=[None],
+        mask_groups={f"_{nmasks}_": { 32 : int(nmasks/2), 56 : int(nmasks/2) } for nmasks in [1000,2000,3000,4000,5000,6000,8000,9000,10000]},
+        baselines = baselines,
+        groups=[
+            basic,
+        ]),
+
 
 def get_abl2_sal_creator(nmasks=1000):
 
