@@ -105,7 +105,7 @@ def show_sal_dict(sals, img, mag=False):
         showsal(sal[0].cpu(), img, caption=name, mag=True)
 
 
-def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=False):
+def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=False, pos=False):
     
     pimg=img.resize((224,224))  
     plt.imshow(pimg)  
@@ -120,7 +120,8 @@ def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=Fal
     nsal = sal
     if 'LTX' in name:
         nsal = torch.sigmoid(nsal)
-    nsal = nsal * (nsal >= 0)
+    if pos:
+        nsal = nsal * (nsal >= 0)
 
         
     nsal = (nsal - nsal.min()) / (nsal.max() - nsal.min())

@@ -15,7 +15,8 @@ def get_args():
     CNN_MODELS = ["resnet50","vgg16", "convnext_base", "densenet201","densenet201NT","densenet201RT","resnet50NT", "resnet50RT", "vgg16NT", "vgg16RT"] ## "resnet18"
     ALL_MODELS = CNN_MODELS + VIT_MODELS    
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--selection")       
+    parser.add_argument("--selection")
+    parser.add_argument("--variant", default="")
     parser.add_argument("--model", choices=ALL_MODELS, default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
@@ -70,10 +71,6 @@ methods = [
 ]
 
 
-methods = [
-    (f'MinXS32_{idx+1}', f'MinRomp32_1000_32_501_msk1.0_tv0.1_mgn0.01_{idx+1}_0')
-    for idx in range(10)
-]
 
 if 'vit' not in model_name:
     methods = [
@@ -97,11 +94,16 @@ else:
     ]
 
 
+methods = [
+    (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
+    for idx in range(10)
+]
+
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
 
 figsize=(10,10)
-fontsize=7
+fontsize=14
 
 all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
@@ -130,7 +132,10 @@ for imgidx, image_info in enumerate(all_images):
     idx += 1
     show_single_sal(img, None, None)   
     #plt.figtext(0.98, 0.5, target_name, va='center', ha='left', rotation='vertical')
-    plt.figtext(0.124, 0.5, target_name.replace('_', ' '),  va='center', ha='right',  rotation='vertical', fontsize=5)
+    caption = target_name
+    if args.variant:
+        caption = str(args.variant)
+    plt.figtext(0.124, 0.5, target_name.replace('_', ' '),  va='center', ha='right',  rotation='vertical', fontsize=fontsize)
 
 
     for method_name, variant in methods:
@@ -146,8 +151,11 @@ for imgidx, image_info in enumerate(all_images):
         show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=True)
         plt.title(method_name, fontsize=fontsize)
     
-    
-    save_path = f"vismany2/{model_name}/{image_name}.png"
+    base_path = "vis"
+    if args.variant:    
+        save_path = f"{base_path}/{model_name}/{args.variant}/{image_name}.png"
+    else:
+        save_path = f"{base_path}/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
