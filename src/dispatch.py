@@ -282,7 +282,7 @@ def get_abl3_sal_creator():
         baselines = baselines,
         groups=[
             basic,
-        ]),
+        ])
 
 
 def get_abl2_sal_creator(nmasks=1000):
