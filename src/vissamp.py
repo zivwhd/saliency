@@ -93,11 +93,17 @@ else:
         ('T-Attr', 'Dimpl_t-attr_0'),
     ]
 
+if args.variant 1= "masks":
+    methods = [
+        (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
+        for idx in range(10)
+    ]
+else:
+    methods = [
+        (f'N={idx+1}', f'MSK_1000_ZrZrNone_{idx+1}000_56_501_msk1.0_tv0.1_mgn0.01_0')
+        for idx in range(10)
+    ]
 
-methods = [
-    (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
-    for idx in range(10)
-]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
