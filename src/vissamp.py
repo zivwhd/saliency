@@ -17,6 +17,8 @@ def get_args():
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--selection")
     parser.add_argument("--variant", default="")
+    parser.add_argument("--dir", default="vis")
+    parser.add_argument('--pos', action='store_true', default=False)
     parser.add_argument("--model", choices=ALL_MODELS, default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
@@ -154,10 +156,10 @@ for imgidx, image_info in enumerate(all_images):
         plt.subplot(1, len(methods)+1, idx)         
         idx += 1
         show_single_sal(img, None, None)
-        show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=False, pos=True)
+        show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=False, pos=args.pos)
         plt.title(method_name, fontsize=fontsize)
     
-    base_path = "vis2"
+    base_path = args.dir
     if args.variant:    
         save_path = f"{base_path}/{model_name}/{args.variant}/{image_name}.png"
     else:
