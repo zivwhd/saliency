@@ -93,7 +93,7 @@ else:
         ('T-Attr', 'Dimpl_t-attr_0'),
     ]
 
-if args.variant != "masks":
+if args.variant in ["min","mean","median","prod"]:
     methods = [
         (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
         for idx in range(10)
