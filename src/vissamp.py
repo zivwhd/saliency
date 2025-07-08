@@ -157,7 +157,7 @@ for imgidx, image_info in enumerate(all_images):
         show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=False, pos=True)
         plt.title(method_name, fontsize=fontsize)
     
-    base_path = "vis"
+    base_path = "vis2"
     if args.variant:    
         save_path = f"{base_path}/{model_name}/{args.variant}/{image_name}.png"
     else:
