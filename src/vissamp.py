@@ -102,7 +102,7 @@ if args.variant in ["min","mean","median","prod"]:
     ]
 else:
     methods = [
-        (f'N={idx+1}', f'MSK_{idx+1}000_ZrZrNone_5000_56_501_msk1.0_tv0.1_mgn0.01_0')         
+        (f'N={idx+1}', f'MSK_{idx+1}000_ZrZrNone_{3500 if (idx==6) else 5000}_56_501_msk1.0_tv0.1_mgn0.01_0')         
         for idx in range(10)
     ]
 
