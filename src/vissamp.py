@@ -74,6 +74,19 @@ methods = [
 
 
 
+
+if args.variant in ["min","mean","median","prod"]:
+    methods = [
+        (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
+        for idx in range(10)
+    ]
+else:
+    methods = [
+        (f'N={idx+1}', f'MSK_{idx+1}000_ZrZrNone_{3500 if (idx==6) else 5000}_56_501_msk1.0_tv0.1_mgn0.01_0')         
+        for idx in range(10)
+    ]
+
+
 if 'vit' not in model_name:
     methods = [
         ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),
@@ -93,17 +106,6 @@ else:
         ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
         ('RISE','RISE_4000_7_0.5_0'),    
         ('T-Attr', 'Dimpl_t-attr_0'),
-    ]
-
-if args.variant in ["min","mean","median","prod"]:
-    methods = [
-        (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
-        for idx in range(10)
-    ]
-else:
-    methods = [
-        (f'N={idx+1}', f'MSK_{idx+1}000_ZrZrNone_{3500 if (idx==6) else 5000}_56_501_msk1.0_tv0.1_mgn0.01_0')         
-        for idx in range(10)
     ]
 
 
