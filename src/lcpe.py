@@ -781,21 +781,25 @@ class ProbSqMaskGen(SqMaskGen):
 
 class AutoCompExpCreator:
 
-    def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, **kwargs):
+    def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, tune_single_pass=True, **kwargs):
         self.nmasks = nmasks
         self.segsize = segsize        
         self.kwargs = kwargs
         self.cap_response = cap_response
+        self.tune_single_pass = tune_single_pass
         
     
-    def __call__(self, me, inp, catidx):
+    def __call__(self, me, inp, catidx, callback=None):
         start_time = time.time()
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
         report_duration(start_time, me.arch, "SLOC_TUNE")
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
                               cap_response=self.cap_response, pprob=pprob, **self.kwargs)
-        rv = algo(me, inp, catidx)
+        if callback:
+            rv = algo.explain(me, inp, catidx, callback=callback)
+        else:
+            rv = algo(me, inp, catidx)
         report_duration(start_time, me.arch, "SLOC")
         return rv
 
@@ -871,7 +875,8 @@ class MulCompExpCreator(AutoCompExpCreator):
 
     def __call__(self, me, inp, catidx):
         all_segsize = list(set(self.flatten(self.segsize)))
-        pprob_dict = { segsize : self.tune_pprob(segsize, me, inp, catidx) for segsize in all_segsize }
+        pprob_dict = { segsize : self.tune_pprob(segsize, me, inp, catidx, single_pass=self.tune_single_pass) 
+                      for segsize in all_segsize }
         #pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         #logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
 

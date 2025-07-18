@@ -492,6 +492,14 @@ def get_abl_sal_creator(nmasks=1000):
                 #modify(c_model=0.2, desc="MDL"), 
             ])
     ]
+
+    return MultiCompExpCreator(
+        desc="MComp",
+        pprob=[None],
+        mask_groups=basic_mask_groups,            
+        baselines = baselines,
+        groups=[modify(desc="CPONLY", c_tv=0, c_magnitude=0)])
+
     return CombSaliencyCreator(runs)
 
 
