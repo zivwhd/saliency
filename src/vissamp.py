@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument("--selection")
     parser.add_argument("--variant", default="")
     parser.add_argument("--dir", default="vis")
-    parser.add_argument('--pos', action='store_true', default=False)
+    parser.add_argument('--pos', action='store_true', default=True)
     parser.add_argument("--model", choices=ALL_MODELS, default="resnet50", help="TBD")    
 
     args = parser.parse_args()    
