@@ -66,9 +66,9 @@ class DimplVitSaliencyCreator:
 
         for opr in self.methods:
             start_time = time.time()
-            sal = self.handle_transformers(model, me.arch, opr, inp[0], catidx)
-            report_duration(start_time, me.arch, opr)
+            sal = self.handle_transformers(model, me.arch, opr, inp[0], catidx)            
             res[f"Dimpl_{opr}"] = torch.tensor(sal).unsqueeze(0)
+            report_duration(start_time, me.arch, opr.replace('-',''))
         return res
     
 
