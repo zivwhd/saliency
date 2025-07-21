@@ -99,7 +99,8 @@ class MaskedRespGen:
             self.num_masks += int(is_valid.sum())
 
 
-    def gen(self, model, inp, nmasks, batch_size=32, **kwargs):        
+    def gen(self, model, inp, nmasks, batch_size=32, **kwargs):
+        print("GEN", nmasks, batch_size)
         with torch.no_grad():
             while self.num_masks < nmasks:                
                 remaining = nmasks - self.num_masks
