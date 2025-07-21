@@ -498,7 +498,12 @@ def get_abl_sal_creator(nmasks=1000):
         pprob=[None],
         mask_groups=basic_mask_groups,            
         baselines = baselines,
-        groups=[modify(desc="CPONLY", c_tv=0, c_magnitude=0)])
+        groups=[
+            modify(desc="SLOC"),
+            modify(desc="NOTV", c_tv=0),
+            modify(desc="NOL1", c_magnitude=0),
+            modify(desc="CPONLY", c_tv=0, c_magnitude=0)
+        ])
 
     return CombSaliencyCreator(runs)
 
