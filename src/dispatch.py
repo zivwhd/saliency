@@ -503,7 +503,7 @@ def get_abl_sal_creator(nmasks=1000):
             modify(desc="NOTV", c_tv=0),
             modify(desc="NOL1", c_magnitude=0),
             modify(desc="CPONLY", c_tv=0, c_magnitude=0)
-        ]) 
+        ])
 
     return CombSaliencyCreator(runs)
 
