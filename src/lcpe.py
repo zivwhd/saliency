@@ -935,8 +935,11 @@ class MProbCompExpCreator:
             pprob = [0.6] * len(self.segsize)
         else:
             assert False, f"Unexpected arch {me.arch}"
+        start_time = time.time()
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=pprob, **self.kwargs)
-        return algo(me, inp, catidx)
+        rv = algo(me, inp, catidx)
+        report_duration(start_time, me.arch, "SLOCxP")
+        return rv
 
 
 
@@ -963,6 +966,6 @@ class ProbRangeCompExpCreator:
             all_data.append(data)
 
         all_data = MaskedRespData.join(all_data)            
-        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=[0.5]*len(self.nmasks), **self.kwargs)
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=[0.5]*len(self.nmasks), **self.kwargs)        
         return algo(me,inp,catidx, data=all_data)
         
