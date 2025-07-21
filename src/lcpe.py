@@ -653,7 +653,7 @@ class CompExpCreator:
         start_time = time.time() 
         if data is None:                        
             data = self.generate_data(me, inp, catidx, logit=self.c_logit)
-            report_duration(start_time, me.arch, "SLOC_GEN", f'{self.nmasks}_{self.epochs}')
+            report_duration(start_time, me.arch, "SLOC_GEN")
 
         start_time_expl = time.time()
 
@@ -679,7 +679,7 @@ class CompExpCreator:
                                    c_norm=self.c_norm, c_activation=self.c_activation,
                                    baseline=data.baseline, callback=callback)
         
-        report_duration(start_time_expl, me.arch, "SLOC_OPT", f'{self.nmasks}_{self.epochs}')
+        report_duration(start_time_expl, me.arch, "SLOC_OPT")
         
         
         return sal
