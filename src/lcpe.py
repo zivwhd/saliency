@@ -661,8 +661,9 @@ class CompExpCreator:
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
             #initial = (torch.randn(224,224)*0.2+1).abs()
-            print("setting initial")
-            initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
+            print("setting initial")            
+            initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
+            #initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
 
         fmdl = me.narrow_model(catidx, with_softmax=True)        
         
@@ -746,8 +747,7 @@ class MultiCompExpCreator:
 
 class ProbSqMaskGen(SqMaskGen):
 
-    def gen_masks(self, nmasks):
-        #print("@@@@@ ProbSqMaskGen", nmasks)
+    def gen_masks(self, nmasks):        
         probs = self.prob[0:nmasks]
         self.prob = self.prob[nmasks:]
         indexes = torch.arange(nmasks)
@@ -816,8 +816,6 @@ class AutoCompExpCreator:
         return torch.tensor([pscore(x) for x in probs])
 
     def get_prob_score_list(self, pprob, segsize, me, inp, catidx, sampsize=50):
-        #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
-
         prob_list = []
         for x in pprob:
             prob_list += ([x] * sampsize)
