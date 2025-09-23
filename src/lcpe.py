@@ -9,6 +9,8 @@ from skimage.segmentation import slic,mark_boundaries
 from reports import report_duration
 from torch.optim.lr_scheduler import StepLR
 from collections import defaultdict
+from scipy.sparse.linalg import cg, gmres, lsqr
+import functools
 
 tqdm = lambda x: x
 
@@ -482,6 +484,70 @@ class BlurBaseline:
     def desc(self):
         return f"Blr{self.ksize}x{self.sigma}"
 
+@functools.cache
+def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
+    numel = shape[0]*shape[1]
+    res = torch.zeros(numel, numel)
+    count = 0
+    if ctv:
+        for idx in range(shape[0]):
+            for jdx in range(shape[1]-1):
+                count += 1
+                idx_pos = idx*shape[0] + jdx 
+                idx_neg = idx*shape[0] + jdx+1
+                res[idx_pos, idx_pos] += 1.0
+                res[idx_neg, idx_neg] += 1.0
+                res[idx_pos, idx_neg] -= 1.0
+                res[idx_pos, idx_neg] -= 1.0
+    if rtv:
+        for idx in range(shape[0]-1):
+            for jdx in range(shape[1]):
+                #count += 1
+                idx_pos = idx*shape[0] + jdx
+                idx_neg = (idx+1)*shape[0] + jdx
+                res[idx_pos, idx_pos] += 1.0
+                res[idx_neg, idx_neg] += 1.0
+                res[idx_pos, idx_neg] -= 1.0
+                res[idx_pos, idx_neg] -= 1.0
+
+    if norm:
+        res = res / torch.sqrt(torch.Tensor([count]).unsqueeze(0))
+    return res
+
+def optimize_ols(self, masks, responses, c_magnitude, c_tv, c_sample):
+    masks = masks.cpu() * 1.0 
+    assert 0 <= c_sample <= 1
+    oshape = masks.shape[1:]
+
+    if (c_sample == 1):
+        masks = masks.unsqueeze(1)  
+        masks_downsampled = F.interpolate(masks, scale_factor=0.5, mode='bilinear', align_corners=False)
+        masks_downsampled = masks_downsampled.squeeze(1) 
+        masks = masks_downsampled
+
+    dshape = masks.shape[1:]
+    Y = responses.cpu() / (oshape[0] * oshape[1])
+    fmasks = masks.flatten(start_dim=1)
+
+    weights = torch.sqrt(1/ (2 * fmasks.shape[0] * fmasks.sum(dim=1, keepdim=True)))
+    Xw = fmasks * weights
+    Yw = Y * weights[:,0]
+    XTXw = Xw.T @ Xw 
+    XTY = Xw.T @ Yw
+
+    ## reverting data generation numel factor
+    tvXTX = get_tv_XTX(dshape)
+    import math
+    XTX = XTXw + torch.eye(XTXw.shape[0]) *  math.sqrt(c_magnitude / XTXw.shape[0])  + tvXTX*math.sqrt(c_tv)
+    bb, _info = gmres(XTX.numpy(), XTY.numpy())
+    msal = torch.Tensor(bb.reshape(*dshape)).unsqueeze(0)
+    
+    if oshape != dshape:
+        msal = F.interpolate(msal.unsqueeze(0), size=oshape, mode='bilinear', align_corners=False)[0]
+    return msal[0]
+
+
+
 class CompExpCreator:
 
     def __init__(self, nmasks=500, segsize=64, batch_size=32, 
@@ -494,6 +560,7 @@ class CompExpCreator:
                  select_from=100, select_freq=10, select_del=0.5,
                  epochs=300, 
                  model_epochs=300, c_model=0,
+                 c_sample = 0.5,
                  c_opt="Adam",
                  mgen=None,
                  desc = "MComp",                 
@@ -528,6 +595,7 @@ class CompExpCreator:
         self.c_magnitude = c_magnitude        
         self.c_positive = c_positive        
         self.c_opt = c_opt
+        self.c_sample = 0.5
         self.lr = lr
         self.lr_step = lr_step
         lr_step_decay = lr_step_decay
@@ -548,45 +616,61 @@ class CompExpCreator:
 
 
     def description(self):
-        if len(self.nmasks) == 1:
-            desc = f"{self.desc}{self.ext_desc}_{self.nmasks[0]}_{self.segsize[0]}_{self.epochs}"
+        if self.epochs:
+            opt_desc = f'{self.epochs}'
         else:
-            desc = f"{self.desc}{self.ext_desc}_Mr_{self.epochs}"
+            opt_desc = 'OLS'
 
-        if self.model_epochs:
-            desc += f":{self.model_epochs}"
-        if self.select_from is not None:
-            desc += f"b"
+        if len(self.nmasks) == 1:
+            desc = f"{self.desc}{self.ext_desc}_{self.nmasks[0]}_{self.segsize[0]}_{opt_desc}"
+        else:
+            desc = f"{self.desc}{self.ext_desc}_Mr_{opt_desc}"
 
-        if self.c_norm or self.c_activation:
-            desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
+        if self.epochs:
+            if self.model_epochs:
+                desc += f":{self.model_epochs}"
+            if self.select_from is not None:
+                desc += f"b"
 
-        if self.c_logit:
-            desc += "l"
+            if self.c_norm or self.c_activation:
+                desc += "_" + ("n" * self.c_norm) + (self.c_activation[0] if self.c_activation else "")
 
-        if self.c_smoothness != 0:
-            desc += f"_krn{self.c_smoothness}_" + str("x").join(map(str, self.avg_kernel_size))
+            if self.c_logit:
+                desc += "l"
 
-        if self.c_mask_completeness:
-            desc += f"_msk{self.c_mask_completeness}"
+            if self.c_smoothness != 0:
+                desc += f"_krn{self.c_smoothness}_" + str("x").join(map(str, self.avg_kernel_size))
 
-        if self.c_completeness:
-            desc += f"_cp{self.c_completeness}"
+            if self.c_mask_completeness:
+                desc += f"_msk{self.c_mask_completeness}"
 
-        if self.c_tv:
-            desc += f"_tv{self.c_tv}"
+            if self.c_completeness:
+                desc += f"_cp{self.c_completeness}"
 
-        if self.c_magnitude:
-            desc += f"_mgn{self.c_magnitude}"
+            if self.c_tv:
+                desc += f"_tv{self.c_tv}"
 
-        if self.c_positive:
-            desc += f"_p{self.c_positive}"
+            if self.c_magnitude:
+                desc += f"_mgn{self.c_magnitude}"
 
-        if self.c_model:
-            desc += f"_mdl{self.c_model}"
+            if self.c_positive:
+                desc += f"_p{self.c_positive}"
 
-        if self.c_selfness:
-            desc += f"_sf{self.c_selfness}"
+            if self.c_model:
+                desc += f"_mdl{self.c_model}"
+
+            if self.c_selfness:
+                desc += f"_sf{self.c_selfness}"
+        else:
+            if self.c_sample:
+                desc += f"_s{self.c_sample}"
+
+            if self.c_tv:
+                desc += f"_tv{self.c_tv}"
+
+            if self.c_magnitude:
+                desc += f"_mgn{self.c_magnitude}"
+
 
         return desc
     
@@ -599,6 +683,7 @@ class CompExpCreator:
         #return {
         #    f"{self.desc}_{self.nmasks}_{self.segsize}{ksdesc}_{self.epochs}_{self.c_completeness}_{self.c_smoothness}" : sal.cpu().unsqueeze(0)
         #}
+
 
 
     def generate_data(self, me, inp, catidx, logit=False):
@@ -665,22 +750,27 @@ class CompExpCreator:
             initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
             #initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
 
-        fmdl = me.narrow_model(catidx, with_softmax=True)        
         
-        sal = optimize_explanation(fmdl, inp, initial, data.all_masks, data.all_pred, score=data.added_score, 
-                                   epochs=self.epochs, select_from=self.select_from, 
-                                   select_freq=self.select_freq, select_del=self.select_del,
-                                   model_epochs=self.model_epochs, lr=self.lr, c_opt=self.c_opt,
-                                   avg_kernel_size=self.avg_kernel_size,
-                                   c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
-                                   c_tv=self.c_tv, c_selfness=self.c_selfness,
-                                   c_mask_completeness=self.c_mask_completeness,
-                                   c_model=self.c_model,
-                                   c_magnitude=self.c_magnitude,
-                                   c_positive = self.c_positive,
-                                   c_norm=self.c_norm, c_activation=self.c_activation,
-                                   baseline=data.baseline, callback=callback)
-        
+        if self.epochs:
+            fmdl = me.narrow_model(catidx, with_softmax=True)        
+            
+            sal = optimize_explanation(fmdl, inp, initial, data.all_masks, data.all_pred, score=data.added_score, 
+                                    epochs=self.epochs, select_from=self.select_from, 
+                                    select_freq=self.select_freq, select_del=self.select_del,
+                                    model_epochs=self.model_epochs, lr=self.lr, c_opt=self.c_opt,
+                                    avg_kernel_size=self.avg_kernel_size,
+                                    c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
+                                    c_tv=self.c_tv, c_selfness=self.c_selfness,
+                                    c_mask_completeness=self.c_mask_completeness,
+                                    c_model=self.c_model,
+                                    c_magnitude=self.c_magnitude,
+                                    c_positive = self.c_positive,
+                                    c_norm=self.c_norm, c_activation=self.c_activation,
+                                    baseline=data.baseline, callback=callback)
+        else:
+            sal = optimize_ols(self, masks=data.all_masks, responses=data.all_pred, 
+                               c_magnitude=self.c_magnitude, c_tv=self.c_tv, c_sample=self.c_sample)
+
         report_duration(start_time_expl, me.arch, "SLOC_OPT")
         
         
@@ -790,13 +880,15 @@ class AutoCompExpCreator:
         self.tune_single_pass = tune_single_pass
         
     
-    def __call__(self, me, inp, catidx, callback=None):
+    def __call__(self, me, inp, catidx, callback=None, return_algo=True):
         start_time = time.time()
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
         report_duration(start_time, me.arch, "SLOC_TUNE")
-        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, 
+        algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize,         
                               cap_response=self.cap_response, pprob=pprob, **self.kwargs)
+        if return_algo:
+            return algo
         if callback:
             rv = algo.explain(me, inp, catidx, callback=callback)
         else:

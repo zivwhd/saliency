@@ -153,6 +153,32 @@ def get_autoncomp_sal_creator():
 
     ])
 
+def get_autols_sal_creator():
+    basic = dict(desc="AutoOLS", epochs=None, c_magnitude=0.01, c_tv=0.1, c_sample=0.5)
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+    return CombSaliencyCreator([
+        MultiCompExpCreator(
+            desc="SLOC_OLS",            
+            mask_groups={f"Mix":{32:500, 56:500}},
+            pprob=[None],
+            baselines = [ZeroBaseline()],
+            groups=[
+                modify(c_magnitude=1),
+                modify(c_magnitude=0.1),
+                modify(c_magnitude=0.001), 
+                modify(c_magnitude=0.0001),
+                modify(c_tv=1),
+                modify(c_tv=0.5),
+                modify(c_tv=0.3),
+                modify(c_tv=0.2),
+                modify(c_tv=0.01),
+            ])
+    ])
+
 def get_autoncomp2_sal_creator():
     return MProbCompExpCreator(
         desc="SLOCxxProb", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
