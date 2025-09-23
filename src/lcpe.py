@@ -484,7 +484,8 @@ class BlurBaseline:
     def desc(self):
         return f"Blr{self.ksize}x{self.sigma}"
 
-@functools.cache
+
+@functools.lru_cache(maxsize=None)
 def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
     numel = shape[0]*shape[1]
     res = torch.zeros(numel, numel)
