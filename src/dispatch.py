@@ -154,7 +154,7 @@ def get_autoncomp_sal_creator():
     ])
 
 def get_autols_sal_creator():
-    basic = dict(desc="AutoOLS", epochs=None, c_magnitude=0.01, c_tv=0.1, c_sample=0.5)
+    basic = dict(desc="AutoOLS", epochs=None, c_magnitude=100, c_tv=100, c_sample=0.5)
     def modify(**kwargs):
         args = basic.copy()
         args.update(**kwargs)
@@ -167,15 +167,15 @@ def get_autols_sal_creator():
             pprob=[None],
             baselines = [ZeroBaseline()],
             groups=[
+                modify(),
+                modify(c_magnitude=200),
+                modify(c_magnitude=50),
+                modify(c_magnitude=10), 
                 modify(c_magnitude=1),
-                modify(c_magnitude=0.1),
-                modify(c_magnitude=0.001), 
-                modify(c_magnitude=0.0001),
-                modify(c_tv=1),
-                modify(c_tv=0.5),
-                modify(c_tv=0.3),
-                modify(c_tv=0.2),
-                modify(c_tv=0.01),
+                modify(c_tv=200),
+                modify(c_tv=50),
+                modify(c_tv=10),
+                modify(c_tv=1)                
             ])
     ])
 
