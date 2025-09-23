@@ -520,7 +520,7 @@ def optimize_ols(self, masks, responses, c_magnitude, c_tv, c_sample):
     assert 0 <= c_sample <= 1
     oshape = masks.shape[1:]
 
-    if (c_sample == 1):
+    if (c_sample < 1):
         masks = masks.unsqueeze(1)  
         masks_downsampled = F.interpolate(masks, scale_factor=0.5, mode='bilinear', align_corners=False)
         masks_downsampled = masks_downsampled.squeeze(1) 
