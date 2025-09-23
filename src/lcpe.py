@@ -11,6 +11,7 @@ from torch.optim.lr_scheduler import StepLR
 from collections import defaultdict
 from scipy.sparse.linalg import cg, gmres, lsqr
 import functools
+import math
 
 tqdm = lambda x: x
 
@@ -499,7 +500,7 @@ def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
                 res[idx_pos, idx_pos] += 1.0
                 res[idx_neg, idx_neg] += 1.0
                 res[idx_pos, idx_neg] -= 1.0
-                res[idx_pos, idx_neg] -= 1.0
+                res[idx_neg, idx_pos] -= 1.0
     if rtv:
         for idx in range(shape[0]-1):
             for jdx in range(shape[1]):
@@ -509,13 +510,13 @@ def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
                 res[idx_pos, idx_pos] += 1.0
                 res[idx_neg, idx_neg] += 1.0
                 res[idx_pos, idx_neg] -= 1.0
-                res[idx_pos, idx_neg] -= 1.0
+                res[idx_neg, idx_pos] -= 1.0
 
     if norm:
-        res = res / torch.sqrt(torch.Tensor([count]).unsqueeze(0))
+        res = res / torch.Tensor([count]).unsqueeze(0)
     return res
 
-def optimize_ols(self, masks, responses, c_magnitude, c_tv, c_sample):
+def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample):
     masks = masks.cpu() * 1.0 
     assert 0 <= c_sample <= 1
     oshape = masks.shape[1:]
@@ -537,9 +538,8 @@ def optimize_ols(self, masks, responses, c_magnitude, c_tv, c_sample):
     XTY = Xw.T @ Yw
 
     ## reverting data generation numel factor
-    tvXTX = get_tv_XTX(dshape)
-    import math
-    XTX = XTXw + torch.eye(XTXw.shape[0]) *  math.sqrt(c_magnitude / XTXw.shape[0])  + tvXTX*math.sqrt(c_tv)
+    tvXTX = get_tv_XTX(dshape)    
+    XTX = XTXw + torch.eye(XTXw.shape[0]) *  c_magnitude / XTXw.shape[0]  + tvXTX*c_tv
     bb, _info = gmres(XTX.numpy(), XTY.numpy())
     msal = torch.Tensor(bb.reshape(*dshape)).unsqueeze(0)
     
@@ -769,7 +769,7 @@ class CompExpCreator:
                                     c_norm=self.c_norm, c_activation=self.c_activation,
                                     baseline=data.baseline, callback=callback)
         else:
-            sal = optimize_ols(self, masks=data.all_masks, responses=data.all_pred, 
+            sal = optimize_ols(masks=data.all_masks, responses=data.all_pred, 
                                c_magnitude=self.c_magnitude, c_tv=self.c_tv, c_sample=self.c_sample)
 
         report_duration(start_time_expl, me.arch, "SLOC_OPT")
