@@ -109,7 +109,7 @@ else:
 
 
 methods = [
-    ("OLS.tv{tv}.mgn{mgn}", "AutoOLSZrNone_500_56_OLS_s0.5_tv{tv}_mgn{mgn}_0")
+    (f"OLS.tv{tv}.mgn{mgn}", f"AutoOLSZrNone_500_56_OLS_s0.5_tv{tv}_mgn{mgn}_0")
     for tv, mgn in [(100, 100), (1,100), (10,100), (50,100), (200,100), (100,1), (100,10), (100,50), (100,200)]    
 ] + [('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')]
 
