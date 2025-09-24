@@ -74,7 +74,6 @@ methods = [
 
 
 
-
 if args.variant in ["min","mean","median","prod"]:
     methods = [
         (f'N={idx+1}', f'MinRomp32_Mr_501_msk1.0_tv0.1_mgn0.01_{args.variant}_{idx+1}_0')
@@ -108,6 +107,11 @@ else:
         ('T-Attr', 'Dimpl_t-attr_0'),
     ]
 
+
+methods = [
+    ("OLS.tv{tv}.mgn{mgn}", "AutoOLSZrNone_500_56_OLS_s0.5_tv{tv}_mgn{mgn}_0")
+    for tv, mgn in [(100, 100), (1,100), (10,100), (50,100), (200,100), (100,1), (100,10), (100,50), (100,200)]    
+] + [('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
@@ -151,6 +155,8 @@ for imgidx, image_info in enumerate(all_images):
     for method_name, variant in methods:
         logging.info(f"method: {method_name} - {variant}")
         result_path = os.path.join("results", model_name, "saliency", variant, image_info.name)
+        if method_name.startswith('..'):
+            result_path = '../saliency/' + result_path
         logging.info(f"loading {result_path}")
         assert os.path.isfile(result_path)
         sal = torch.load(result_path).float()
