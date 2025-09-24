@@ -117,7 +117,7 @@ TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json'
 
 
 figsize=(10,10)
-fontsize=9
+fontsize=6 #9
 
 all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
