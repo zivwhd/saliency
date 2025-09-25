@@ -15,7 +15,7 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MulCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline
+from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MulCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, SegSlocExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
@@ -302,8 +302,16 @@ def get_creators_abl():
     return CombSaliencyCreator(runs)
 
 
-
 def get_creators(model_name):
+    return SegSlocExpCreator(
+        desc = "SegMulti", seg_list=[(20,200,0.5),(40,400,0.5),(60,400,0.5)],
+        c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+        epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+        c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",        
+    )
+
+
+def get_creators_old(model_name):
     return get_creators_cnn()
     if 'resnet' in model_name or 'densenet' in model_name:
         return get_creators_cnn()
