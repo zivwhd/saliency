@@ -529,6 +529,7 @@ def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample):
 
     dshape = masks.shape[1:]
     Y = responses.cpu() / (oshape[0] * oshape[1])
+
     fmasks = masks.flatten(start_dim=1)
 
     weights = torch.sqrt(1/ (2 * fmasks.shape[0] * fmasks.sum(dim=1, keepdim=True)))
@@ -569,6 +570,7 @@ class CompExpCreator:
                  baseline_gen = ZeroBaseline(),                 
                  ext_desc = "",
                  cap_response = False,
+                 force_desc = False,
                  **kwargs):
         
         assert type(segsize) == type(nmasks)
@@ -614,9 +616,13 @@ class CompExpCreator:
             self.model_epochs = 0
             self.c_model = 0
         self.ext_desc = ext_desc
+        self.force_desc = force_desc
 
 
     def description(self):
+        if self.force_desc:
+            return self.desc
+        
         if self.epochs:
             opt_desc = f'{self.epochs}'
         else:
@@ -1059,4 +1065,34 @@ class ProbRangeCompExpCreator:
         all_data = MaskedRespData.join(all_data)            
         algo = CompExpCreator(nmasks=self.nmasks, segsize=self.segsize, pprob=[0.5]*len(self.nmasks), **self.kwargs)        
         return algo(me,inp,catidx, data=all_data)
+        
+
+class SegSlocExpCreator:
+    def __init__(self, desc, seg_list=[], sq_list=[], **kwargs):
+        self.seg_list = seg_list
+        self.sq_list = sq_list
+        self.desc = desc
+        self.kwargs = kwargs
+
+    def __call__(self, me, inp, catidx):
+        all_data = []
+        for segsize, nmasks, pprob in self.sq_list:
+            algo = CompExpCreator(
+                desc=self.desc, segsize=[segsize], nmasks=[nmasks], pprob=[pprob], force_desc=True, **self.kwargs)
+            idata = algo.generate_data(me, inp, catidx)
+            all_data.append(idata)
+            
+        for nsegs, nmasks, pprob in self.seg_list:
+            sg = SegMaskGen(inp, nsegs)
+            algo = CompExpCreator(
+                desc=self.desc, segsize=[0], nmasks=[nmasks], pprob=[pprob], mgen=sg, force_desc=True, **self.kwargs)
+            idata = algo.generate_data(me, inp, catidx)
+            all_data.append(idata)
+
+        data = MaskedRespData.join(all_data)
+        sal = algo(me, inp, catidx, data=data)
+        return sal
+    
+
+            
         
