@@ -323,9 +323,7 @@ def get_creators(model_name):
             f"MixLSeg":{-20:200, 56: 400,  32:400},
             f"MixMSeg":{-20:200, -40: 400,  56:400},
             f"MixSegSSq":{-20:200, -60: 300, 32:500}
-        }
-            
-
+        },
         pprob=[None],
         baselines = [ZeroBaseline()],
         groups=[modify(desc="GD"), modify(desc="Pos", c_magnitude=0, c_positive=1, c_tv=0.05)],
