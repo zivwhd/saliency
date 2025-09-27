@@ -303,6 +303,37 @@ def get_creators_abl():
 
 
 def get_creators(model_name):
+
+    basic =  dict(
+        desc="Auto", c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+        epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+        c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        force_desc=True
+    )
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+
+    algo = MultiCompExpCreator(
+        desc="Sloc",            
+        mask_groups={
+            f"Segs":{-20:200, -40:400, -60:400},
+            f"MixLSeg":{-20:200, 56: 400,  32:400},
+            f"MixMSeg":{-20:200, -40: 400,  56:400},
+            f"MixSegSSq":{-20:200, -60: 300, 32:500}
+        }
+            
+
+        pprob=[None],
+        baselines = [ZeroBaseline()],
+        groups=[modify(desc="GD"), modify(desc="Pos", c_magnitude=0, c_positive=1, c_tv=0.05)],
+        acargs=dict(main_probs=[0.3,0.4,0.5,0.6,0.7,0.8], extra_probs=[], sampsize=40)
+        )
+    
+    return algo
+
     return SegSlocExpCreator(
         desc = "SegMulti", seg_list=[(20,200,0.5),(40,400,0.5),(60,400,0.5)],
         c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  

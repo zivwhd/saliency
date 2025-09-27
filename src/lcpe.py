@@ -31,7 +31,7 @@ class LoadMaskGen:
 
 class SegMaskGen:
 
-    def __init__(self, inp, n_segments):
+    def __init__(self, inp, n_segments, prob=0.5):
         base = inp[0].cpu().numpy().transpose(1,2,0)
         #print(base.shape)
         #n_segments = n_segments #base.shape[0] * base.shape[1] / (segsize * segsize)
@@ -39,9 +39,10 @@ class SegMaskGen:
         #print(inp.shape, self.segments.shape)
         self.nelm = torch.unique(self.segments).numel()
         self.mshape = inp.shape
+        self.prob = prob
     
     def gen_masks(self, nmasks):
-        return (self.gen_masks_cont(nmasks) < 0.5)
+        return (self.gen_masks_cont(nmasks) < self.prob)
 
     def gen_masks_cont(self, nmasks):        
         #print("Generating segments mask")
@@ -516,7 +517,8 @@ def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
         res = res / torch.Tensor([count]).unsqueeze(0)
     return res
 
-def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample):
+def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None):
+    print("optimize_ols")
     masks = masks.cpu() * 1.0 
     assert 0 <= c_sample <= 1
     oshape = masks.shape[1:]
@@ -532,7 +534,10 @@ def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample):
 
     fmasks = masks.flatten(start_dim=1)
 
+    
     weights = torch.sqrt(1/ (2 * fmasks.shape[0] * fmasks.sum(dim=1, keepdim=True)))
+    if c_weights is not None:
+        weights = weights * torch.sqrt(fmasks.shape[0] * c_weights / c_weights.sum()).unsqueeze(1)
     Xw = fmasks * weights
     Yw = Y * weights[:,0]
     XTXw = Xw.T @ Xw 
@@ -700,7 +705,7 @@ class CompExpCreator:
         all_masks_list = []
         all_pred_list = []
 
-        parts = list(zip(self.segsize, self.nmasks, self.pprob))
+        parts = list(zip(self.segsize, self.nmasks, self.pprob))        
         for segsize, nmasks, pprob  in parts:
             mgen = MaskedRespGen(segsize, mgen=self.mgen, baseline=baseline, ishape=me.shape, prob=pprob)            
             logging.debug(f"generating {nmasks} masks and responses")
@@ -790,7 +795,8 @@ class MultiCompExpCreator:
                  batch_size=32,
                  desc="MComp",
                  pprob = [None],
-                 groups=[]):        
+                 groups=[], 
+                 acargs={}):
         self.mask_groups = mask_groups
         self.batch_size = batch_size
         self.baselines = baselines
@@ -798,6 +804,7 @@ class MultiCompExpCreator:
         self.desc = desc
         self.last_data = None
         self.pprob = pprob
+        self.acargs = acargs
         logging.info("MultiCompExpCreator")
 
     def __call__(self, me, inp, catidx):        
@@ -815,25 +822,29 @@ class MultiCompExpCreator:
                 for segsize, mlimit in seglimit.items():
                     if pprob is None:
                         tn = AutoCompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
-                                           baseline_gen=bgen)
+                                           baseline_gen=bgen, **self.acargs)
                         selected_pprob = tn.tune_pprob(segsize, me, inp, catidx)                        
                     else:
                         selected_pprob = pprob
                     
+                    mgen = None
+                    if segsize < 0:
+                        mgen = SegMaskGen(inp, -segsize)
                     dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
-                                        baseline_gen=bgen, pprob=selected_pprob)
+                                        baseline_gen=bgen, pprob=selected_pprob, mgen=mgen)
                     
                     seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
                 
                 for nm, maskspec in self.mask_groups.items():
                     logging.info(f"mask: {nm} {maskspec}")
                     data = MaskedRespData.join([seg_masks[segsize].subset(nmasks) for segsize, nmasks in maskspec.items()])
-                    
-                    desc = self.desc + nm + bgen.desc                
+                                                            
                     # self.last_data = data
                     for kwargs in self.groups:
-                        group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size, desc=desc)
+                        group_args = dict(nmasks=nmasks, segsize=segsize, batch_size=self.batch_size)
                         group_args.update(kwargs)                        
+                        group_args['desc'] = self.desc + nm +  group_args.get('desc', '') + bgen.desc
+
                         algo = CompExpCreator(**group_args, ext_desc=f"{bgen.desc}{pprob}")
                         res = algo(me, inp, catidx, data=data)
                         all_sals.update(res)
@@ -842,7 +853,11 @@ class MultiCompExpCreator:
         return all_sals
 
 
-class ProbSqMaskGen(SqMaskGen):
+class ProbSqMaskGen:
+
+    def __init__(self, inner, prob):
+        self.prob = prob
+        self.inner = inner
 
     def gen_masks(self, nmasks):        
         probs = self.prob[0:nmasks]
@@ -852,10 +867,13 @@ class ProbSqMaskGen(SqMaskGen):
         all_masks = []
         all_indexes = []
         total_masks = 0
+        idx = 0
         while total_masks < nmasks:
             #print("@@@", probs)
+            #print("itr", idx)
+            idx += 1
             remaining_masks = (nmasks - total_masks)
-            masks = (self.gen_masks_cont(remaining_masks) < probs.unsqueeze(1).unsqueeze(1) )
+            masks = (self.inner.gen_masks_cont(remaining_masks) < probs.unsqueeze(1).unsqueeze(1) )
             is_valid = (masks.flatten(start_dim=1).sum(dim=1) > 0)
             num_valid = int(is_valid.sum())
             if num_valid == 0:
@@ -879,12 +897,19 @@ class ProbSqMaskGen(SqMaskGen):
 
 class AutoCompExpCreator:
 
-    def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, tune_single_pass=True, **kwargs):
+    def __init__(self, nmasks=[1000], segsize=[32], cap_response=False, tune_single_pass=True, 
+                main_probs = [0.3, 0.4, 0.5, 0.6, 0.7],
+                extra_probs = [0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8],
+                sampsize = 50,
+                 **kwargs):
         self.nmasks = nmasks
         self.segsize = segsize        
         self.kwargs = kwargs
         self.cap_response = cap_response
         self.tune_single_pass = tune_single_pass
+        self.main_probs =  main_probs
+        self.extra_probs = extra_probs
+        self.sampsize = sampsize
         
     
     def __call__(self, me, inp, catidx, callback=None, return_algo=True):
@@ -903,7 +928,8 @@ class AutoCompExpCreator:
         report_duration(start_time, me.arch, "SLOC")
         return rv
 
-    def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=50):
+    def get_prob_score(self, pprob, segsize, me, inp, catidx, sampsize=None):
+        sampsize = sampsize or self.sampsize
         #logging.info(f"get_prob_score: {segsize}, {sampsize}, {pprob}")
         algo = CompExpCreator(desc="gen", segsize=segsize, nmasks=sampsize, cap_response=self.cap_response, pprob=pprob)    
         data = algo.generate_data(me, inp, catidx)         
@@ -915,11 +941,17 @@ class AutoCompExpCreator:
         return torch.tensor([pscore(x) for x in probs])
 
     def get_prob_score_list(self, pprob, segsize, me, inp, catidx, sampsize=50):
+        #print("Checking", segsize, pprob)
         prob_list = []
         for x in pprob:
             prob_list += ([x] * sampsize)
 
-        mgen = ProbSqMaskGen(segsize=segsize, mshape=me.shape, prob=torch.Tensor(prob_list))
+        if segsize > 0: 
+            inner = SqMaskGen(segsize=segsize, mshape=me.shape)
+        else:
+            inner = SegMaskGen(inp, n_segments=-segsize)
+        mgen = ProbSqMaskGen(inner, prob=torch.Tensor(prob_list))
+        
         algo = CompExpCreator(desc="gen", segsize=[segsize], nmasks=[sampsize*len(pprob)], mgen=mgen,
                               pprob=[torch.Tensor(prob_list)], batch_size=len(prob_list))    
         data = algo.generate_data(me, inp, catidx)  
@@ -933,11 +965,11 @@ class AutoCompExpCreator:
     def tune_pprob(self, segsize, me, inp, catidx, single_pass=True):
         logging.info(f"tune_pprob: {segsize}")        
         pscore = lambda x: self.get_prob_score(x, segsize, me, inp, catidx)
-        main_probs = [0.3, 0.4, 0.5, 0.6, 0.7]
-        extra_probs = [0.2, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.8]
+        main_probs = self.main_probs
+        extra_probs = self.extra_probs
 
         if single_pass: 
-            main_probs += extra_probs
+            main_probs = main_probs + extra_probs
 
         main_scores = self.get_prob_score_list(main_probs, segsize, me, inp, catidx)
         
