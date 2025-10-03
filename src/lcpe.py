@@ -912,7 +912,7 @@ class AutoCompExpCreator:
         self.sampsize = sampsize
         
     
-    def __call__(self, me, inp, catidx, callback=None, return_algo=True):
+    def __call__(self, me, inp, catidx, callback=None, return_algo=False):
         start_time = time.time()
         pprob = [self.tune_pprob(segsize, me, inp, catidx) for segsize in self.segsize]
         logging.info(f"selected probs: ARCH,{me.arch},SEG,{','.join(map(str,self.segsize))},PROB,{','.join(map(str,pprob))}")
@@ -985,6 +985,7 @@ class AutoCompExpCreator:
             all_scores = torch.concat([main_scores, aux_scores])
 
         rv = float(all_probs[int(all_scores.argmax())])
+        print(f"tuned: {segsize} - > {rv}")
         return rv
 
 class MulCompExpCreator(AutoCompExpCreator):

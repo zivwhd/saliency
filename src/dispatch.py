@@ -182,16 +182,12 @@ def get_autols_sal_creator():
             mask_groups={f"Mix":{32:500, 56:500}},
             pprob=[None],
             baselines = [ZeroBaseline()],
-            groups=[
-                modify(),
-                modify(c_magnitude=200),
-                modify(c_magnitude=50),
-                modify(c_magnitude=10), 
-                modify(c_magnitude=1),
-                modify(c_tv=200),
-                modify(c_tv=50),
-                modify(c_tv=10),
-                modify(c_tv=1)                
+            groups=[                
+                modify(c_magnitude=45),
+                modify(c_magnitude=40),                
+                modify(c_magnitude=30),
+                modify(c_magnitude=20), 
+                modify(c_magnitude=25), 
             ])
     ])
 
