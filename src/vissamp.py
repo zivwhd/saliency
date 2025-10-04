@@ -110,9 +110,14 @@ else:
 
 #[(100, 100), (1,100), (10,100), (50,100), (200,100), (100,1), (100,10), (100,50), (100,200)]    
 methods = [
-    (f"LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv{tv}_mgn{mgn}_0")
+    (f"LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv{tv}_mgn{mgn}_0")    
     for tv, mgn in [(100,50)]
-] + [('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')]
+] 
+
+methods = [
+    ('SEG', 'SlocSegsGDZr_0')
+    ('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
+]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
