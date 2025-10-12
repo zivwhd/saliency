@@ -85,10 +85,12 @@ class MaskedRespGen:
         
         baseline = self.baseline.to(inp.device)
         
+        #print("###", inp.shape)
         for idx in tqdm(range(itr)):            
+            
             masks = self.mgen.gen_masks(batch_size)
             is_valid = (masks.flatten(start_dim=1).sum(dim=1) > 0)
-            #print(is_valid.shape, masks.shape)
+
             if (not any(is_valid)):
                 continue
             masks = masks[ is_valid ]
@@ -129,7 +131,7 @@ class TotalVariationLoss(nn.Module):
         return loss
 
 class MaskedExplanationSum(nn.Module):
-    def __init__(self, H=224, W=224, initial_value=None,):
+    def __init__(self, H=224, W=224, initial_value=None, with_bias=False):
         super(MaskedExplanationSum, self).__init__()
         # Initialize explanation with given initial value or zeros
         if initial_value is not None:
@@ -137,8 +139,16 @@ class MaskedExplanationSum(nn.Module):
         else:
             self.explanation = nn.Parameter(torch.zeros(H, W))
 
+        if with_bias:
+            self.bias = nn.Parameter(torch.zeros(1))
+            print("## with bias")
+        else:
+            self.bias = None
+
     def forward(self, x):
         y =  (x * self.explanation).flatten(start_dim=1).sum(dim=1)
+        if self.bias is not None:
+            y = y + self.bias
         return y
 
     def normalize(self, score):
@@ -183,6 +193,7 @@ def optimize_explanation_i(
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
         c_positive=0,
+        c_logistic=False,
         c_activation=None,
         c_norm=False,
         renorm=False, baseline=None, 
@@ -192,16 +203,16 @@ def optimize_explanation_i(
         c_opt="Adam"
         ):
     mse = nn.MSELoss()  # Mean Squared Error loss
-    bce = nn.BCELoss(reduction="mean")
+    lbce = nn.BCEWithLogitsLoss(reduction='none') 
     tv = TotalVariationLoss()
 
     if baseline is None:
         assert False ## no default
         baseline = torch.zeros(inp.shape).to(inp.device)
 
-    #print(list(model.parameters()))
+    
     logging.debug(f"### lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; avg_kernel_size={avg_kernel_size}")
-    print(f"## lr={lr}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_positive={c_positive}, c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation}; c_model={c_model}; c_opt={c_opt};")
+    print(f"## lr={lr}; c_logistic={c_logistic}; c_completeness={c_completeness}; c_tv={c_tv}; c_smoothness={c_smoothness}; c_positive={c_positive}, c_magnitude={c_magnitude}; avg_kernel_size={avg_kernel_size}; c_norm={c_norm}; c_activation={c_activation}; c_model={c_model}; c_opt={c_opt};")
 
     print("###", dict(epochs=epochs, lr=lr, score=score, 
         c_mask_completeness=c_mask_completeness, c_smoothness=c_smoothness, c_completeness=c_completeness, c_selfness=c_selfness,
@@ -209,7 +220,9 @@ def optimize_explanation_i(
         c_tv=c_tv, avg_kernel_size=avg_kernel_size, c_model=c_model,
         c_activation=c_activation, c_norm=c_norm, renorm=renorm,
         select_from=select_from, select_freq=select_freq, select_del=select_del))
-    
+
+    assert (not c_logistic)
+
     if c_opt=="Adam":
         optimizer = optim.Adam(mexp.parameters(), lr=lr)
     elif c_opt=="AdamW":
@@ -244,12 +257,15 @@ def optimize_explanation_i(
         output = mexp(data)
         explanation, sig = normalize_explanation(mexp.explanation, score, c_norm, c_activation)
         
-        comp_loss = (((output - targets) ** 2) / (mweights * explanation.numel())).mean()        
+        if c_logistic:
+            cl_weights = 1 / data.flatten(start_dim=1).sum(dim=1)
+            comp_loss = (lbce(output, targets) * cl_weights).mean()            
+            assert comp_loss >= 0
+        else:
+            comp_loss = (((output - targets) ** 2) / (mweights * explanation.numel())).mean()        
         
-        #comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()
-                
+        #comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()                
         #comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
-
 
         if c_completeness != 0:            
             explanation_sum = mexp.explanation.sum()
@@ -268,6 +284,7 @@ def optimize_explanation_i(
             tv_loss = tv(explanation)
         else:
             tv_loss = 0
+
 
         if c_model:
             if c_activation == "sigmoid":
@@ -353,11 +370,12 @@ def optimize_explanation_i(
 
 def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.0, 
                          epochs=0, model_epochs=0, c_model=0,
-                         c_activation=None, c_norm=False,                         
+                         c_activation=None, c_norm=False, c_logistic=False,
                          **kwargs):
     # Initialize the model with the given initial explanation
     shape = inp.shape[-2:]    
-    mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1])
+    assert (not c_logistic)
+    mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1], with_bias=c_logistic)
     mexp = mexp.to(data.device)
 
     if not c_activation:
@@ -367,7 +385,8 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
     if epochs > model_epochs:
         rv = optimize_explanation_i(
             fmdl, inp, mexp, data, targets, score=score, 
-            c_activation=c_activation, c_norm=c_norm, c_model=0, epochs=epochs-model_epochs, **kwargs)
+            c_activation=c_activation, c_norm=c_norm, c_logistic=c_logistic, 
+            c_model=0, epochs=epochs-model_epochs, **kwargs)
     
     mid_time = time.time()
     logging.info(f"Optimization I: {mid_time - start_time}")    
@@ -378,6 +397,7 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
             c_activation=c_activation, c_norm=c_norm,
             c_model=c_model, epochs=epochs, 
             start_epoch=(epochs-model_epochs),
+            c_logistic=c_logistic,
             **kwargs)                
         
     end_time = time.time()    
@@ -562,6 +582,7 @@ class CompExpCreator:
                  c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_magnitude=0, c_positive=0, c_norm=False, c_activation=False,
+                 c_logistic = False,
                  c_logit = False,
                  avg_kernel_size=(5,5),
                  select_from=100, select_freq=10, select_del=0.5,
@@ -575,7 +596,7 @@ class CompExpCreator:
                  baseline_gen = ZeroBaseline(),                 
                  ext_desc = "",
                  cap_response = False,
-                 force_desc = False,
+                 force_desc = False,                 
                  **kwargs):
         
         assert type(segsize) == type(nmasks)
@@ -615,13 +636,14 @@ class CompExpCreator:
         self.model_epochs = model_epochs
         self.desc = desc
         self.mgen = mgen        
-        self.cap_response = cap_response
+        self.cap_response = cap_response        
         self.baseline_gen = baseline_gen
         if self.model_epochs == 0 or self.c_model == 0:
             self.model_epochs = 0
             self.c_model = 0
         self.ext_desc = ext_desc
         self.force_desc = force_desc
+        self.c_logistic = c_logistic
 
 
     def description(self):
@@ -722,11 +744,14 @@ class CompExpCreator:
 
         device = me.device
 
-        if logit:
+        if self.c_logistic:
+            norm = lambda x: x
+        elif logit:
             norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
         elif self.cap_response:
             norm = lambda x: torch.maximum((x - baseline_score), torch.zeros(1).to(device)) * rfactor
         else:
+            print("## basic response")
             norm = lambda x: (x - baseline_score) * rfactor
                 
         added_score = norm(label_score)
@@ -758,8 +783,14 @@ class CompExpCreator:
         if initial is None:
             #initial = torch.rand(inp.shape[-2:]).to(inp.device)
             #initial = (torch.randn(224,224)*0.2+1).abs()
-            print("setting initial")            
-            initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
+            print("setting initial")
+            if self.c_logistic:
+                assert False
+                bs = torch.logit(data.label_score.cpu()) / (me.shape[0] * me.shape[1])
+                initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1) * bs                
+                print("logistic initial", initial.mean())
+            else:
+                initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
             #initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
 
         
@@ -774,6 +805,7 @@ class CompExpCreator:
                                     c_completeness=self.c_completeness, c_smoothness=self.c_smoothness, 
                                     c_tv=self.c_tv, c_selfness=self.c_selfness,
                                     c_mask_completeness=self.c_mask_completeness,
+                                    c_logistic=self.c_logistic,
                                     c_model=self.c_model,
                                     c_magnitude=self.c_magnitude,
                                     c_positive = self.c_positive,
