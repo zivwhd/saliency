@@ -14,7 +14,7 @@ from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, MulCompExpCreator, ProbRangeCompExpCreator, SegSlocExpCreator
-from msm import MsmExpCreator
+from msm import MsmExpCreator, SoftMsmExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
@@ -356,7 +356,7 @@ def get_abl3_sal_creator():
 
 
 def get_msm_sal_creator():
-    return SoftMsmExpCreator()
+    return SoftMsmExpCreator("Mix")
 
 def get_abl2_sal_creator(nmasks=1000):
 
