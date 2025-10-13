@@ -16,6 +16,7 @@ from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
 from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MulCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, SegSlocExpCreator
+from msm import MsmExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
@@ -303,6 +304,8 @@ def get_creators_abl():
 
 
 def get_creators(model_name):
+    
+    return MsmExpCreator(alphas=[0], blur_radius=[0])
 
     basic =  dict(
         desc="Auto", c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  

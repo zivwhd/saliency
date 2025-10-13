@@ -189,7 +189,8 @@ def main():
 
     elif args.explainer == "xMSM":
         from msm import MsmExpCreator
-        explainer = MsmExpCreator(alphas=[0], blur_radius=[0])
+        salc = MsmExpCreator(alphas=[0], blur_radius=[0])
+        explainer = STEAttributionExplainer(salc, me)        
 
 
     elif args.explainer == "xDIX":
