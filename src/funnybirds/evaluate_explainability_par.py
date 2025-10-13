@@ -24,7 +24,7 @@ parser.add_argument('--model', required=True,
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
                              'xGC', 'xLSC', 'xLC', 'aLSC', 'amLSC','mixLSC','mixSLOCxP','SlocSeg','xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
-                             'xDIXv'],
+                             'xDIXv', 'xMSM'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -186,6 +186,10 @@ def main():
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",        
         )   
         explainer = STEAttributionExplainer(salc, me)
+
+    elif args.explainer == "xMSM":
+        from msm import MsmExpCreator
+        explainer = MsmExpCreator(alphas=[0], blur_radius=[0])
 
 
     elif args.explainer == "xDIX":

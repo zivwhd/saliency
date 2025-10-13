@@ -49,7 +49,7 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, with_pos=False,  save_path=None):
+def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, with_pos=False,  save_path=None, pos=False):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
     slots = 3 + with_mask + with_pos
@@ -58,6 +58,8 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
     #mask = mask * (mask>0)
     if mag:
         sal = torch.max(torch.min(sal, torch.quantile(sal,0.99)), torch.quantile(sal,0.01))
+    if pos:
+        sal = sal * (sal > 0)
     plt.subplot(1, slots, 3)
     plt.title(caption)
     plt.imshow(sal, cmap='jet')#cmap='RdBu')
@@ -100,9 +102,9 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
     else:
         plt.show()    
 
-def show_sal_dict(sals, img, mag=False):
+def show_sal_dict(sals, img, **kwargs):
     for name, sal in sals.items():
-        showsal(sal[0].cpu(), img, caption=name, mag=True)
+        showsal(sal[0].cpu(), img, caption=name, **kwargs)
 
 
 def show_single_sal(img, allsal, name=None, alpha=None, mag=False, grayscale=False, pos=False):
