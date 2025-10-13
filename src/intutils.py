@@ -49,7 +49,7 @@ def toquant(sal):
     quantiles = ranks.float() / (sal.numel() - 1)
     return quantiles.reshape(shape)
 
-def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, with_pos=False,  save_path=None, pos=False):
+def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=True, with_pos=False,  save_path=None, pos=False, cmap='jet'):
     #stdsal = np.array( ((sal - sal.min()) / (sal.max()-sal.min())).unsqueeze(-1)) 
     #stdsal = (stdsal > 0.7)
     slots = 3 + with_mask + with_pos
@@ -62,12 +62,12 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
         sal = sal * (sal > 0)
     plt.subplot(1, slots, 3)
     plt.title(caption)
-    plt.imshow(sal, cmap='jet')#cmap='RdBu')
+    plt.imshow(sal, cmap=cmap)#cmap='RdBu')
     plt.xticks([])  
     plt.yticks([])
     plt.subplot(1, slots, 2)
     plt.imshow(img)    
-    plt.imshow(sal, cmap='jet', alpha=alpha)  # Set alpha for transparency
+    plt.imshow(sal, cmap=cmap, alpha=alpha)  # Set alpha for transparency
     plt.xticks([])  
     plt.yticks([])
     
@@ -93,7 +93,7 @@ def showsal(sal, img, caption="", quantile=0, mag=True, alpha=0.6, with_mask=Tru
         plt.subplot(1, slots, 4)
         msk = mask.unsqueeze(-1).numpy()
         pos = (osal > 0)
-        plt.imshow(pos, cmap='jet')
+        plt.imshow(pos, cmap=cmap)
         plt.xticks([])  
         plt.yticks([])
 
