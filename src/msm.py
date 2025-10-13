@@ -270,7 +270,7 @@ class MarginalStructuralExplanation:
 class MsmExpCreator(MarginalStructuralExplanation):
     
     def __init__(self, nsegs=100, nmasks=1500, 
-                 prob=0.5,
+                 prob=0.5, patchsize=0,
                  alphas=[0, 0.0001, 0.0005], 
                  blur_radius=[0, 0.5, 1]):
         
@@ -279,14 +279,16 @@ class MsmExpCreator(MarginalStructuralExplanation):
         self.nmasks = nmasks
         self.alphas = alphas
         self.blur_radius = blur_radius
+        self.patchsize = patchsize
 
 
     def __call__(self, me, inp, catidx):
         shape = inp.shape[-2:]
         res = {}
         sga = self.get_segments(inp, self.nsegs)
+        print(f"actual nseg: {sga.nelm}")
         assignments, _base, _masks, pred = self.generate_assignment_pred(me, inp, catidx, sga, self.nmasks, 
-                                                                         prob=self.prob, patchsize=0)
+                                                                         prob=self.prob, patchsize=self.patchsize)
         
         for alpha in self.alphas:
             _attr, exp = self.solve(sga, assignments, pred, with_bias=True, alpha=alpha)
@@ -297,6 +299,8 @@ class MsmExpCreator(MarginalStructuralExplanation):
                     texp = self.gaussian_blur_torch(exp, radius)
 
                 desc = f"Msm{self.nsegs}x{self.nmasks}x{self.prob}"
+                if self.patchsize:
+                    desc += f"s{self.patchsize}"
                 if alpha:
                     desc += f"a{alpha}"
                 if br:

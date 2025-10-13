@@ -335,7 +335,7 @@ def main():
         report('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(accuracy, round(csdc[best_threshold],5), round(pc[best_threshold],5), 
                                                        round(dc[best_threshold],5), round(distractibility[best_threshold],5), 
                                                        background_independence, sd, ts))
-        report('Best threshold:', best_threshold)
+        report(f'Best threshold: {best_threshold}')
 
     print("Done all")
     res_list = ["accuracy","csdc","ts","sd","pc","dc","distractibility","background_independence"]
