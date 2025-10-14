@@ -310,7 +310,7 @@ class SoftMsmExpCreator(MarginalStructuralExplanation):
 
         self.desc = desc
         self.patches = patches
-        prob=0.5,
+        self.prob=prob
         self.nsegs = nsegs
         self.alphas = alphas
         self.l1wt = l1wt
@@ -321,7 +321,7 @@ class SoftMsmExpCreator(MarginalStructuralExplanation):
         mask_list, pred_list = [], []
         mse = MarginalStructuralExplanation()
         for patchsize, nmasks in self.patches.items():
-            masks, pred = mse.generate_mask_pred(me,inp,catidx, nmasks=nmasks,patchsize=patchsize)
+            masks, pred = mse.generate_mask_pred(me,inp,catidx, nmasks=nmasks,patchsize=patchsize,prob=self.prob)
             mask_list.append(masks)
             pred_list.append(pred)
 
