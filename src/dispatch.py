@@ -356,7 +356,7 @@ def get_abl3_sal_creator():
 
 
 def get_msm_sal_creator():
-    return SoftMsmExpCreator("Mix")
+    return MsmExpCreator(200, 2000)
 
 def get_abl2_sal_creator(nmasks=1000):
 

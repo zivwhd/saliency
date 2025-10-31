@@ -192,7 +192,8 @@ def optimize_explanation_i(
         c_magnitude=0,
         c_tv=0, avg_kernel_size=(5,5),
         c_model=0,
-        c_positive=0,
+        c_positive=0,        
+        c_compliment=False,
         c_logistic=False,
         c_activation=None,
         c_norm=False,
@@ -200,7 +201,7 @@ def optimize_explanation_i(
         callback=None, 
         select_from=None, select_freq=10, select_del=0.5,
         start_epoch=0,
-        c_opt="Adam"
+        c_opt="Adam"        
         ):
     mse = nn.MSELoss()  # Mean Squared Error loss
     lbce = nn.BCEWithLogitsLoss(reduction='none') 
@@ -244,6 +245,7 @@ def optimize_explanation_i(
     avg_kernel = avg_kernel / avg_kernel.numel()
 
     mweights = data.flatten(start_dim=1).sum(dim=1) * 2
+    compliment_mweights = (1-data*1.0).flatten(start_dim=1).sum(dim=1) * 2
     #mweights = mexp.explanation.numel()
 
     metric_steps = torch.tensor([0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]).to(inp.device)
@@ -264,6 +266,12 @@ def optimize_explanation_i(
         else:
             comp_loss = (((output - targets) ** 2) / (mweights * explanation.numel())).mean()        
         
+        if c_compliment:
+            compliment_targets = score - targets
+            compliment_output = mexp(1 - data*1.0)
+            compliment_comp_loss = (((compliment_output - compliment_targets) ** 2) / (compliment_mweights * explanation.numel())).mean()        
+            comp_loss += compliment_comp_loss
+
         #comp_loss = (((output / mweights) - (targets / mweights)) ** 2).mean()                
         #comp_loss = mse(output/explanation.numel(), targets/explanation.numel())
 
@@ -272,6 +280,8 @@ def optimize_explanation_i(
             explanation_loss = mse(explanation_sum/explanation.numel(), score/ explanation.numel())             
         else:
             explanation_loss = 0
+
+        
         
         conv_loss = 0
         if c_smoothness != 0:                
@@ -582,6 +592,7 @@ class CompExpCreator:
                  c_mask_completeness=1.0, c_completeness=0.1, 
                  c_smoothness=0, c_selfness=0.0, c_tv=1,
                  c_magnitude=0, c_positive=0, c_norm=False, c_activation=False,
+                 c_compliment=False,
                  c_logistic = False,
                  c_logit = False,
                  avg_kernel_size=(5,5),
@@ -623,6 +634,7 @@ class CompExpCreator:
         self.c_logit = c_logit
         self.c_magnitude = c_magnitude        
         self.c_positive = c_positive        
+        self.c_compliment = c_compliment
         self.c_opt = c_opt
         self.c_sample = 0.5
         self.lr = lr
@@ -689,6 +701,9 @@ class CompExpCreator:
 
             if self.c_positive:
                 desc += f"_p{self.c_positive}"
+
+            if self.c_compliment:
+                desc += f"_C"
 
             if self.c_model:
                 desc += f"_mdl{self.c_model}"
@@ -790,8 +805,12 @@ class CompExpCreator:
                 initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1) * bs                
                 print("logistic initial", initial.mean())
             else:
-                initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
-            #initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
+                if self.c_compliment:
+                    initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
+                    initial = initial *  data.added_score.cpu() / initial.sum()
+                else:                
+                    initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1)
+                    #initial = (torch.randn(me.shape[0],me.shape[1])*0.2+3)
 
         
         if self.epochs:
@@ -809,6 +828,7 @@ class CompExpCreator:
                                     c_model=self.c_model,
                                     c_magnitude=self.c_magnitude,
                                     c_positive = self.c_positive,
+                                    c_compliment = self.c_compliment,
                                     c_norm=self.c_norm, c_activation=self.c_activation,
                                     baseline=data.baseline, callback=callback)
         else:
