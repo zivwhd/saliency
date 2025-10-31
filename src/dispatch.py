@@ -356,7 +356,7 @@ def get_abl3_sal_creator():
 
 
 def get_msm_sal_creator():
-    return MsmExpCreator(200, 2000)
+    return MsmExpCreator(50, 1000, alphas=[0])
 
 def get_abl2_sal_creator(nmasks=1000):
 
