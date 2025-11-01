@@ -154,6 +154,7 @@ class MarginalStructuralExplanation:
         pred_list = []
         mask_list = []
         print(f"## generating {nmasks} masks and responses")
+        baseline = torch.rand(inp.shape).to(inp.device)
         while total < nmasks:
             cbs = min(batch_size, nmasks - total)
             masks = mgen.gen_masks_cont(cbs)
@@ -162,7 +163,7 @@ class MarginalStructuralExplanation:
                 continue
             masks = masks[is_valid]
             dmasks = masks.to(inp.device).float()
-            pert_inp = inp * dmasks.unsqueeze(1) ##  baseline * (1.0-dmasks.unsqueeze(1))
+            pert_inp = inp * dmasks.unsqueeze(1)  +  0 * (1.0-dmasks.unsqueeze(1))
             out = model(pert_inp) ## CHNG
             mout = out.clone().detach().cpu()
             pred_list.append(mout)
@@ -234,12 +235,13 @@ class MarginalStructuralExplanation:
         
         print(f"## fitting: bias={with_bias}; alpha={alpha}")
 
-        Y = pred
+        Y = (pred)
         X = assignments * 1.0
         if with_bias:
             X = torch.concat([torch.ones(X.shape[0],1), X], dim=1)
 
         gmdl = sm.GLM(Y.numpy(), X.numpy(), family=sm.families.Binomial())
+        #gmdl = sm.GLM(Y.numpy(), X.numpy(), family=sm.families.Gaussian())
         
         if alpha:
             results = gmdl.fit_regularized(
@@ -348,7 +350,7 @@ class MsmExpCreator(MarginalStructuralExplanation):
     
     def __init__(self, nsegs=100, nmasks=1500, 
                  prob=0.5, patchsize=0,
-                 alphas=[0, 0.05, 0.1, 0.5, 1], 
+                 alphas=[0], 
                  l1wt=0,
                  blur_radius=[0]):
         
@@ -370,7 +372,7 @@ class MsmExpCreator(MarginalStructuralExplanation):
                                                                          prob=self.prob, patchsize=self.patchsize)
         
         for alpha in self.alphas:
-            _attr, exp = self.solve(sga, assignments, pred, with_bias=True, alpha=alpha, l1wt=self.l1wt)
+            _attr, exp = self.solve(sga, assignments, pred, with_bias=True, alpha=alpha, l1wt=self.l1wt)            
             for br in self.blur_radius:
                 texp = exp
                 if br:

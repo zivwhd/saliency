@@ -222,7 +222,7 @@ def optimize_explanation_i(
         c_activation=c_activation, c_norm=c_norm, renorm=renorm,
         select_from=select_from, select_freq=select_freq, select_del=select_del))
 
-    assert (not c_logistic)
+    #assert (not c_logistic)
 
     if c_opt=="Adam":
         optimizer = optim.Adam(mexp.parameters(), lr=lr)
@@ -384,7 +384,7 @@ def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.
                          **kwargs):
     # Initialize the model with the given initial explanation
     shape = inp.shape[-2:]    
-    assert (not c_logistic)
+    #assert (not c_logistic)
     mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1], with_bias=c_logistic)
     mexp = mexp.to(data.device)
 
@@ -761,6 +761,7 @@ class CompExpCreator:
 
         if self.c_logistic:
             norm = lambda x: x
+            print("No normalization for logistic")
         elif logit:
             norm = lambda x: (torch.logit(x) + torch.log((1-baseline_score)/baseline_score)) * rfactor
         elif self.cap_response:
@@ -800,7 +801,7 @@ class CompExpCreator:
             #initial = (torch.randn(224,224)*0.2+1).abs()
             print("setting initial")
             if self.c_logistic:
-                assert False
+                #assert False
                 bs = torch.logit(data.label_score.cpu()) / (me.shape[0] * me.shape[1])
                 initial = (torch.randn(me.shape[0],me.shape[1])*0.1+1) * bs                
                 print("logistic initial", initial.mean())
@@ -883,7 +884,7 @@ class MultiCompExpCreator:
                     if segsize < 0:
                         mgen = SegMaskGen(inp, -segsize)
                     dc = CompExpCreator(nmasks=mlimit, segsize=segsize, batch_size=self.batch_size,
-                                        baseline_gen=bgen, pprob=selected_pprob, mgen=mgen)
+                                        baseline_gen=bgen, pprob=selected_pprob, mgen=mgen, **self.acargs)
                     
                     seg_masks[segsize] = dc.generate_data(me, inp, catidx)            
                 
