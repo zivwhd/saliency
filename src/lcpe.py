@@ -308,7 +308,11 @@ def optimize_explanation_i(
             model_loss = 0
 
         if c_magnitude != 0:
-            magnitude_loss = mexp.explanation.abs().mean()
+            if not c_logistic:
+                magnitude_loss = mexp.explanation.abs().mean()
+            else:
+                magnitude_loss = (mexp.explanation *  mexp.explanation).mean()
+
         else:
             magnitude_loss = 0
 

@@ -356,7 +356,26 @@ def get_abl3_sal_creator():
 
 
 
+
 def get_msm_sal_creator():
+    return MultiCompExpCreator(
+        desc="Lgstc",
+        mask_groups={f"My":{-20:400, 16:500, 40:300, 64:200} },            
+                baselines = [ZeroBaseline()],
+                pprob=[0.5],
+                acargs=dict(c_logistic=True),
+                groups=[
+                    dict(        
+                        desc="ALog", c_opt="Adam",
+                        select_from=None,  c_positive=0, 
+                        c_completeness=0, c_model=0.0, c_norm=False,  c_activation="",
+                        #force_desc=True,
+                        c_mask_completeness=1, c_magnitude=50, c_smoothness=0, c_tv=100, c_logistic=True,
+                        lr=0.001, lr_step=40, lr_step_decay=0.9, epochs=500
+                    ),
+
+                ])    
+
     algo = MultiCompExpCreator(
         desc="Logistic",
         mask_groups={f"Mx":{-20:200, 16:1000} },            
