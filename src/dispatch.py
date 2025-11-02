@@ -357,7 +357,7 @@ def get_abl3_sal_creator():
 
 
 
-def get_msm_sal_creator():
+def get_msml_sal_creator():
 
     basic=dict(        
             desc="MsmLog", c_opt="Adam",
