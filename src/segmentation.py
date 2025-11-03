@@ -305,7 +305,7 @@ def get_creators_abl():
 
 def get_creators(model_name):
     
-    return MsmExpCreator(alphas=[0], blur_radius=[0])
+    #return MsmExpCreator(alphas=[0], blur_radius=[0])
 
     basic =  dict(
         desc="Auto", c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
@@ -342,6 +342,31 @@ def get_creators(model_name):
         c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",        
     )
 
+
+def get_creators(model_name):
+    basic =  dict(
+        desc="Auto", c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+        epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+
+        c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        force_desc=True
+    )
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+    algo = MultiCompExpCreator(
+        desc="Sloc",            
+        mask_groups={
+            f"SegsHigh":{-20:200, -40:400, -60:400} 
+        },
+        pprob=[None],
+        baselines = [ZeroBaseline()],
+        groups=[modify(desc="LS", epochs=None, c_tv=100, c_magnitude=50 )],
+        acargs=dict(main_probs=[0.3,0.4,0.5,0.6,0.7,0.8], extra_probs=[], sampsize=40)
+        )
+    return algo
 
 def get_creators_old(model_name):
     return get_creators_cnn()
