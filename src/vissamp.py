@@ -115,7 +115,7 @@ methods = [
 ] 
 
 methods = [
-    ('SEG', 'SlocSegsHighLSZr_0_0'),
+    ('SEG', 'SlocSegsHighLSZr_0'),
     ('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
 ]
 
