@@ -384,12 +384,13 @@ def optimize_explanation_i(
 
 def optimize_explanation(fmdl, inp, initial_explanation, data, targets, score=1.0, 
                          epochs=0, model_epochs=0, c_model=0,
-                         c_activation=None, c_norm=False, c_logistic=False,
+                         c_activation=None, c_norm=False, 
+                         c_logistic=False, c_with_bias=False,
                          **kwargs):
     # Initialize the model with the given initial explanation
     shape = inp.shape[-2:]    
     #assert (not c_logistic)
-    mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1], with_bias=c_logistic)
+    mexp = MaskedExplanationSum(initial_value=initial_explanation, H=shape[0], W=shape[1], with_bias=(c_logistic or c_with_bias))
     mexp = mexp.to(data.device)
 
     if not c_activation:
@@ -598,6 +599,7 @@ class CompExpCreator:
                  c_magnitude=0, c_positive=0, c_norm=False, c_activation=False,
                  c_compliment=False,
                  c_logistic = False,
+                 c_with_bias = False,
                  c_logit = False,
                  avg_kernel_size=(5,5),
                  select_from=100, select_freq=10, select_del=0.5,
@@ -660,6 +662,7 @@ class CompExpCreator:
         self.ext_desc = ext_desc
         self.force_desc = force_desc
         self.c_logistic = c_logistic
+        self.c_with_bias = c_with_bias
 
 
     def description(self):
@@ -830,6 +833,7 @@ class CompExpCreator:
                                     c_tv=self.c_tv, c_selfness=self.c_selfness,
                                     c_mask_completeness=self.c_mask_completeness,
                                     c_logistic=self.c_logistic,
+                                    c_with_bias=self.c_with_bias,
                                     c_model=self.c_model,
                                     c_magnitude=self.c_magnitude,
                                     c_positive = self.c_positive,

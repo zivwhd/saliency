@@ -154,6 +154,22 @@ def get_autoncomp_sal_creator():
 
     ])
 
+def get_bsloc_sal_creator():
+
+    return MultiCompExpCreator(
+            desc="BSLOC",            
+            mask_groups={f"Mix":{32:500, 56:500}},
+            pprob=[None],
+            baselines = [ZeroBaseline()],
+            groups=[
+                dict(
+                    desc="Auto", c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+                    epochs=501, select_from=None, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+                    c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="", c_with_bias=True,
+                ),
+            ]
+        )
+
 def get_segsloc_sal_creator():
     #return SegSlocExpCreator(
     #    desc = "SegMultiPos", seg_list=[(20,200,0.5),(40,400,0.5),(60,400,0.5)],
