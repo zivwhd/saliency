@@ -115,8 +115,9 @@ methods = [
 ] 
 
 methods = [
-    ('SEG', 'SlocSegsHighLSZr_0'),
-    ('..SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
+    ('.','SEG', 'SlocSegsHighLSZr_0'),
+    ("../saliency.run", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0")    
+    ('../saliency','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
 ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
@@ -158,9 +159,9 @@ for imgidx, image_info in enumerate(all_images):
     plt.figtext(0.124, 0.5, caption,  va='center', ha='right',  rotation='vertical', fontsize=fontsize)
 
 
-    for method_name, variant in methods:
+    for base_path, method_name, variant in methods:
         logging.info(f"method: {method_name} - {variant}")
-        result_path = os.path.join("results", model_name, "saliency", variant, image_info.name)
+        result_path = os.path.join(base_path, "results", model_name, "saliency", variant, image_info.name)
         if method_name.startswith('..'):
             result_path = '../saliency/' + result_path
         logging.info(f"loading {result_path}")
