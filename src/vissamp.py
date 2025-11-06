@@ -131,6 +131,7 @@ all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
 all_image_names = set(all_images_dict.keys())
 
 
+
 def vhandle(imgidx, image_info):
     logging.info(f"[{imgidx}] image: {image_info}")
     image_path = image_info.path
@@ -166,7 +167,8 @@ def vhandle(imgidx, image_info):
         if method_name.startswith('..'):
             result_path = '../saliency/' + result_path
         logging.info(f"loading {result_path}")
-        assert os.path.isfile(result_path)
+        if not os.path.isfile(result_path):
+            raise FileNotFoundError(f"not found: {result_path}")
         sal = torch.load(result_path).float()
         logging.info(f"loaded {sal.shape}")
         plt.subplot(1, len(methods)+1, idx)         
@@ -187,5 +189,5 @@ def vhandle(imgidx, image_info):
 for imgidx, image_info in enumerate(all_images):
     try:
         vhandle(imgidx, image_info)
-    except:
+    except FileNotFoundError:
         logging.exception("error")
