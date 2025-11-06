@@ -130,7 +130,8 @@ all_images_dict = isrc.get_all_images()
 all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
 all_image_names = set(all_images_dict.keys())
 
-for imgidx, image_info in enumerate(all_images):
+
+def vhandle(imgidx, image_info):
     logging.info(f"[{imgidx}] image: {image_info}")
     image_path = image_info.path
     image_name = image_info.name
@@ -183,4 +184,8 @@ for imgidx, image_info in enumerate(all_images):
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    
 
-
+for imgidx, image_info in enumerate(all_images):
+    try:
+        vhandle(imgidx, image_info)
+    except:
+        logging.exception("error")
