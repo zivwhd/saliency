@@ -398,18 +398,18 @@ def get_msml_sal_creator():
 
     return MultiCompExpCreator(
         desc="MsmLog",
-        mask_groups={f"Eq":{32:500, 56:500} },            
+        mask_groups={f"Ev":{32:500, 56:300} },            
                 baselines = [ZeroBaseline()],
                 pprob=[None],
                 acargs=dict(c_logistic=True),
                 groups=[                    
                     modify(),
-                    modify(epochs=1000, desc="Epc"),
-                    modify(c_tv=200),
+                    #modify(epochs=1000, desc="Epc"),
+                    #modify(c_tv=200),
                     #modify(c_tv=400),                    
                     #modify(c_tv=600),
-                    modify(c_magnitude=10),
-                    modify(c_magnitude=100),
+                    #modify(c_magnitude=10),
+                    #modify(c_magnitude=100),
                     #modify(c_magnitude=400),
                 ])    
 
