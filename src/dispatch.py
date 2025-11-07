@@ -388,7 +388,7 @@ def get_msml_sal_creator():
             c_completeness=0, c_model=0.0, c_norm=False,  c_activation="",
             #force_desc=True,
             c_mask_completeness=1, c_magnitude=50, c_smoothness=0, c_tv=100, c_logistic=True,
-            lr=0.001, lr_step=40, lr_step_decay=0.9, epochs=500
+            lr=0.01, lr_step=45, lr_step_decay=0.9, epochs=500
     )    
 
     def modify(**kwargs):
@@ -398,7 +398,7 @@ def get_msml_sal_creator():
 
     return MultiCompExpCreator(
         desc="MsmLog",
-        mask_groups={f"My":{32:500, 56:300} },            
+        mask_groups={f"Eq":{32:500, 56:500} },            
                 baselines = [ZeroBaseline()],
                 pprob=[None],
                 acargs=dict(c_logistic=True),
