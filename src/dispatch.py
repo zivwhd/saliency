@@ -403,6 +403,7 @@ def get_msml_sal_creator():
                 pprob=[None],
                 acargs=dict(c_logistic=True),
                 groups=[                    
+                    modify(),
                     modify(lr=0.01, desc="LowLR"),
                     modify(epochs=1000, desc="Epc"),
                     modify(c_tv=200),
