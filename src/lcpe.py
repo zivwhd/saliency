@@ -57,6 +57,43 @@ class SegMaskGen:
         #print(self.nelm, rnd.shape, self.segments.shape, len(self.segments.unique()), len(parts.unique()))
         return rnd[parts.view(-1)].view(parts.shape)
 
+class MixMaskGen:
+    
+    def __init__(self, inp, n_segments, blob_n_segments, efactor=3, prob=0.5):
+        base = inp[0].cpu().numpy().transpose(1,2,0)
+        self.segments = torch.tensor(slic(base,n_segments=n_segments,compactness=10,sigma=1), dtype=torch.int32)
+        
+        self.mshape = (inp.shape[2], inp.shape[3])
+        self.wide_shape = (inp.shape[2]* efactor, inp.shape[3]*efactor, inp.shape[1])
+        seed = torch.rand(self.wide_shape)
+        self.blob_n_segments = blob_n_segments * efactor * efactor
+        self.blob_segments = slic(seed,n_segments=self.blob_n_segments, compactness=1, sigma=20)
+        self.n_segments = n_segments        
+        self.prob = prob
+        print("init done")
+
+    def gen_masks(self, nmasks):
+        return (self.gen_masks_cont(nmasks) < self.prob)
+
+    def gen_masks_cont(self, nmasks):
+        res = []
+
+        offs = 2
+        nelm = self.n_segments * (self.blob_n_segments + offs)
+        blob_segments = self.blob_segments
+        height, width= self.mshape
+        for idx in range(nmasks):
+            w_crop = torch.randint(blob_segments.shape[1]- width-1, (1,))
+            h_crop = torch.randint(blob_segments.shape[0]- height-1, (1,))
+            wseg = blob_segments[h_crop[0]:height + h_crop[0], w_crop[0]:width + w_crop[0]]
+
+            #print(width, height, wseg.shape, blob_segments.shape)
+            comb_seg = self.segments * (self.blob_n_segments + offs) + wseg
+            rnd = torch.rand(2+nelm)
+            seg = rnd[comb_seg.view(-1)].view(comb_seg.shape)
+            res.append(seg)
+        return torch.stack(res)
+
 
 class MaskedRespGen:
     def __init__(self, segsize=48, ishape = (224,224),
