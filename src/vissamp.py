@@ -4,6 +4,7 @@ from PIL import Image
 import matplotlib
 from matplotlib import pyplot as plt
 import glob,os,logging,json,argparse
+import random
 
 matplotlib.use('Agg')
 
@@ -115,9 +116,10 @@ methods = [
 ] 
 
 methods = [
-    ('.','SEG', 'SlocSegsHighLSZr_0'),
-    ("../saliency.run", "LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),
     ('../saliency','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
+    ("../saliency.run", "LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),
+    ('.','SEG', 'SlocSegsHighLSZr_0'),
+    ('.','SEG', 'SlocSqSegsHighLSZr_0')        
 ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
@@ -127,7 +129,9 @@ figsize=(10,10)
 fontsize=4 #9
 
 all_images_dict = isrc.get_all_images()
-all_images = sorted(list(all_images_dict.values()), key=lambda x:x.name)
+all_images = list(all_images_dict.values())
+random.shuffle(all_images)
+
 all_image_names = set(all_images_dict.keys())
 
 
@@ -160,6 +164,14 @@ def vhandle(imgidx, image_info):
         caption = str(args.variant)
     plt.figtext(0.124, 0.5, caption,  va='center', ha='right',  rotation='vertical', fontsize=fontsize)
 
+    base_path = args.dir
+    if args.variant:    
+        save_path = f"{base_path}/{model_name}/{args.variant}/{image_name}.png"
+    else:
+        save_path = f"{base_path}/{model_name}/{image_name}.png"
+
+    if os.path.isfile(save_path):
+        return
 
     for base_path, method_name, variant in methods:
         logging.info(f"method: {method_name} - {variant}")
@@ -177,11 +189,6 @@ def vhandle(imgidx, image_info):
         show_single_sal(img, {method_name : sal}, method_name, alpha=0.6, mag=False, pos=args.pos)
         plt.title(method_name, fontsize=fontsize)
     
-    base_path = args.dir
-    if args.variant:    
-        save_path = f"{base_path}/{model_name}/{args.variant}/{image_name}.png"
-    else:
-        save_path = f"{base_path}/{model_name}/{image_name}.png"
     logging.info(f"saving: {save_path}")
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path, dpi=1200, bbox_inches='tight', transparent=False, pad_inches=0)    

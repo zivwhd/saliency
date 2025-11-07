@@ -388,7 +388,7 @@ def get_msml_sal_creator():
             c_completeness=0, c_model=0.0, c_norm=False,  c_activation="",
             #force_desc=True,
             c_mask_completeness=1, c_magnitude=50, c_smoothness=0, c_tv=100, c_logistic=True,
-            lr=0.01, lr_step=45, lr_step_decay=0.9, epochs=500
+            lr=0.001, lr_step=40, lr_step_decay=0.9, epochs=500
     )    
 
     def modify(**kwargs):
@@ -404,7 +404,6 @@ def get_msml_sal_creator():
                 acargs=dict(c_logistic=True),
                 groups=[                    
                     modify(),
-                    modify(lr=0.01, desc="LowLR"),
                     modify(epochs=1000, desc="Epc"),
                     modify(c_tv=200),
                     #modify(c_tv=400),                    
