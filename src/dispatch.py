@@ -398,7 +398,13 @@ def get_msml_sal_creator():
 
     return MultiCompExpCreator(
         desc="MsmLog",
-        mask_groups={f"Ev":{32:500, 56:300} },            
+        mask_groups={
+            f"Ev":{32:500, 56:300},
+            f"Ev2":{32:700, 56:300},
+            f"Ev3":{32:800, 56:200},
+            f"Ev4":{32:1000},
+
+            },            
                 baselines = [ZeroBaseline()],
                 pprob=[None],
                 acargs=dict(c_logistic=True),
