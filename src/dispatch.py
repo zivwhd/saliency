@@ -383,7 +383,7 @@ def get_abl3_sal_creator():
 def get_msml_sal_creator():
 
     basic=dict(        
-            desc="MsmLog", c_opt="Adam",
+            desc="MSMLog", c_opt="Adam",
             select_from=None,  c_positive=0, 
             c_completeness=0, c_model=0.0, c_norm=False,  c_activation="",
             #force_desc=True,
