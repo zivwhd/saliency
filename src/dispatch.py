@@ -406,11 +406,11 @@ def get_msml_sal_creator():
                     modify(lr=0.01, desc="LowLR"),
                     modify(epochs=1000, desc="Epc"),
                     modify(c_tv=200),
-                    modify(c_tv=400),
-                    modify(c_tv=600),
+                    #modify(c_tv=400),                    
+                    #modify(c_tv=600),
+                    modify(c_magnitude=10),
                     modify(c_magnitude=100),
-                    modify(c_magnitude=200),
-                    modify(c_magnitude=400),
+                    #modify(c_magnitude=400),
                 ])    
 
     algo = MultiCompExpCreator(
