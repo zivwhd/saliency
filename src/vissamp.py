@@ -119,7 +119,8 @@ methods = [
     ('../saliency','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
     ("../saliency.run", "LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),
     ('.','SEG', 'SlocSegsHighLSZr_0'),
-    ('.','SEG', 'SlocSqSegsHighLSZr_0')        
+    ('.','Mix', 'SlocSqSegsHighLSZr_0'),
+    ("../saliency.msm", "MSM", "MsmLogEv3MSMLogZrZrNone_1000_56_500_msk1_tv100_mgn50_0")        
 ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
