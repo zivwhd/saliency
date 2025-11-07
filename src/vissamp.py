@@ -116,7 +116,7 @@ methods = [
 ] 
 
 methods = [
-    ('../saliency','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0')
+    ('../saliency','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),
     ("../saliency.run", "LS", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),
     ('.','SEG', 'SlocSegsHighLSZr_0'),
     ('.','Mix', 'SlocSqSegsHighLSZr_0'),
