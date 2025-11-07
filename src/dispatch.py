@@ -402,8 +402,9 @@ def get_msml_sal_creator():
                 baselines = [ZeroBaseline()],
                 pprob=[None],
                 acargs=dict(c_logistic=True),
-                groups=[
-                    modify(),
+                groups=[                    
+                    modify(lr=0.01, desc="LowLR"),
+                    modify(epochs=1000, desc="Epc"),
                     modify(c_tv=200),
                     modify(c_tv=400),
                     modify(c_tv=600),
