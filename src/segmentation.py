@@ -369,6 +369,33 @@ def get_creators(model_name):
         )
     return algo
 
+def get_creators(model_name):
+    basic=dict(        
+            desc="MSMLog", c_opt="Adam",
+            select_from=None,  c_positive=0, 
+            c_completeness=0, c_model=0.0, c_norm=False,  c_activation="",
+            #force_desc=True,
+            c_mask_completeness=1, c_magnitude=50, c_smoothness=0, c_tv=100, c_logistic=True,
+            lr=0.001, lr_step=40, lr_step_decay=0.9, epochs=500
+    )    
+
+    def modify(**kwargs):
+        args = basic.copy()
+        args.update(**kwargs)
+        return args
+
+    return MultiCompExpCreator(
+        desc="MsmLog",
+        mask_groups={
+            f"Ev3":{32:800, 56:200},
+        },            
+        baselines = [ZeroBaseline()],
+        pprob=[None],
+        acargs=dict(c_logistic=True),
+        groups=[                    
+            modify(),
+                ])    
+    
 def get_creators_old(model_name):
     return get_creators_cnn()
     if 'resnet' in model_name or 'densenet' in model_name:
