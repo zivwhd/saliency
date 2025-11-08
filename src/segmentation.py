@@ -359,8 +359,9 @@ def get_creators(model_name):
     algo = MultiCompExpCreator(
         desc="Sloc",            
         mask_groups={
-            f"SegsHigh2":{-20:200, -40:400, -60:400},
-            f"SqSegsHigh":{-20:100, -40:200, -60:200, 32:250, 56:250},
+            f"RWLS":{ 32:500, 56:500},            
+            #f"SegsHigh2":{-20:200, -40:400, -60:400},
+            #f"SqSegsHigh":{-20:100, -40:200, -60:200, 32:250, 56:250},
         },
         pprob=[None],
         baselines = [ZeroBaseline()],
@@ -369,7 +370,7 @@ def get_creators(model_name):
         )
     return algo
 
-def get_creators(model_name):
+def get_creators_(model_name):
     basic=dict(        
             desc="MSMLog", c_opt="Adam",
             select_from=None,  c_positive=0, 
