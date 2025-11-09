@@ -303,7 +303,7 @@ def get_creators_abl():
     return CombSaliencyCreator(runs)
 
 
-def get_creators(model_name):
+def get_creators_(model_name):
     
     #return MsmExpCreator(alphas=[0], blur_radius=[0])
 
@@ -370,7 +370,7 @@ def get_creators_(model_name):
         )
     return algo
 
-def get_creators_(model_name):
+def get_creators(model_name):
     basic=dict(        
             desc="MSMLog", c_opt="Adam",
             select_from=None,  c_positive=0, 
