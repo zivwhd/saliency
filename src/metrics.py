@@ -282,12 +282,14 @@ class Metrics:
         probs = torch.softmax(logits, dim=1)
 
         nsal = saliency
-        nsal = nsal * (nsal > 0)
+        #nsal = nsal * (nsal > 0)
+        nsal = (nsal > 0) * 1.0
         salmax, salmin = nsal.max(), nsal.min()
         if salmax > salmin:
             mask = (nsal - salmin) / (salmax-salmin)
         else: 
             mask = torch.zeros(nsal.shape)
+            mask = torch.ones(nsal.shape)
 
         masked_inp = inp * mask.to(inp.device).unsqueeze(0)
         pred_mask = model(masked_inp)
