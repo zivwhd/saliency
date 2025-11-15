@@ -39,7 +39,8 @@ class Metrics:
         res['IROF'] = qply(quantus.IROF(
             segmentation_method="slic",
             perturb_baseline="mean",
-            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            #perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            #perturb_func=quantus.perturb_func.baseline_replacement_by_segments,
             return_aggregate=False,
             ))
 
