@@ -43,17 +43,6 @@ class Metrics:
             return_aggregate=False,
             ))
 
-        res['FaithfulnessCorrelationProb'] = qply(quantus.FaithfulnessCorrelation(
-            nr_runs=100,  
-            subset_size=224,  
-            perturb_baseline="black",
-            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
-            similarity_func=quantus.similarity_func.correlation_pearson,  
-            abs=False,  
-            return_aggregate=False,
-            softmax=True
-        ))
-
         res['FaithfulnessCorrelation'] = qply(quantus.FaithfulnessCorrelation(
             nr_runs=100,  
             subset_size=224,  
@@ -62,14 +51,6 @@ class Metrics:
             similarity_func=quantus.similarity_func.correlation_pearson,  
             abs=False,  
             return_aggregate=False,
-        ))
-
-        res['FaithfulnessEstimate'] = qply(quantus.FaithfulnessEstimate(
-            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
-            similarity_func=quantus.similarity_func.correlation_pearson,
-            features_in_step=224,  
-            perturb_baseline="black",
-            softmax=True,
         ))
 
         res['FaithfulnessEstimate'] = qply(quantus.FaithfulnessEstimate(
@@ -86,7 +67,7 @@ class Metrics:
         ))
         
         res['MonotonicityCorrelation'] = qply(quantus.MonotonicityCorrelation(
-            nr_samples=10,
+           nr_samples=10,
             features_in_step=3136,
             perturb_baseline="uniform",
             perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
@@ -102,10 +83,6 @@ class Metrics:
             display_progressbar=True,
         ))
 
-        res['ROAD'] = qply(quantus.ROAD())
-
-        #res["Continuity"] = qply(quantus.Continuity())
-
         res['Sufficiency'] = qply(quantus.Sufficiency(
             threshold=0.6,
             return_aggregate=False,
@@ -119,9 +96,9 @@ class Metrics:
         res['Sparseness'] = qply(quantus.Sparseness())
 
         res['Complexity'] = qply(quantus.Complexity())
-        #res['EffectiveComplexity'] = qply(quantus.EffectiveComplexity(eps=1e-5))
+        res['EffectiveComplexity'] = qply(quantus.EffectiveComplexity(eps=1e-5))
 
-        #res['Completeness'] = qply(quantus.Completeness(abs=False, disable_warnings=True))
+        res['Completeness'] = qply(quantus.Completeness(abs=False, disable_warnings=True))
 
         res['NonSensitivity'] = qply(quantus.NonSensitivity(
             abs=True,
@@ -131,9 +108,7 @@ class Metrics:
             perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
             features_in_step=6272,
         ))
-        #res["SensitivityN"] = qply(quantus.SensitivityN())
-        #res["MaxSensitivity"] = qply(quantus.MaxSensitivity())
-        #res["AvgSensitivity"] = qply(quantus.AvgSensitivity())
+
         return res
 
 
