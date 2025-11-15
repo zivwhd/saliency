@@ -27,14 +27,15 @@ class Metrics:
         logging.info(f" inp:{inp.shape}; sal:{saliency.shape}")        
         print(f" inp:{inp.shape}; sal:{saliency.shape}")        
         res = dict()
-        def qply(mmt):
+        def qply(mmt, **kwargs):
             sal = saliency.cpu().numpy()
             rmet = mmt(
                 model=me.model, 
                 x_batch=inp.cpu().numpy(), 
                 y_batch=np.array([topidx]),
                 a_batch=sal - sal.min(),
-                device=me.device)
+                device=me.device, **kwargs)
+            print(rmet)
             return float(rmet[0])
 
         res['IROF'] = qply(quantus.IROF(
@@ -61,6 +62,25 @@ class Metrics:
             features_in_step=224,  
             perturb_baseline="black",
         ))
+
+        res['FaithfulnessCorrelationProb'] = qply(quantus.FaithfulnessCorrelation(
+            nr_runs=100,  
+            subset_size=224,  
+            perturb_baseline="black",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            similarity_func=quantus.similarity_func.correlation_pearson,  
+            abs=False,  
+            return_aggregate=False,            
+        ), softmax=True)
+
+        res['FaithfulnessEstimateProb'] = qply(quantus.FaithfulnessEstimate(
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            similarity_func=quantus.similarity_func.correlation_pearson,
+            features_in_step=224,  
+            perturb_baseline="black",            
+        ), softmax=True)
+
+        #res['ROAD'] = qply(quantus.ROAD(return_aggregate=True))
 
         res['Monotonicity'] = qply(quantus.Monotonicity(
             features_in_step=224,
