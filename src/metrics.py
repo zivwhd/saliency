@@ -24,7 +24,8 @@ class Metrics:
         model = me.model
         logits = model(inp).cpu()
         topidx = int(torch.argmax(logits))
-        
+        logging.info(f" inp:{inp.shape}; sal:{saliency.shape}")        
+        print(f" inp:{inp.shape}; sal:{saliency.shape}")        
         res = dict()
         def qply(mmt):
             sal = saliency.cpu().numpy()
@@ -36,13 +37,13 @@ class Metrics:
                 device=me.device)
             return float(rmet[0])
 
-        #res['IROF'] = qply(quantus.IROF(
-        #    segmentation_method="slic",
-        #    perturb_baseline="mean",
-        #    #perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
-        #    #perturb_func=quantus.perturb_func.baseline_replacement_by_segments,
-        #    return_aggregate=False,
-        #    ))
+        res['IROF'] = qply(quantus.IROF(
+            segmentation_method="slic",
+            perturb_baseline="mean",
+            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+            #perturb_func=quantus.perturb_func.baseline_replacement_by_segments,
+            return_aggregate=False,
+            ))
 
         res['FaithfulnessCorrelation'] = qply(quantus.FaithfulnessCorrelation(
             nr_runs=100,  
