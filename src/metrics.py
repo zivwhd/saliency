@@ -82,11 +82,11 @@ class Metrics:
 
         #res['ROAD'] = qply(quantus.ROAD(return_aggregate=True))
 
-        res['Monotonicity'] = qply(quantus.Monotonicity(
-            features_in_step=224,
-            perturb_baseline="black",
-            perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
-        ))
+        #res['Monotonicity'] = qply(quantus.Monotonicity(
+        #    features_in_step=224,
+        #    perturb_baseline="black",
+        #    perturb_func=quantus.perturb_func.baseline_replacement_by_indices,
+        #))
         
         res['MonotonicityCorrelation'] = qply(quantus.MonotonicityCorrelation(
            nr_samples=10,
@@ -105,22 +105,22 @@ class Metrics:
             display_progressbar=True,
         ))
 
-        res['Sufficiency'] = qply(quantus.Sufficiency(
-            threshold=0.6,
-            return_aggregate=False,
-        ))
+        #res['Sufficiency'] = qply(quantus.Sufficiency(
+        #    threshold=0.6,
+        #    return_aggregate=False,
+        #))
 
-        res['Consistency'] = qply(quantus.Consistency(
-            discretise_func=quantus.discretise_func.top_n_sign,
-            return_aggregate=False,
-        ))
+        #res['Consistency'] = qply(quantus.Consistency(
+        #    discretise_func=quantus.discretise_func.top_n_sign,
+        #    return_aggregate=False,
+        #))
 
         res['Sparseness'] = qply(quantus.Sparseness())
 
         res['Complexity'] = qply(quantus.Complexity())
-        res['EffectiveComplexity'] = qply(quantus.EffectiveComplexity(eps=1e-5))
+        #res['EffectiveComplexity'] = qply(quantus.EffectiveComplexity(eps=1e-5))
 
-        res['Completeness'] = qply(quantus.Completeness(abs=False, disable_warnings=True))
+        #res['Completeness'] = qply(quantus.Completeness(abs=False, disable_warnings=True))
 
         res['NonSensitivity'] = qply(quantus.NonSensitivity(
             abs=True,
