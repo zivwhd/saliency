@@ -19,12 +19,15 @@ from mpert import IEMPertSaliencyCreator
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
 from dix_cnn import DixCnnSaliencyCreator
+from adators_lrp import EPreAwareLRPSaliencyCreator
 
 from sanity import SanityCreator
 import torch
 import socket
 
 
+def attnlrp_sal_creator():
+    return CombSaliencyCreator([EPreAwareLRPSaliencyCreator(False), EPreAwareLRPSaliencyCreator(True)])
 
 def get_dixcnn_sal_creator():
     return DixCnnSaliencyCreator()
