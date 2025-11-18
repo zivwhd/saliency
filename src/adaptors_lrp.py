@@ -136,8 +136,9 @@ class EPreAwareLRPSaliencyCreator:
                                 prop_rules = args.prop_rules,  
                                 conv_prop_rule = args.conv_prop_rule, 
                                 index=torch.tensor([catidx])).reshape(1, 224, 224).detach().cpu()
-        
+
+        Org = Res
         Res = -Res
         if (Res.max() - Res.min()) > 0:
             Res = (Res-Res.min()) / (Res.max() - Res.min())
-        return { self.method : Res}
+        return { self.method : Res, f'{self.method}_o' : Org}
