@@ -26,7 +26,7 @@ import torch
 import socket
 
 
-def attnlrp_sal_creator():
+def get_attnlrp_sal_creator():
     return CombSaliencyCreator([EPreAwareLRPSaliencyCreator(False), EPreAwareLRPSaliencyCreator(True)])
 
 def get_dixcnn_sal_creator():
