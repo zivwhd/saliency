@@ -19,7 +19,7 @@ from mpert import IEMPertSaliencyCreator
 from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
 from dix_cnn import DixCnnSaliencyCreator
-from adators_lrp import EPreAwareLRPSaliencyCreator
+from adaptors_lrp import EPreAwareLRPSaliencyCreator
 
 from sanity import SanityCreator
 import torch
