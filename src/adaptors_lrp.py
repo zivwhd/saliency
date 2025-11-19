@@ -119,7 +119,8 @@ class EPreAwareLRPSaliencyCreator:
         args.data_set = None
         args.grid = False
         args.nb_classes = 1000
-
+        args.conv_prop_rule = None
+        args.prop_rules=None
         config.get_config(args, skip_further_testing = True)
         config.set_components_custom_lrp(args, gridSearch= args.grid)
         if 'base' in me.arch:
@@ -127,18 +128,32 @@ class EPreAwareLRPSaliencyCreator:
         elif 'small' in me.arch:
              args.model_components['size'] = 'small'
 
+        print(args.__dict__)
         model = simp_model_env(args)
         model.to(inp.device)
         model.eval()
-        assert 'full_lrp' in args.method
+        #assert 'full_lrp' in args.method
         lrp = LRP(model)
         Res  = lrp.generate_LRP(inp.cuda(), method=args.method,  cp_rule = args.cp_rule, 
                                 prop_rules = args.prop_rules,  
                                 conv_prop_rule = args.conv_prop_rule, 
-                                index=torch.tensor([catidx])).reshape(1, 224, 224).detach().cpu()
+                                index=torch.tensor([catidx])).detach().cpu()
 
-        Org = Res
-        Res = -Res
-        if (Res.max() - Res.min()) > 0:
-            Res = (Res-Res.min()) / (Res.max() - Res.min())
-        return { self.method : Res, f'{self.method}_o' : Org}
+        print("####", Res.shape)
+        if Res.numel() == 224*224:
+            Res = Res.reshape(1, 224, 224)        
+            Org = Res
+            Res = -Res
+            if (Res.max() - Res.min()) > 0:
+                Res = (Res-Res.min()) / (Res.max() - Res.min())
+            return { self.method : Res, f'{self.method}_o' : Org}
+        elif Res.numel() == 196:
+            sal = Res.reshape(14, 14).unsqueeze(0).unsqueeze(0)
+            sal = sal.reshape(14, 14).unsqueeze(0).unsqueeze(0)
+            sal =  torch.nn.functional.interpolate(sal, scale_factor=16, mode='bilinear', align_corners=False)
+            print(sal.shape)
+            return { self.method : sal[0]}
+        else:
+            assert False
+
+

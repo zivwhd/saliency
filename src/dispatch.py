@@ -27,7 +27,8 @@ import socket
 
 
 def get_attnlrp_sal_creator():
-    return CombSaliencyCreator([EPreAwareLRPSaliencyCreator(False), EPreAwareLRPSaliencyCreator(True)])
+    return EPreAwareLRPSaliencyCreator(method="custom_lrp_gamma_rule_full")
+    #return CombSaliencyCreator([EPreAwareLRPSaliencyCreator(False), EPreAwareLRPSaliencyCreator(True)])
 
 def get_dixcnn_sal_creator():
     return DixCnnSaliencyCreator()
