@@ -509,7 +509,7 @@ def summarize_all_scores(root_dir="results", models=None):
         df["DEL"] = 100 - df["DEL_raw"]
         df["POS"] = 100 - df["POS_raw"]
         df["IDA"] = (2 * df["DEL"] * df["INS"]) / (df["INS"] + df["DEL"])
-        df["PNA"] = (2 * df["POS"] * df["NEG"]) / (df["NEG"] + df["POS"])
+        df["NPA"] = (2 * df["POS"] * df["NEG"]) / (df["NEG"] + df["POS"])
 
         auc_rows.append(df)
 
@@ -519,7 +519,7 @@ def summarize_all_scores(root_dir="results", models=None):
         "DEL": "mean",
         "POS": "mean",
         "IDA": "mean",
-        "PNA": "mean"
+        "NPA": "mean"
     }).reset_index() if auc_rows else pd.DataFrame(columns=["model", "variant"])
 
     # ============================================================================

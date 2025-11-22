@@ -397,6 +397,9 @@ def get_creators(model_name):
             modify(),
                 ])    
     
+def get_creators(model_name):
+    return IGSaliencyCreator()
+
 def get_creators_old(model_name):
     return get_creators_cnn()
     if 'resnet' in model_name or 'densenet' in model_name:
