@@ -541,6 +541,8 @@ def summarize_all_scores(root_dir="results", models=None):
 
     if q_rows:
         qdf = pd.concat(q_rows)
+        qdf["FaithfulnessCorrelationProb"] = qdf["FaithfulnessCorrelationProb"]*100
+        qdf["FaithfulnessEstimateProb"] = qdf["FaithfulnessEstimateProb"]*100
         q_agg = qdf.groupby(["model", "variant"]).agg({
             "IROF": "mean",
             "FaithfulnessCorrelationProb": "mean",
