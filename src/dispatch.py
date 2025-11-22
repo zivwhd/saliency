@@ -1100,7 +1100,7 @@ ALL_MODELS = CNN_MODELS + VIT_MODELS
 def get_args(): 
     creators = get_creators() + ['any','all']
     parser = argparse.ArgumentParser(description="dispatcher")
-    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "asummary", "all"], help="TBD")
+    parser.add_argument("--action", choices=["list_images", "create_sals", "scores", "summary", "asummary", "all","summaryall"], help="TBD")
     parser.add_argument("--sal", choices=creators, default="cpe", help="TBD")
     parser.add_argument("--dataset", choices=["imagenet","voc"], default="imagenet", help="TBD")
     parser.add_argument("--marker", default="m", help="TBD")       
@@ -1169,6 +1169,8 @@ if __name__ == '__main__':
         if args.action == "list_images":
             for img in task_images:
                 print(f"{img.name}")
+        elif args.action == "summaryall":
+            summarize_all_scores()
         elif args.action == "summary":
             if args.model == "all":
                 model_names = ALL_MODELS

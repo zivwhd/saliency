@@ -454,3 +454,138 @@ class CombSaliencyCreator:
         return res
         
 
+import os
+import pandas as pd
+
+import os
+import pandas as pd
+
+def summarize_all_scores(root_dir="results", models=None):
+    """
+    Aggregates per-image metrics from results.csv, qresults.csv, and eresults.csv
+    for the specified list of models under `root_dir`, computes derived metrics,
+    merges, and saves the final summary as 'results/all_summary.csv'.
+    
+    Parameters:
+        root_dir (str): Root folder containing model subfolders.
+        models (list of str): List of model names to process.
+            Default: ["resnet50", "densenet201", "vit_small_patch16_224", "vit_base_patch16_224"]
+    Returns:
+        merged (pd.DataFrame): Aggregated DataFrame with all metrics.
+    """
+    if models is None:
+        models = ["resnet50", "densenet201", "vit_small_patch16_224", "vit_base_patch16_224"]
+
+    output_file = os.path.join(root_dir, "all_summary.csv")
+
+    def load_csv(path):
+        return pd.read_csv(path) if os.path.exists(path) else None
+
+    # ============================================================================
+    # 1. Aggregate AUC metrics from results.csv
+    # ============================================================================
+    auc_rows = []
+
+    for model in models:
+        mpath = os.path.join(root_dir, model)
+        if not os.path.isdir(mpath):
+            continue
+
+        df = load_csv(os.path.join(mpath, "results.csv"))
+        if df is None:
+            continue
+
+        df["model"] = model
+        df = df.rename(columns={
+            "pred_ins_auc": "INS_raw",
+            "pred_neg_auc": "NEG_raw",
+            "pred_del_auc": "DEL_raw",
+            "pred_pos_auc": "POS_raw"
+        })
+
+        df["INS"] = df["INS_raw"]
+        df["NEG"] = df["NEG_raw"]
+        df["DEL"] = 100 - df["DEL_raw"]
+        df["POS"] = 100 - df["POS_raw"]
+        df["IDA"] = (2 * df["DEL"] * df["INS"]) / (df["INS"] + df["DEL"])
+        df["PNA"] = (2 * df["POS"] * df["NEG"]) / (df["NEG"] + df["POS"])
+
+        auc_rows.append(df)
+
+    auc_agg = pd.concat(auc_rows).groupby(["model", "variant"]).agg({
+        "INS": "mean",
+        "NEG": "mean",
+        "DEL": "mean",
+        "POS": "mean",
+        "IDA": "mean",
+        "PNA": "mean"
+    }).reset_index() if auc_rows else pd.DataFrame(columns=["model", "variant"])
+
+    # ============================================================================
+    # 2. Aggregate qresults.csv metrics
+    # ============================================================================
+    q_rows = []
+
+    for model in models:
+        mpath = os.path.join(root_dir, model)
+        if not os.path.isdir(mpath):
+            continue
+
+        df = load_csv(os.path.join(mpath, "qresults.csv"))
+        if df is None:
+            continue
+
+        df["model"] = model
+        q_rows.append(df)
+
+    if q_rows:
+        qdf = pd.concat(q_rows)
+        q_agg = qdf.groupby(["model", "variant"]).agg({
+            "IROF": "mean",
+            "FaithfulnessCorrelationProb": "mean",
+            "FaithfulnessEstimateProb": "mean"
+        }).reset_index()
+        q_agg = q_agg.rename(columns={
+            "FaithfulnessCorrelationProb": "FTC",
+            "FaithfulnessEstimateProb": "FTE"
+        })
+    else:
+        q_agg = pd.DataFrame(columns=["model", "variant", "IROF", "FTC", "FTE"])
+
+    # ============================================================================
+    # 3. Aggregate eresults.csv metrics
+    # ============================================================================
+    e_rows = []
+
+    for model in models:
+        mpath = os.path.join(root_dir, model)
+        if not os.path.isdir(mpath):
+            continue
+
+        df = load_csv(os.path.join(mpath, "eresults.csv"))
+        if df is None:
+            continue
+
+        df["model"] = model
+        e_rows.append(df)
+
+    if e_rows:
+        edf = pd.concat(e_rows)
+        e_agg = edf.groupby(["model", "variant"]).agg({
+            "pred_aic": "mean",
+            "pred_sic": "mean"
+        }).reset_index()
+        e_agg = e_agg.rename(columns={"pred_aic": "AIC", "pred_sic": "SIC"})
+    else:
+        e_agg = pd.DataFrame(columns=["model", "variant", "AIC", "SIC"])
+
+    # ============================================================================
+    # 4. Merge all aggregated results
+    # ============================================================================
+    merged = auc_agg.merge(q_agg, on=["model", "variant"], how="outer")
+    merged = merged.merge(e_agg, on=["model", "variant"], how="outer")
+
+    merged.to_csv(output_file, index=False)
+    print(f"Saved aggregated summary to: {output_file}")
+
+    return merged
