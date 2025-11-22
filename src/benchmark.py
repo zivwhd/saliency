@@ -478,6 +478,7 @@ def summarize_all_scores(root_dir="results", models=None):
 
     output_file = os.path.join(root_dir, "all_summary.csv")
 
+    pmean = lambda x: x[x >= -1000].mean()
     def load_csv(path):
         return pd.read_csv(path) if os.path.exists(path) else None
 
@@ -572,8 +573,8 @@ def summarize_all_scores(root_dir="results", models=None):
     if e_rows:
         edf = pd.concat(e_rows)
         e_agg = edf.groupby(["model", "variant"]).agg({
-            "pred_aic": "mean",
-            "pred_sic": "mean"
+            "pred_aic": pmean,
+            "pred_sic": pmean
         }).reset_index()
         e_agg = e_agg.rename(columns={"pred_aic": "AIC", "pred_sic": "SIC"})
     else:
