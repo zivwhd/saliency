@@ -6,6 +6,10 @@ except:
 from enum import Enum, auto
 import logging,time
 import torch
+import numpy as np
+import math
+
+from skimage.segmentation import slic
 
 from pytorch_grad_cam import run_dff_on_image, GradCAM, FullGrad, LayerCAM, GradCAMPlusPlus, AblationCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
@@ -124,3 +128,115 @@ class DixCnnSaliencyCreator:
         from baselines.dix import setup
 
     #return DimplVitSaliencyCreator(['dix'])
+
+
+
+class KernelShapSaliencyCreator:
+
+    def __init__(self,
+                 n_evals=1000,
+                 n_segments=50,
+                 compactness=10.0, 
+                 sigma=1):
+        self.n_segments = n_segments
+        self.compactness = compactness
+        self.sigma = sigma
+        self.n_evals = 1000
+
+        
+    def __call__(self, me, inp, catidx):
+        sal = self.explain(me, inp, catidx,  ##
+                           n_segments=self.n_segments, 
+                           max_evals= self.n_evals)
+        desc = f"KernelShap_{self.n_evals}_{self.n_segments}"
+        return {desc : sal}
+
+
+    def explain(self, me, inp: torch.Tensor, catidx: int,
+                n_segments: int = 75,
+                compactness: float = 10.0,
+                max_evals: int = 1000,
+                batch_size: int = 32,
+                baseline: str = "zero",   # "zero" or "mean"
+                ridge: float = 1e-6,
+                seed: int = 0) -> torch.Tensor:
+        """
+        Short KernelSHAP (manual) over SLIC superpixels.
+        Uses inp *as-is* (no unnormalization). Returns (1,H,W) tensor.
+
+        inp: (1,C,H,W) normalized tensor. Model scalar is me.model(x)[:, catidx].
+        """
+        assert inp.ndim == 4 and inp.shape[0] == 1
+        device = inp.device
+        C, H, W = inp.shape[1], inp.shape[2], inp.shape[3]
+
+        # SLIC on HWC float (using inp as-is)
+        x_hwc = inp.detach().cpu()[0].permute(1, 2, 0).numpy().astype(np.float32)
+        segments = slic(x_hwc, n_segments=n_segments, compactness=compactness,
+                        start_label=0, channel_axis=-1)
+        K = int(segments.max()) + 1
+        sp_masks = [(segments == k) for k in range(K)]
+
+        # Baseline (in same space as inp)
+        if baseline == "zero":
+            base = np.zeros((H, W, C), dtype=np.float32)
+        elif baseline == "mean":
+            base_color = x_hwc.reshape(-1, C).mean(axis=0)
+            base = np.broadcast_to(base_color, (H, W, C)).copy()
+        else:
+            raise ValueError("baseline must be 'zero' or 'mean'")
+
+        # Shapley kernel weight
+        def w_s(s: int) -> float:
+            if s == 0 or s == K:
+                return 1e6
+            return (K - 1) / (math.comb(K, s) * s * (K - s))
+
+        rng = np.random.default_rng(seed)
+
+        # Sample coalitions Z (M,K); include empty & full
+        M = max(2, int(max_evals))
+        Z = np.zeros((M, K), dtype=np.int8)
+        Z[0, :] = 0
+        Z[1, :] = 1
+        for i in range(2, M):
+            s = int(rng.integers(1, K))
+            idx = rng.choice(K, size=s, replace=False)
+            Z[i, idx] = 1
+
+        sizes = Z.sum(axis=1)
+        Wgt = np.array([w_s(int(s)) for s in sizes], dtype=np.float64)
+
+        @torch.no_grad()
+        def eval_batch(zb: np.ndarray) -> np.ndarray:
+            B = zb.shape[0]
+            imgs = np.empty((B, H, W, C), dtype=np.float32)
+            for bi in range(B):
+                im = base.copy()
+                for k in np.nonzero(zb[bi])[0]:
+                    m = sp_masks[int(k)]
+                    im[m] = x_hwc[m]
+                imgs[bi] = im
+            t = torch.from_numpy(imgs).permute(0, 3, 1, 2).to(device=device, dtype=inp.dtype)
+            y = me.model(t)[:, catidx]
+            return y.detach().cpu().numpy().astype(np.float64)
+
+        y = np.empty((M,), dtype=np.float64)
+        for s in range(0, M, batch_size):
+            e = min(M, s + batch_size)
+            y[s:e] = eval_batch(Z[s:e])
+
+        # Weighted linear regression: y ~ b0 + Z @ phi
+        X = np.concatenate([np.ones((M, 1), dtype=np.float64), Z.astype(np.float64)], axis=1)
+        XT_W = X.T * Wgt
+        A = XT_W @ X
+        b = XT_W @ y
+        I = np.eye(K + 1, dtype=np.float64); I[0, 0] = 0.0
+        beta = np.linalg.solve(A + ridge * I, b)
+        phi = beta[1:]  # (K,)
+
+        # Broadcast to pixels -> (1,H,W)
+        pix = np.zeros((H, W), dtype=np.float32)
+        for k in range(K):
+            pix[sp_masks[k]] = float(phi[k])
+        return torch.from_numpy(pix).unsqueeze(0).to(device)
