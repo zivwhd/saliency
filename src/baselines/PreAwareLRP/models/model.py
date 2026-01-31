@@ -615,12 +615,14 @@ def deit_small_patch16_224(pretrained=False,
     if pretrained:
         checkpoint = torch.hub.load_state_dict_from_url(
             url="https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth",
+            #url="https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/vit_small_p16_224-15ec54c9.pth",
             map_location="cpu", check_hash=True
         )
 
         #checkpoint = torch.load("deit_base_patch16_224-b5f2ef4d.pth", map_location="cpu")
-        #model.load_state_dict(checkpoint["model"])
         model.load_state_dict(checkpoint["model"])
+        model.load_state_dict(checkpoint)
+        #model.load_state_dict(checkpoint["model"])
     return model
 
 
@@ -698,6 +700,9 @@ def lrp_vit_small_patch16_224(
         **kwargs
     )
 
+    if pretrained:
+        print("loading weights")
+        load_vit_small_weights(model)
     return model
 
 def deit_tiny_patch16_224(pretrained=False, 
@@ -752,6 +757,7 @@ def load_vit_small_weights(model):
     url = "https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/vit_small_p16_224-15ec54c9.pth"
     state_dict = torch.hub.load_state_dict_from_url(url, map_location="cpu", check_hash=True)
 
+    state_dict = adapt_vit_state_dict(state_dict)
     # Remove classifier if sizes differ
     if "head.bias" in state_dict:
         del state_dict["head.bias"]
@@ -782,7 +788,80 @@ def load_vit_small_weights(model):
     print("Unexpected keys:", unexpected)
 
 
-def simp_vit_small_patch16_224(
+import torch
+
+def adapt_vit_state_dict(checkpoint, model_num_blocks=None, model_use_qkv_split=False, skip_head=True):
+    """
+    Adapt a ViT checkpoint state_dict to match a model with different architecture or naming.
+
+    Args:
+        checkpoint (dict): Original state_dict from pretrained ViT.
+        model_num_blocks (int, optional): Number of transformer blocks in your model. 
+                                          If None, load all blocks.
+        model_use_qkv_split (bool): True if your model uses separate q_proj/k_proj/v_proj Linear layers.
+                                     False if your model uses a combined qkv Linear.
+        skip_head (bool): True to skip loading the classifier head (useful if number of classes differs).
+
+    Returns:
+        new_state_dict (dict): Manipulated state_dict ready to load into your model.
+    """
+    new_state_dict = {}
+
+    # Identify block indices in checkpoint
+    block_indices = sorted(
+        set(int(k.split('.')[1]) for k in checkpoint.keys() if k.startswith('blocks.'))
+    )
+    max_block = block_indices[-1] if model_num_blocks is None else model_num_blocks - 1
+
+    for k, v in checkpoint.items():
+        # Skip blocks beyond model depth
+        if k.startswith('blocks.'):
+            block_idx = int(k.split('.')[1])
+            if block_idx > max_block:
+                continue
+
+            # Handle QKV rename / merge
+            if model_use_qkv_split and k.endswith('attn.qkv.weight'):
+                # Split qkv into q_proj/k_proj/v_proj
+                q, k_, v_ = v.chunk(3, dim=0)
+                new_state_dict[f'blocks.{block_idx}.attn.q_proj.weight'] = q
+                new_state_dict[f'blocks.{block_idx}.attn.k_proj.weight'] = k_
+                new_state_dict[f'blocks.{block_idx}.attn.v_proj.weight'] = v_
+                continue
+            if model_use_qkv_split and k.endswith('attn.qkv.bias'):
+                q, k_, v_ = v.chunk(3, dim=0)
+                new_state_dict[f'blocks.{block_idx}.attn.q_proj.bias'] = q
+                new_state_dict[f'blocks.{block_idx}.attn.k_proj.bias'] = k_
+                new_state_dict[f'blocks.{block_idx}.attn.v_proj.bias'] = v_
+                continue
+
+            if not model_use_qkv_split:
+                # If checkpoint has separate q/k/v but model uses combined qkv
+                if k.endswith('attn.q_proj.weight'):
+                    k_w = checkpoint[f'blocks.{block_idx}.attn.k_proj.weight']
+                    v_w = checkpoint[f'blocks.{block_idx}.attn.v_proj.weight']
+                    new_state_dict[f'blocks.{block_idx}.attn.qkv.weight'] = torch.cat([v, k_w, v_w], dim=0)
+                    continue
+                if k.endswith('attn.q_proj.bias'):
+                    k_b = checkpoint.get(f'blocks.{block_idx}.attn.k_proj.bias', torch.zeros_like(v))
+                    v_b = checkpoint.get(f'blocks.{block_idx}.attn.v_proj.bias', torch.zeros_like(v))
+                    new_state_dict[f'blocks.{block_idx}.attn.qkv.bias'] = torch.cat([v, k_b, v_b], dim=0)
+                    continue
+                # Skip original k/v
+                if 'k_proj' in k or 'v_proj' in k:
+                    continue
+
+        # Skip classifier head if requested
+        if skip_head and k.startswith('head.'):
+            continue
+
+        # Copy everything else
+        new_state_dict[k] = v
+
+    return new_state_dict
+
+
+def simp_vit_small_patch16_224_old(
         pretrained=False,
         isWithBias=True,
         qkv_bias=True,
@@ -817,6 +896,55 @@ def simp_vit_small_patch16_224(
         projection_drop_rate=projection_drop_rate,
         **kwargs
     )
+
+    if pretrained:
+        print("loading weights")
+        load_vit_small_weights(model)
+
+    return model
+
+def simp_vit_small_patch16_224(
+        pretrained=False,
+        isWithBias=True,
+        qkv_bias=True,
+        layer_norm=partial(LayerNorm, eps=1e-6),
+        activation=GELU,
+        attn_activation=Softmax(dim=-1),
+        last_norm=LayerNorm,
+        attn_drop_rate=0.,
+        patch_embed=PatchEmbed,
+        isConvWithBias=True,
+        FFN_drop_rate=0.,
+        projection_drop_rate=0.,
+        **kwargs):
+
+    model = VisionTransformer(
+        patch_size=16, 
+        embed_dim=768,
+        depth=12,
+        num_heads=12,
+
+        # REAL ViT-S:
+        mlp_ratio=3,                         # <-- Fix this!
+
+        qkv_bias=qkv_bias,
+
+        # REAL ViT uses Linear patch embedding:
+        patch_embed=LinearPatchEmbed,  # <-- Fix this!
+
+        layer_norm=layer_norm,
+        activation=activation,
+        attn_activation=attn_activation,
+        last_norm=last_norm,
+        attn_drop_rate=attn_drop_rate,
+        drop_rate=FFN_drop_rate,
+        projection_drop_rate=projection_drop_rate,
+        **kwargs
+    )
+
+    if pretrained:
+        print("loading weights")
+        load_vit_small_weights(model)
 
     return model
 

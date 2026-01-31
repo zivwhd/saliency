@@ -13,7 +13,7 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, MulCompExpCreator, ProbRangeCompExpCreator, SegSlocExpCreator
+from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, MulCompExpCreator, ProbRangeCompExpCreator, SegSlocExpCreator, RngSegSlocExpCreator
 from msm import MsmExpCreator, SoftMsmExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
@@ -218,6 +218,10 @@ def get_segsloc_sal_creator():
         acargs=dict(main_probs=[0.3,0.4,0.5,0.6,0.7,0.8], extra_probs=[], sampsize=40)
         )
     return algo
+
+
+def get_segrng_sal_creator():
+    return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
 
 
 def get_autols_sal_creator():

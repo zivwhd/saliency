@@ -31,7 +31,7 @@ class ModelEnv:
     def load_model(self, arch, dev):
         if arch.startswith('voc_'):
             model_arch = arch.replace('voc_','')
-            model = torchray.benchmark.models.get_model(arch=model_arch, dataset="voc", convert_to_fully_convolutional=False)
+            model   = torchray.benchmark.models.get_model(arch=model_arch, dataset="voc", convert_to_fully_convolutional=False)
 
         elif arch == 'vgg16NT':
             model = torchvision.models.vgg16(pretrained=False)
@@ -39,6 +39,12 @@ class ModelEnv:
             model = torchvision.models.vgg16(pretrained=False)
             output_weights_path = 'models/vgg16_retrained_n.pth'
             model.load_state_dict(torch.load(output_weights_path))
+
+        elif arch == "deit_base_patch16_224":
+            model = timm.create_model("deit_base_patch16_224.fb_in1k", pretrained=True)
+
+        elif arch == "deit_small_patch16_224":
+            model = timm.create_model("deit_small_patch16_224.fb_in1k", pretrained=True)
 
         elif 'resnet' in arch or 'vgg' in arch:
         # Get a network pre-trained on ImageNet.
@@ -120,7 +126,7 @@ class ModelEnv:
                 torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                              std=[0.229, 0.224, 0.225]),
             ])
-        elif 'vit' in self.arch:
+        elif 'vit' in self.arch or 'deit' in self.arch:
             transform = transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.ToTensor(),

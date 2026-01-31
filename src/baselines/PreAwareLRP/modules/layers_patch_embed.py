@@ -9,7 +9,7 @@ import math
 
 
 
-__all__ = ['PatchEmbed', 'ExpandedPatchEmbed', 'RefinedPatchEmbed', 'GatedPatchEmbedding']
+__all__ = ['PatchEmbed', 'ExpandedPatchEmbed', 'RefinedPatchEmbed', 'GatedPatchEmbedding','LinearPatchEmbed']
 
 class PatchEmbed(nn.Module):
     """ Image to Patch Embedding
@@ -49,7 +49,65 @@ class PatchEmbed(nn.Module):
     
 
 
+class LinearPatchEmbed(nn.Module):
+    """
+    Standard ViT patch embedding using a Linear layer (used in ViT-Small / ViT-Base).
+    Converts image (B, C, H, W) into patch embeddings (B, N, embed_dim)
+    """
+    def __init__(self, img_size=224, patch_size=16, in_chans=3, embed_dim=768, isWithBias=True):
+        super().__init__()
+        self.img_size = img_size
+        self.patch_size = patch_size
+        self.in_chans = in_chans
+        self.embed_dim = embed_dim
 
+        # Number of patches
+        self.num_patches = (img_size // patch_size) ** 2
+
+        # Linear projection
+        self.proj = nn.Linear(in_chans * patch_size * patch_size, embed_dim, bias=isWithBias)
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        assert H == self.img_size and W == self.img_size, \
+            f"Input image size ({H}*{W}) doesn't match model ({self.img_size}*{self.img_size})"
+
+        # unfold patches: (B, C*patch_size*patch_size, N)
+        x = torch.nn.functional.unfold(
+            x,
+            kernel_size=self.patch_size,
+            stride=self.patch_size
+        )  # shape: (B, patch_dim, N)
+
+        x = x.transpose(1, 2)  # (B, N, patch_dim)
+        x = self.proj(x)       # (B, N, embed_dim)
+        return x
+
+    def relprop(self, cam, **kwargs):
+        """
+        Layer-wise relevance propagation for Linear patch embedding.
+        cam: (B, N, embed_dim)
+        returns: (B, C, H, W)
+        """
+        # Reverse linear projection
+        cam = self.proj.weight.T @ cam.transpose(1, 2)  # (patch_dim, B, N)
+        cam = cam.transpose(1, 2)                        # (B, N, patch_dim)
+
+        # Fold patches back to image
+        B, N, patch_dim = cam.shape
+        H = W = self.img_size
+        C = self.in_chans
+        patch_size = self.patch_size
+
+        cam = cam.transpose(1, 2)  # (B, patch_dim, N)
+        cam = torch.nn.functional.fold(
+            cam,
+            output_size=(H, W),
+            kernel_size=patch_size,
+            stride=patch_size
+        )  # (B, C, H, W)
+        return cam
+    
 ###############################################################################################
 class ExpandedPatchEmbed(nn.Module):
     """ Image to Patch Embedding

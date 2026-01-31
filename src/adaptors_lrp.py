@@ -127,7 +127,7 @@ class EPreAwareLRPSaliencyCreator:
             args.model_components['size'] = 'base'
         elif 'small' in me.arch:
              args.model_components['size'] = 'small'
-
+        args.alt_model_name = me.arch
         print(args.__dict__)
         model = simp_model_env(args)
         model.to(inp.device)

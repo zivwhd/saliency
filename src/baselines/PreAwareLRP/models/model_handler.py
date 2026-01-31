@@ -15,6 +15,35 @@ def simp_model_env(args, pretrained=True, hooks=True, **kwargs):
     assert pretrained
     assert hooks
 
+    arch = args.alt_model_name
+    print("####", arch)
+    if arch == "deit_small_patch16_224":
+        gen = vit_LRP_small
+    elif arch == "deit_base_patch16_224":
+        gen = vit_LRP_base
+    elif arch == "vit_small_patch16_224":
+        gen = simp_vit_LRP_small
+    elif arch == "vit_base_patch16_224":
+        gen = simp_vit_LRP_base
+
+    return gen(
+        isWithBias           = args.model_components["isWithBias"],
+        isConvWithBias       = args.model_components["isConvWithBias"],
+
+        layer_norm           = args.model_components["norm"],
+        last_norm            = args.model_components["last_norm"],
+        attn_drop_rate       = args.model_components["attn_drop_rate"],
+        FFN_drop_rate        = args.model_components["FFN_drop_rate"],
+        patch_embed          = args.model_components["patch_embed"],
+        projection_drop_rate = args.model_components['projection_drop_rate'],
+
+
+        activation      = args.model_components["activation"],
+        attn_activation = args.model_components["attn_activation"],
+        num_classes     = args.nb_classes,
+        pretrained=True
+    )
+
     size = args.model_components['size']
     if size == 'base':
         return simp_vit_LRP_base(

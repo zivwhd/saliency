@@ -61,7 +61,7 @@ def mask_step(model, inp, gen_masks, itr, batch_size=32):
 
 class SqMaskGen:
 
-    def __init__(self, segsize, mshape, efactor=4, prob=0.5):
+    def __init__(self, segsize, mshape, efactor=4, prob=0.5, fcrop=None):
         base = np.zeros((mshape[0] * efactor, mshape[1] * efactor ,3), np.int32)
         n_segments = base.shape[0] * base.shape[1] / (segsize * segsize)
         self.setsize = n_segments
@@ -69,6 +69,7 @@ class SqMaskGen:
         self.nelm = torch.unique(self.segments).numel()
         self.prob = prob
         self.mshape = mshape
+        self.fcrop = fcrop
     
     def gen_masks_(self, nmasks):
         return gen_seg_masks(self.segments, nmasks, width=self.mshape[1], height=self.mshape[0])
@@ -89,9 +90,14 @@ class SqMaskGen:
         nelm = step * nmasks
         rnd = torch.rand(2+nelm)
         stt = []
-        for idx in range(nmasks):
-            w_crop = torch.randint(self.segments.shape[1]- width, (nmasks,))
-            h_crop = torch.randint(self.segments.shape[0]- height, (nmasks,))
+        if self.fcrop is not None:
+            w_crop = self.fcrop[1] * torch.ones(nmasks, dtype=torch.int32)
+            h_crop = self.fcrop[0] * torch.ones(nmasks, dtype=torch.int32)
+            
+        for idx in range(nmasks):            
+            if self.fcrop is None:                                
+                w_crop = torch.randint(self.segments.shape[1]- width, (nmasks,))
+                h_crop = torch.randint(self.segments.shape[0]- height, (nmasks,))            
             wseg = self.segments[h_crop[idx]:height + h_crop[idx], w_crop[idx]:width + w_crop[idx]] + step * idx
             stt.append(wseg)
 

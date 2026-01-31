@@ -1208,12 +1208,17 @@ class SegSlocExpCreator:
     def __call__(self, me, inp, catidx):
         all_data = []
         for segsize, nmasks, pprob in self.sq_list:
+            if pprob < 0:
+                pprob = self.get_pprob(me)                
             algo = CompExpCreator(
                 desc=self.desc, segsize=[segsize], nmasks=[nmasks], pprob=[pprob], force_desc=True, **self.kwargs)
             idata = algo.generate_data(me, inp, catidx)
             all_data.append(idata)
             
         for nsegs, nmasks, pprob in self.seg_list:
+            if pprob < 0:
+                pprob = self.get_pprob(me)
+                #print(pprob)
             sg = SegMaskGen(inp, nsegs)
             algo = CompExpCreator(
                 desc=self.desc, segsize=[0], nmasks=[nmasks], pprob=[pprob], mgen=sg, force_desc=True, **self.kwargs)
@@ -1225,5 +1230,20 @@ class SegSlocExpCreator:
         return sal
     
 
+    def get_pprob(self, me):
+        if 'vit_small' in me.arch:
+            return 0.3            
+        elif 'vit_base' in me.arch:
+            return 0.2
+        elif me.arch == 'resnet50':
+            return 0.6            
+        elif me.arch == 'densenet201':
+            return 0.6
+        else:
+            assert False, f"Unexpected arch {me.arch}"
             
         
+class RngSegSlocExpCreator(SegSlocExpCreator):
+    def __init__(self, **kwargs):
+        seg_list = seg_list = [(x, 25, -1) for x in range(20,60)]
+        super().__init__(seg_list=seg_list, **kwargs)
