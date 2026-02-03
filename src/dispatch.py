@@ -224,7 +224,7 @@ def get_segrng_sal_creator():
     return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
 
 def get_kshap_sal_creator():
-    return KernelShapSaliencyCreator()
+    return KernelShapSaliencyCreator(n_segments=40)
 
 def get_autols_sal_creator():
     basic = dict(desc="AutoOLS", epochs=None, c_magnitude=100, c_tv=100, c_sample=0.5)
