@@ -15,7 +15,7 @@ from csixnn import IXNNSaliencyCreator
 from acpe import TreSaliencyCreator
 from benchmark import *
 from cpe import *
-from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MulCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, SegSlocExpCreator
+from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MulCompExpCreator, ZeroBaseline, RandBaseline, BlurBaseline, SegSlocExpCreator, RngSegSlocExpCreator
 from msm import MsmExpCreator
 from mpert import IEMPertSaliencyCreator 
 from extpert import ExtPertSaliencyCreator
@@ -332,7 +332,7 @@ def get_creators_(model_name):
         groups=[modify(desc="GD"), modify(desc="Pos", c_magnitude=0, c_positive=1, c_tv=0.05)],
         acargs=dict(main_probs=[0.3,0.4,0.5,0.6,0.7,0.8], extra_probs=[], sampsize=40)
         )
-    
+        
     return algo
 
     return SegSlocExpCreator(
@@ -398,7 +398,8 @@ def get_creators(model_name):
                 ])    
     
 def get_creators(model_name):
-    return IGSaliencyCreator()
+    #return IGSaliencyCreator()
+    return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
 
 def get_creators_old(model_name):
     return get_creators_cnn()
