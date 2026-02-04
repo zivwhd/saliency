@@ -24,7 +24,7 @@ parser.add_argument('--model', required=True,
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
                              'xGC', 'xLSC', 'xLC', 'aLSC', 'amLSC','mixLSC','mixSLOCxP','SlocSeg','xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
-                             'xDIXv', 'xMSMsl'],
+                             'xDIXv', 'xMSMsl', 'RngSeg'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -157,6 +157,11 @@ def main():
             epochs=101, select_from=10, select_freq=3, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
             c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
         )
+        explainer = STEAttributionExplainer(salc, me)
+
+    elif args.explainer == "RngSeg":
+        from lcpe import RngSegSlocExpCreator
+        salc = RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
         explainer = STEAttributionExplainer(salc, me)
 
     elif args.explainer == "mixLSC":
