@@ -240,3 +240,99 @@ class KernelShapSaliencyCreator:
         for k in range(K):
             pix[sp_masks[k]] = float(phi[k])
         return torch.from_numpy(pix).unsqueeze(0).to(device)
+
+
+def kernel_shap_image(
+    model,
+    image,          # np.ndarray, shape (H, W, C), already normalized
+    class_idx,      # int
+    device,
+    n_segments=50,
+    nsamples=1000,
+    background="zero"  # "zero" or "mean"
+):
+    """
+    Faithful Kernel-SHAP for images (Lundberg & Lee, 2017)
+
+    Returns:
+        phi        : (M,) Shapley values per superpixel
+        phi0       : scalar bias term
+        segments   : (H, W) superpixel map
+    """
+    import numpy as np
+    import torch
+    from skimage.segmentation import slic
+    from sklearn.linear_model import LinearRegression
+    from math import comb
+
+    # -----------------------------
+    # 1. Superpixels = features
+    # -----------------------------
+    segments = slic(image, n_segments=n_segments, compactness=30, sigma=3)
+    
+    
+    M = segments.max() + 1
+
+    # -----------------------------
+    # 2. Background
+    # -----------------------------
+    if background == "zero":
+        bg = np.zeros_like(image)
+    elif background == "mean":
+        bg = image.mean(axis=(0, 1), keepdims=True)
+    else:
+        raise ValueError("background must be 'zero' or 'mean'")
+
+    # -----------------------------
+    # 3. Model wrapper
+    # -----------------------------
+    def f(x_np):
+        x = torch.from_numpy(x_np).permute(2, 0, 1).unsqueeze(0).to(device)
+        with torch.no_grad():
+            logits = model(x.float())
+            probs = torch.softmax(logits, dim=1)
+        return probs[0, class_idx].item()
+
+    # -----------------------------
+    # 4. Masking h_x(z)
+    # -----------------------------
+    def apply_mask(z):
+        out = image.copy()
+        for i in range(M):
+            if z[i] == 0:
+                out[segments == i] = bg[segments == i]
+        return out
+
+    # -----------------------------
+    # 5. Shapley kernel π(z)
+    # -----------------------------
+    def kernel(z):
+        k = z.sum()
+        if k == 0 or k == M:
+            return 0.0
+        return (M - 1) / (comb(M, k) * k * (M - k))
+
+    # -----------------------------
+    # 6. Coalition sampling
+    # -----------------------------
+    Z = np.random.randint(0, 2, size=(nsamples, M))
+    Z[0] = np.zeros(M)
+    Z[1] = np.ones(M)
+
+    y = np.zeros(nsamples)
+    w = np.zeros(nsamples)
+
+    for i, z in enumerate(Z):
+        y[i] = f(apply_mask(z))
+        w[i] = kernel(z)
+
+    # -----------------------------
+    # 7. Weighted linear regression
+    # -----------------------------
+    reg = LinearRegression(fit_intercept=True)
+    reg.fit(Z, y, sample_weight=w)
+
+    phi = reg.coef_
+    phi0 = reg.intercept_
+
+    return phi, phi0, segments

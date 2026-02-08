@@ -6,6 +6,7 @@ import argparse, logging, os, re
 from dataset import ImagenetSource, VOCSource, Coord
 from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV, KernelShapSaliencyCreator
 from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
+from adaptors_kshap import CaptumKernelShapSaliencyCreator
 from adaptors_gig import IGSaliencyCreator
 from RISE import RiseSaliencyCreator
 from cexcnn import CexCnnSaliencyCreator
@@ -223,8 +224,14 @@ def get_segsloc_sal_creator():
 def get_segrng_sal_creator():
     return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
 
-def get_kshap_sal_creator():
-    return KernelShapSaliencyCreator(n_segments=40)
+def get_ckshap_sal_creator():    
+    return CombSaliencyCreator([
+        CaptumKernelShapSaliencyCreator(n_segments=20),
+        CaptumKernelShapSaliencyCreator(n_segments=30),
+        CaptumKernelShapSaliencyCreator(n_segments=40),
+        CaptumKernelShapSaliencyCreator(n_segments=50)])
+
+    #return KernelShapSaliencyCreator(n_segments=40)
 
 def get_autols_sal_creator():
     basic = dict(desc="AutoOLS", epochs=None, c_magnitude=100, c_tv=100, c_sample=0.5)
