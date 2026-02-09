@@ -486,6 +486,7 @@ def summarize_all_scores(root_dir="results", models=None):
 
     pmean = lambda x: x[x >= -1000].mean()
     def load_csv(path):
+        logging.info(f"reading {path}")
         return pd.read_csv(path) if os.path.exists(path) else None
 
     # ============================================================================
