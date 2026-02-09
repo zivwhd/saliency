@@ -128,7 +128,7 @@ methods = [
     ("../saliency.qnt", "xp", "SLOCxxProb_Mr_501_msk1.0_tv0.1_mgn0.01_0"),
     ("../saliency.qnt", "mon", "AutoMonZrNone_500_56_501b_msk1.0_tv0.1_mgn0.01_0"),
     ("../saliency.qnt", "ls", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),    
-    ('../saliency.qnt','RngSegSloc_0', 'rng'),
+    ('../saliency.qnt','rng' 'RngSegSloc_0'),
 ]
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
