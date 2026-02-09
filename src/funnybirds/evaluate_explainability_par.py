@@ -24,7 +24,7 @@ parser.add_argument('--model', required=True,
 parser.add_argument('--explainer', required=True,
                     choices=['IntegratedGradients', 'InputXGradient', 'Rollout', 'CheferLRP', 'CustomExplainer',
                              'xGC', 'xLSC', 'xLC', 'aLSC', 'amLSC','mixLSC','mixSLOCxP','SlocSeg','xRISE', 'xEP', 'xAC', 'xGC++', 'xFG', 'xIG', 'xGIG','xDIX','xMP',
-                             'xDIXv', 'xMSMsl', 'RngSeg'],
+                             'xDIXv', 'xMSMsl', 'RngSeg','kshap'],
                     help='explainer')
 parser.add_argument('--checkpoint_name', type=str, required=False, default=None,
                     help='checkpoint name (including dir)')
@@ -162,6 +162,11 @@ def main():
     elif args.explainer == "RngSeg":
         from lcpe import RngSegSlocExpCreator
         salc = RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
+        explainer = STEAttributionExplainer(salc, me)
+
+    elif args.explainer == "kshap":
+        from adaptors_kshap import CaptumKernelShapSaliencyCreator
+        salc = CaptumKernelShapSaliencyCreator(n_segments=50)        
         explainer = STEAttributionExplainer(salc, me)
 
     elif args.explainer == "mixLSC":
