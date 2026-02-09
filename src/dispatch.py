@@ -226,9 +226,9 @@ def get_segrng_sal_creator():
 
 def get_ckshap_sal_creator():    
     return CombSaliencyCreator([
-        CaptumKernelShapSaliencyCreator(n_segments=20),
-        CaptumKernelShapSaliencyCreator(n_segments=30),
-        CaptumKernelShapSaliencyCreator(n_segments=40),
+        #CaptumKernelShapSaliencyCreator(n_segments=20),
+        #CaptumKernelShapSaliencyCreator(n_segments=30),
+        #CaptumKernelShapSaliencyCreator(n_segments=40),
         CaptumKernelShapSaliencyCreator(n_segments=50)])
 
     #return KernelShapSaliencyCreator(n_segments=40)
