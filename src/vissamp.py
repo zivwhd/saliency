@@ -117,10 +117,10 @@ if 'vit' not in model_name:
         ('../saliency.qnt','DIX', 'DixCnn_0'),
         ('../saliency.qnt','EP','MPert_300_o1.0_tv2_2_l0.2_0'),
 
-        ('GC', 'pgc_GradCAM_0'),
-        ('KSHAP', 'CapKernelShap50_1000_0'),        
-        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ('RISE','RISE_4000_7_0.5_0')
+        ('../saliency.qnt','GC', 'pgc_GradCAM_0'),
+        ('../saliency.qnt','KSHAP', 'CapKernelShap50_1000_0'),        
+        ('../saliency.qnt','LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('../saliency.qnt','RISE','RISE_4000_7_0.5_0')
 ]
 else:
     methods = [
