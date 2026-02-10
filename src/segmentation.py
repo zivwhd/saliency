@@ -9,6 +9,7 @@ from dataset import ImagenetSource, Coord
 from adaptors import CaptumCamSaliencyCreator, CamSaliencyCreator, METHOD_CONV
 from adaptors_vit import AttrVitSaliencyCreator, DimplVitSaliencyCreator
 from adaptors_gig import IGSaliencyCreator
+from adaptors_kshap import CaptumKernelShapSaliencyCreator
 from RISE import RiseSaliencyCreator
 from cexcnn import CexCnnSaliencyCreator
 from csixnn import IXNNSaliencyCreator
@@ -399,7 +400,19 @@ def get_creators(model_name):
     
 def get_creators(model_name):
     #return IGSaliencyCreator()
-    return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
+    #return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
+
+    runs = [
+        AutoCompExpCreator(
+            desc="SLOC_main", segsize=[32,56], nmasks=[500,500], c_opt="Adam", lr=0.1, lr_step=45, lr_step_decay=0.9,  
+            epochs=501, select_from=None, select_freq=15, select_del=1.0, c_mask_completeness=1.0, c_magnitude=0.01, c_positive=0, 
+            c_completeness=0, c_tv=0.1, c_model=0.0, c_norm=False,  c_activation="",
+        ),
+        CaptumKernelShapSaliencyCreator(n_segments=50)
+    ]
+
+    return CombSaliencyCreator(runs)
+
 
 def get_creators_old(model_name):
     return get_creators_cnn()
