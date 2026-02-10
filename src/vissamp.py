@@ -130,9 +130,9 @@ else:
         ('../saliency.qnt','GAE', 'Dimpl_gae_0'),        
 
         ('../saliency.qnt','KSHAP', 'CapKernelShap50_1000_0'),        
-        ('../saliency.qnt''LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ('../saliency.qnt''RISE','RISE_4000_7_0.5_0'),    
-        ('../saliency.qnt''T-Attr', 'Dimpl_t-attr_0'),
+        ('../saliency.qnt','LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('../saliency.qnt','RISE','RISE_4000_7_0.5_0'),    
+        ('../saliency.qnt','T-Attr', 'Dimpl_t-attr_0'),
     ]
 
 
