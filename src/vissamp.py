@@ -127,7 +127,7 @@ else:
         ('../saliency.qnt','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),        
         ('../saliency.qnt','DIX', 'Dimpl_dix_0'),
         ('../saliency.qnt','EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-        ('GAE', 'Dimpl_gae_0'),        
+        ('../saliency.qnt','GAE', 'Dimpl_gae_0'),        
 
         ('../saliency.qnt','KSHAP', 'CapKernelShap50_1000_0'),        
         ('../saliency.qnt''LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
