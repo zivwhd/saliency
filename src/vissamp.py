@@ -87,27 +87,6 @@ else:
     ]
 
 
-if 'vit' not in model_name:
-    methods = [
-        ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),
-        ('AC', 'pgc_AblationCAM_0'),
-        ('DIX', 'DixCnn_0'),
-        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-        ('GC', 'pgc_GradCAM_0'),
-        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ('RISE','RISE_4000_7_0.5_0')
-]
-else:
-    methods = [
-        ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),        
-        ('DIX', 'Dimpl_dix_0'),
-        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
-        ('GAE', 'Dimpl_gae_0'),        
-        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
-        ('RISE','RISE_4000_7_0.5_0'),    
-        ('T-Attr', 'Dimpl_t-attr_0'),
-    ]
-
 
 #[(100, 100), (1,100), (10,100), (50,100), (200,100), (100,1), (100,10), (100,50), (100,200)]    
 methods = [
@@ -130,6 +109,32 @@ methods = [
     ("../saliency.qnt", "ls", f"AutoOLSZrNone_500_56_OLS_s0.5_tv100_mgn50_0"),    
     ('../saliency.qnt','rng', 'RngSegSloc_0'),
 ]
+
+if 'vit' not in model_name:
+    methods = [
+        ('../saliency.qnt','SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),
+        ('../saliency.qnt','AC', 'pgc_AblationCAM_0'),
+        ('../saliency.qnt','DIX', 'DixCnn_0'),
+        ('../saliency.qnt','EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+
+        ('GC', 'pgc_GradCAM_0'),
+        ('KSHAP', 'CapKernelShap50_1000_0'),        
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('RISE','RISE_4000_7_0.5_0')
+]
+else:
+    methods = [
+        ('SLOC', 'AutoZrNone_500_56_501_msk1.0_tv0.1_mgn0.01_0'),        
+        ('DIX', 'Dimpl_dix_0'),
+        ('EP','MPert_300_o1.0_tv2_2_l0.2_0'),
+        ('GAE', 'Dimpl_gae_0'),        
+
+        ('KSHAP', 'CapKernelShap50_1000_0'),        
+        ('LTX','sLTX_50_5_5e-05_1.0_0.5_0'),
+        ('RISE','RISE_4000_7_0.5_0'),    
+        ('T-Attr', 'Dimpl_t-attr_0'),
+    ]
+
 
 TARGET_NAMES = json.load(open(os.path.join('dataset','imagenet_class_index.json')))
 
