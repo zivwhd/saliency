@@ -590,7 +590,7 @@ def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
     return res
 
 def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None, c_with_bias=False):
-    print("optimize_ols")
+    print(f"optimize_ols: bias={c_with_bias}")
     masks = masks.cpu() * 1.0 
     assert 0 <= c_sample <= 1
     oshape = masks.shape[1:]
