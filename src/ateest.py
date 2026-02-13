@@ -55,20 +55,21 @@ if __name__ == '__main__':
             continue
 
 
+        segsize = 56
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         prob = float(torch.softmax(logits, dim=1)[0,topidx])
         logging.info(f"ext {itr} {image_path} {image_name} {topidx} {info.desc} : {prob}")
         
-        algo = CompExpCreator(nmasks=1000, segsize=42, pprob=0.5, 
+        algo = CompExpCreator(nmasks=1000, segsize=segsize, pprob=0.5, 
                               epochs=None, c_tv=100, c_magnitude=magnitude )
         data = algo.generate_data(me, inp, topidx)    
         res = algo(me, inp,topidx,data)
         sal = list(res.values())[0].squeeze().cpu()
 
-        fx, fy = random.randrange(0, 42), random.randrange(0, 42)
+        fx, fy = random.randrange(0, segsize), random.randrange(0, segsize)
         #fx, fy = 0, 0 
-        sq = SqMaskGen(42, (224,224), efactor=4, fcrop=(fx,fy))
+        sq = SqMaskGen(segsize, (224,224), efactor=4, fcrop=(fx,fy))
         sqalgo = CompExpCreator(nmasks=2000, segsize=42, pprob=0.5, epochs=None, c_tv=100, c_magnitude=0, mgen=sq)
         sqdata = sqalgo.generate_data(me, inp, topidx)
 
@@ -93,7 +94,7 @@ if __name__ == '__main__':
             ate_list.append(ate_val)
             sal_list.append(sal_val)
             #title,model,marker,magnitude,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
-            print(f"ATEEST,{args.model},{args.marker},{args.mag},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
+            print(f"ATEEST,{args.model},{args.marker},{args.mag},{segsize},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
 
         sys.stdout.flush()
         #sal = 4 * (sel * sal).sum()
