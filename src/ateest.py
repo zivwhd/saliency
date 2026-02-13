@@ -55,7 +55,7 @@ if __name__ == '__main__':
             continue
 
 
-        segsize = 56
+        segsize = 64
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         prob = float(torch.softmax(logits, dim=1)[0,topidx])
