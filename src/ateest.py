@@ -17,6 +17,8 @@ def get_args():
     parser.add_argument("--marker", default="AAA", help="TBD")       
     parser.add_argument("--model", default="resnet50", help="TBD")
     parser.add_argument("--mag", type=float, default=0, help="TBD")
+    args = parser.parse_args()    
+    return args
 
 if __name__ == '__main__':
         
