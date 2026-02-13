@@ -64,7 +64,7 @@ if __name__ == '__main__':
         logging.info(f"ext {itr} {image_path} {image_name} {topidx} {info.desc} : {prob}")
         
         algo = CompExpCreator(nmasks=1000, segsize=segsize, pprob=0.5, 
-                              epochs=None, c_tv=100, c_magnitude=magnitude, 
+                              epochs=None, c_magnitude=magnitude, 
                               c_tv = args.tv,
                               c_with_bias=args.bias )
         data = algo.generate_data(me, inp, topidx)    
