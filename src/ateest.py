@@ -64,7 +64,7 @@ if __name__ == '__main__':
                               epochs=None, c_tv=100, c_magnitude=magnitude )
         data = algo.generate_data(me, inp, topidx)    
         res = algo(me, inp,topidx,data)
-
+        sal = list(res.values())[0].squeeze().cpu()
 
         fx, fy = random.randrange(0, 42), random.randrange(0, 42)
         sq = SqMaskGen(42, (224,224), efactor=4, fcrop=(fx,fy))
