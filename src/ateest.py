@@ -17,6 +17,7 @@ def get_args():
     parser.add_argument("--marker", default="BBB", help="TBD")       
     parser.add_argument("--model", default="resnet50", help="TBD")
     parser.add_argument("--mag", type=float, default=0, help="TBD")
+    parser.add_argument("--tv", type=float, default=100.0, help="TBD")
     parser.add_argument("--bias", type=int, default=0, help="TBD")
     args = parser.parse_args()    
     return args
@@ -63,7 +64,9 @@ if __name__ == '__main__':
         logging.info(f"ext {itr} {image_path} {image_name} {topidx} {info.desc} : {prob}")
         
         algo = CompExpCreator(nmasks=1000, segsize=segsize, pprob=0.5, 
-                              epochs=None, c_tv=100, c_magnitude=magnitude, c_with_bias=args.bias )
+                              epochs=None, c_tv=100, c_magnitude=magnitude, 
+                              c_tv = args.tv,
+                              c_with_bias=args.bias )
         data = algo.generate_data(me, inp, topidx)    
         res = algo(me, inp,topidx,data)
         sal = list(res.values())[0].squeeze().cpu()
@@ -71,7 +74,8 @@ if __name__ == '__main__':
         fx, fy = random.randrange(0, segsize), random.randrange(0, segsize)
         #fx, fy = 0, 0 
         sq = SqMaskGen(segsize, (224,224), efactor=4, fcrop=(fx,fy))
-        sqalgo = CompExpCreator(nmasks=2000, segsize=42, pprob=0.5, epochs=None, c_tv=100, c_magnitude=0, mgen=sq)
+        sqalgo = CompExpCreator(nmasks=2000, segsize=segsize, pprob=0.5, 
+                                epochs=None, c_tv=100, c_magnitude=0, mgen=sq)
         sqdata = sqalgo.generate_data(me, inp, topidx)
 
         all_pred = sqdata.all_pred / inp.numel()
@@ -94,8 +98,8 @@ if __name__ == '__main__':
             #print(ate_val, sal_val)
             ate_list.append(ate_val)
             sal_list.append(sal_val)
-            #title,model,marker,magnitude,segsize,bias,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
-            print(f"ATEEST,{args.model},{args.marker},{args.mag},{segsize},{args.bias},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
+            #title,model,marker,magnitude,tv,segsize,bias,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
+            print(f"ATEEST,{args.model},{args.marker},{args.mag},{args.tv},{segsize},{args.bias},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
 
         sys.stdout.flush()
         #sal = 4 * (sel * sal).sum()
