@@ -17,6 +17,7 @@ def get_args():
     parser.add_argument("--marker", default="BBB", help="TBD")       
     parser.add_argument("--model", default="resnet50", help="TBD")
     parser.add_argument("--mag", type=float, default=0, help="TBD")
+    parser.add_argument("--bias", type=int, default=0, help="TBD")
     args = parser.parse_args()    
     return args
 
@@ -55,14 +56,14 @@ if __name__ == '__main__':
             continue
 
 
-        segsize = 64
+        segsize = 42
         logits = me.model(inp).cpu()
         topidx = int(torch.argmax(logits))        
         prob = float(torch.softmax(logits, dim=1)[0,topidx])
         logging.info(f"ext {itr} {image_path} {image_name} {topidx} {info.desc} : {prob}")
         
         algo = CompExpCreator(nmasks=1000, segsize=segsize, pprob=0.5, 
-                              epochs=None, c_tv=100, c_magnitude=magnitude )
+                              epochs=None, c_tv=100, c_magnitude=magnitude, c_with_bias=args.bias )
         data = algo.generate_data(me, inp, topidx)    
         res = algo(me, inp,topidx,data)
         sal = list(res.values())[0].squeeze().cpu()
@@ -93,8 +94,8 @@ if __name__ == '__main__':
             #print(ate_val, sal_val)
             ate_list.append(ate_val)
             sal_list.append(sal_val)
-            #title,model,marker,magnitude,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
-            print(f"ATEEST,{args.model},{args.marker},{args.mag},{segsize},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
+            #title,model,marker,magnitude,segsize,bias,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
+            print(f"ATEEST,{args.model},{args.marker},{args.mag},{segsize},{args.bias},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
 
         sys.stdout.flush()
         #sal = 4 * (sel * sal).sum()

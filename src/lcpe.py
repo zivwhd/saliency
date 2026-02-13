@@ -589,7 +589,7 @@ def get_tv_XTX(shape, rtv=True, ctv=True, norm=True):
         res = res / torch.Tensor([count]).unsqueeze(0)
     return res
 
-def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None):
+def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None, c_with_bias=False):
     print("optimize_ols")
     masks = masks.cpu() * 1.0 
     assert 0 <= c_sample <= 1
@@ -606,7 +606,10 @@ def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None):
 
     fmasks = masks.flatten(start_dim=1)
 
-    
+    if c_with_bias:
+        bias_col = torch.ones(fmasks.size(0), 1, device=fmasks.device, dtype=fmasks.dtype)
+        fmasks = torch.cat([fmasks, bias_col], dim=1)
+
     weights = torch.sqrt(1/ (2 * fmasks.shape[0] * fmasks.sum(dim=1, keepdim=True)))
     if c_weights is not None:
         weights = weights * torch.sqrt(fmasks.shape[0] * c_weights / c_weights.sum()).unsqueeze(1)
@@ -617,8 +620,15 @@ def optimize_ols(masks, responses, c_magnitude, c_tv, c_sample, c_weights=None):
 
     ## reverting data generation numel factor
     tvXTX = get_tv_XTX(dshape)    
+    if c_with_bias:
+        tmp = torch.zeros(XTXw.shape)
+        tmp[1:,1:] = tvXTX
+        tvXTX = tmp
+
     XTX = XTXw + torch.eye(XTXw.shape[0]) *  c_magnitude / XTXw.shape[0]  + tvXTX*c_tv
     bb, _info = gmres(XTX.numpy(), XTY.numpy())
+    if c_with_bias:
+        bb = bb[:-1]
     msal = torch.Tensor(bb.reshape(*dshape)).unsqueeze(0)
     
     if oshape != dshape:
@@ -879,7 +889,8 @@ class CompExpCreator:
                                     baseline=data.baseline, callback=callback)
         else:
             sal = optimize_ols(masks=data.all_masks, responses=data.all_pred, 
-                               c_magnitude=self.c_magnitude, c_tv=self.c_tv, c_sample=self.c_sample)
+                               c_magnitude=self.c_magnitude, c_tv=self.c_tv, c_sample=self.c_sample,
+                               c_with_bias=self.c_with_bias)
 
         report_duration(start_time_expl, me.arch, "SLOC_OPT")
         
