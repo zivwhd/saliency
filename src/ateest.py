@@ -2,7 +2,7 @@
 
 print("## dispatch.py ")
 
-import argparse, logging, os, re
+import argparse, logging, os, re,sys
 from dataset import ImagenetSource, VOCSource, Coord
 import torch
 
@@ -14,7 +14,7 @@ from lcpe import CompExpCreator, MultiCompExpCreator, AutoCompExpCreator, MProbC
 def get_args(): 
     parser = argparse.ArgumentParser(description="dispatcher")
     parser.add_argument("--selection", default="rsample3", help="TBD")       
-    parser.add_argument("--marker", default="AAA", help="TBD")       
+    parser.add_argument("--marker", default="BBB", help="TBD")       
     parser.add_argument("--model", default="resnet50", help="TBD")
     parser.add_argument("--mag", type=float, default=0, help="TBD")
     args = parser.parse_args()    
@@ -67,6 +67,7 @@ if __name__ == '__main__':
         sal = list(res.values())[0].squeeze().cpu()
 
         fx, fy = random.randrange(0, 42), random.randrange(0, 42)
+        fx, fy = 0, 0 
         sq = SqMaskGen(42, (224,224), efactor=4, fcrop=(fx,fy))
         sqalgo = CompExpCreator(nmasks=2000, segsize=42, pprob=0.5, epochs=None, c_tv=100, c_magnitude=0, mgen=sq)
         sqdata = sqalgo.generate_data(me, inp, topidx)
@@ -91,7 +92,10 @@ if __name__ == '__main__':
             #print(ate_val, sal_val)
             ate_list.append(ate_val)
             sal_list.append(sal_val)
+            #title,model,marker,magnitude,image,topidx,prob,fx,fy,idx,id,ate_val,sal_val
             print(f"ATEEST,{args.model},{args.marker},{args.mag},{image_name},{topidx},{prob},{fx},{fy},{idx},{id},{ate_val},{sal_val}")
+
+        sys.stdout.flush()
         #sal = 4 * (sel * sal).sum()
     #print(aaa, bbb)
 
