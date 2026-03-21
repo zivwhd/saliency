@@ -209,9 +209,181 @@ class SimpleKernelSHAPCreator:
         sal = torch.zeros(inp.shape[-2:])
         for idx in range(M):
             sal = sal + coef[idx] * (segments == unique_segments[idx])                    
-        res = {"SimpleKSHAP":sal.cpu().unsqueeze(0)}
+        res = {f"SimpleKSHAP.{self.n_segments}.{self.n_samples}":sal.cpu().unsqueeze(0)}
         return res
     
+
+class GTKShapCreator:
+    def __init__(self,
+                 n_samples=1000,
+                 n_segments=50,
+                  compactness=30, sigma=3):
+        self.n_segments = n_segments
+        self.compactness = compactness
+        self.sigma = sigma
+        self.n_samples = n_samples
+        self.segments = None
+
+    def __call__(self, me, inp, catidx):
+        sal =  self.explain(me, inp, catidx)
+        return sal
+
+    def explain(self, me, inp, catidx, start_label=0):
+        # 1. Segment the image into 'features' (superpixels)
+        img_np = inp[0].detach().cpu().permute(1, 2, 0).numpy()
+        segments = slic(
+            img_np, 
+            n_segments=self.n_segments, 
+            compactness=self.compactness, 
+            sigma=self.sigma, 
+            start_label=start_label
+        )
+
+        self.segments = segments
+        unique_segments = np.unique(segments)
+        M = len(unique_segments)
+        
+        # Define background (mean color of image)    
+        mean_baseline = inp.mean(dim=(2, 3), keepdim=True).expand_as(inp)
+        #zs, weights = _generate_paired_coalitions(M, self.n_samples) # (N, M)
+        #n_samples = weights.shape[0]
+        #print("### ", n_samples, self.n_samples)
+
+        def model_softmax(input_tensor):
+        # Captum may pass a batch of perturbations; we return probabilities for each            
+            logits = me.model(input_tensor)
+            #return logits
+            return F.softmax(logits, dim=1)
+
+
+        orig_pred = model_softmax(inp).cpu()
+        baseline_pred = model_softmax(mean_baseline.to(inp.device)).cpu()
+        target_diff = (orig_pred-baseline_pred)[0, catidx]
+        baseline_val = baseline_pred[0, catidx].item()
+
+        #x = (torch.rand((self.n_samples ,M)) < 0.5) * 1.0
+        x = []
+        for k in range(1, M):
+            x.append(self.get_choice_pert(k, M, 2))
+        x = torch.concat(x)
+        print("####", x.shape, M, x.dtype)
+
+        xt, preds, est_x, est_preds = self.eval_batch(me, inp, catidx, x, mean_baseline, torch.tensor(segments))
+
+        wx = torch.ones((1, M))
+
+        #print(wx.device, x.device, est_x.device)
+        all_x = torch.concat([wx, x, est_x])
+        
+        ooo = orig_pred[:,catidx].clone().cpu().detach()
+        #print(ooo.shape, preds.shape, est_preds.shape)
+        all_pred = torch.concat([ooo, preds, est_preds]) - baseline_pred[:,catidx]
+
+        
+        #all_weights = torch.ones(all_pred.shape)
+        #all_weights[0] = 1e6
+        all_weights = []
+        for sampidx in range(all_x.shape[0]):
+            k = all_x[sampidx,:].sum()
+            if k == 0 or k == M:
+                w_k = 1e6
+            else:
+                w_k = 1 / (k * (M - k))            
+            all_weights.append(w_k)
+
+        all_weights = torch.tesnor(all_weights)
+        model_reg = LinearRegression(fit_intercept=False)
+            #model_reg = Lasso(fit_intercept=False, alpha=0.000 )
+        model_reg.fit(all_x.numpy(), all_pred.detach().numpy(), sample_weight=all_weights.numpy())
+        #print("###", model_reg.coef_)         
+        coef = model_reg.coef_
+            
+
+        #print(coef)
+
+        total_shap = np.sum(coef)
+        actual_delta = target_diff.item()
+
+
+        sal = torch.zeros(inp.shape[-2:])
+        for idx in range(M):
+            sal = sal + coef[idx] * (segments == unique_segments[idx])                    
+        res = {f"GTKSHAP.{self.n_segments}.{self.n_samples}":sal.cpu().unsqueeze(0)}
+        return res
+
+
+    def get_choice_pert(self, k, M, count):
+        rv = []
+        for _ in range(count):
+            z = np.zeros(M)
+            idx = np.random.choice(M, k, replace=False)
+            z[idx] = 1
+            rv.append(torch.tensor(z, dtype=torch.float32))
+        return torch.stack(rv)
+
+    def get_shapley_kernel_weight(self, subset_size, total_features):
+        """Mathematical Shapley Kernel: Weight = (M-1) / ( (M choose |S|) * |S| * (M-|S|) )"""
+        if subset_size == 0 or subset_size == total_features:
+            assert False ," unexpected subset_size"
+            return 1e6  # Mathematically infinite, represented by a large constant
+        
+        weight = (total_features - 1) / (binom(total_features, subset_size) * subset_size * (total_features - subset_size))
+        return weight
+
+
+    def eval_batch(self, me, inp, catidx, x, baseline, segs):
+        #x = torch.ones(sids.shape[0], requires_grad=True, device=inp.device)
+        x = x.clone().to(inp.device).requires_grad_()
+        sids = segs.unique()
+        pert = []
+        for sampidx in range(x.shape[0]):
+            mask = torch.zeros(inp.shape[-2:], requires_grad=True, device=inp.device)
+            for idx, sid in enumerate(sids):                        
+                mask = mask + (segs == sid).to(inp.device) * x[sampidx, idx]
+            mask = mask.unsqueeze(0).unsqueeze(0)
+            masked_image = mask * inp + (1-mask) * baseline
+            pert.append(masked_image)
+        pert = torch.concat(pert)
+        print("pert:", pert.shape)
+        model = me.model
+        model.zero_grad()
+        output = model(pert)
+        output = F.softmax(output, dim=1)
+        scores = output[:,catidx]
+        print(output.shape, scores, x.shape, len(sids))
+        agg_score = scores.sum()
+        agg_score.backward()
+
+        preds = scores.detach().clone().cpu()
+        grads = x.grad.clone().detach().cpu()
+
+        est_x = []
+        est_pred = []
+
+        for sampidx in range(x.shape[0]):
+            if bool(x[sampidx].sum() <= 1):
+                continue
+
+            for idx, sid in enumerate(sids):
+                if (x[sampidx, idx] < 0.5):
+                    continue
+                px = x[sampidx].detach().clone().cpu()
+                px[idx] = 0                
+                ppred = preds[sampidx] - grads[sampidx,idx]
+                est_x.append(px)
+                est_pred.append(ppred)
+                
+        est_x = torch.stack(est_x)
+        est_preds = torch.tensor(est_pred)
+        return x, preds, est_x, est_preds
+
+                
+
+
+
+
+
+
 
 # Usage Example:
 # explainer = SimpleKernelSHAP(model.predict, n_segments=40, n_samples=500)
