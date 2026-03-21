@@ -229,7 +229,7 @@ def get_ckshap_sal_creator():
         #CaptumKernelShapSaliencyCreator(n_segments=20),
         #CaptumKernelShapSaliencyCreator(n_segments=30),
         #CaptumKernelShapSaliencyCreator(n_segments=40),
-        SimpleKernelSHAPCreator(n_segments=50, n_samples=1000),
+        SimpleKernelSHAPCreator(n_segments=50, n_samples=100),
         #CaptumKernelShapSaliencyCreator(n_segments=50)])
 
     #return KernelShapSaliencyCreator(n_segments=40)
