@@ -230,7 +230,7 @@ def get_ckshap_sal_creator():
         #CaptumKernelShapSaliencyCreator(n_segments=30),
         #CaptumKernelShapSaliencyCreator(n_segments=40),
         #SimpleKernelSHAPCreator(n_segments=50, n_samples=100),
-        GTKShapCreator(n_samples=5, n_segments=40),
+        GTKShapCreator(n_samples=5, n_segments=40, actual=True),
         #CaptumKernelShapSaliencyCreator(n_segments=50)
         ])
 

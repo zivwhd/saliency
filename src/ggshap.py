@@ -217,12 +217,14 @@ class GTKShapCreator:
     def __init__(self,
                  n_samples=1000,
                  n_segments=50,
-                  compactness=30, sigma=3):
+                  compactness=30, sigma=3,
+                  actual=False):
         self.n_segments = n_segments
         self.compactness = compactness
         self.sigma = sigma
         self.n_samples = n_samples
         self.segments = None
+        self.actual = actual
 
     def __call__(self, me, inp, catidx):
         sal =  self.explain(me, inp, catidx)
@@ -263,21 +265,52 @@ class GTKShapCreator:
 
         #x = (torch.rand((self.n_samples ,M)) < 0.5) * 1.0
         x = []
-        for k in range(1, M):
-            x.append(self.get_choice_pert(k, M, 2))
+        for k in range(1, M+1):
+            if k==M:
+                x.append(torch.ones((1,M)))
+            else:
+                x.append(self.get_choice_pert(k, M, 2))
         x = torch.concat(x)
         print("####", x.shape, M, x.dtype)
 
-        xt, preds, est_x, est_preds = self.eval_batch(me, inp, catidx, x, mean_baseline, torch.tensor(segments))
-
-        wx = torch.ones((1, M))
-
-        #print(wx.device, x.device, est_x.device)
-        all_x = torch.concat([wx, x, est_x])
+        bp = baseline_pred[:,catidx].clone().detach().cpu()
         
-        ooo = orig_pred[:,catidx].clone().cpu().detach()
+        if self.actual:
+            all_x = []
+            for sampidx in range(x.shape[0]):                
+                for idx in range(x.shape[1]):
+                    px = x[sampidx].detach().clone().cpu()
+                    px[idx] = 0
+                    all_x.append(px)
+            all_x = torch.concat([x,torch.stack(all_x)])
+
+            batch_size = 32
+            all_pred = []        
+            for idx in range(0,all_x.shape[0],batch_size):                                
+                bx = all_x[idx:idx+batch_size]
+                print("###", idx, bx.shape, all_x.shape)
+                with torch.no_grad():
+                    output = self.apply_model(me, inp, catidx, bx, mean_baseline, torch.tensor(segments))
+                    scores = output[:,catidx].detach().clone().cpu()
+                    all_pred.append(scores)
+            all_pred = torch.concat(all_pred) - bp
+            self.trace = dict(all_pred=all_pred,all_x=all_x)
+        else:
+            xt, preds, est_x, est_preds = self.eval_batch(me, inp, catidx, x, mean_baseline, torch.tensor(segments))
+            all_x = torch.concat([x, est_x])        
+            all_pred = torch.concat([preds, est_preds]) - bp
+
+            self.trace = dict(
+                x =x, preds = preds,
+                est_x=est_x, est_preds=est_preds
+            )
+
+        #wx = torch.ones((1, M))
+        #print(wx.device, x.device, est_x.device)
+        
+        #ooo = orig_pred[:,catidx].clone().cpu().detach()
         #print(ooo.shape, preds.shape, est_preds.shape)
-        all_pred = torch.concat([ooo, preds, est_preds]) - baseline_pred[:,catidx]
+        
 
         
         #all_weights = torch.ones(all_pred.shape)
@@ -307,8 +340,12 @@ class GTKShapCreator:
 
         sal = torch.zeros(inp.shape[-2:])
         for idx in range(M):
-            sal = sal + coef[idx] * (segments == unique_segments[idx])                    
-        res = {f"GTKSHAP.{self.n_segments}.{self.n_samples}":sal.cpu().unsqueeze(0)}
+            sal = sal + coef[idx] * (segments == unique_segments[idx])                   
+        if self.actual:
+            base_name = "ACTSHAP" 
+        else:
+            base_name = "GTKSHAP"
+        res = {f"{base_name}.{self.n_segments}.{self.n_samples}":sal.cpu().unsqueeze(0)}
         return res
 
 
@@ -331,9 +368,7 @@ class GTKShapCreator:
         return weight
 
 
-    def eval_batch(self, me, inp, catidx, x, baseline, segs):
-        #x = torch.ones(sids.shape[0], requires_grad=True, device=inp.device)
-        x = x.clone().to(inp.device).requires_grad_()
+    def apply_model(self, me, inp, catidx, x, baseline, segs):
         sids = segs.unique()
         pert = []
         for sampidx in range(x.shape[0]):
@@ -342,13 +377,22 @@ class GTKShapCreator:
                 mask = mask + (segs == sid).to(inp.device) * x[sampidx, idx]
             mask = mask.unsqueeze(0).unsqueeze(0)
             masked_image = mask * inp + (1-mask) * baseline
-            pert.append(masked_image)
+            pert.append(masked_image)        
         pert = torch.concat(pert)
         print("pert:", pert.shape)
+        output = me.model(pert)
+        output = F.softmax(output, dim=1)
+        return output
+
+    def eval_batch(self, me, inp, catidx, x, baseline, segs):
+        #x = torch.ones(sids.shape[0], requires_grad=True, device=inp.device)
+        x = x.clone().to(inp.device).requires_grad_()
+        sids = segs.unique()
+        
         model = me.model
         model.zero_grad()
-        output = model(pert)
-        output = F.softmax(output, dim=1)
+
+        output = self.apply_model(me, inp, catidx,x, baseline,segs)
         scores = output[:,catidx]
         print(output.shape, scores, x.shape, len(sids))
         agg_score = scores.sum()
