@@ -291,7 +291,7 @@ class GTKShapCreator:
                 w_k = 1 / (k * (M - k))            
             all_weights.append(w_k)
 
-        all_weights = torch.tesnor(all_weights)
+        all_weights = torch.tensor(all_weights)
         model_reg = LinearRegression(fit_intercept=False)
             #model_reg = Lasso(fit_intercept=False, alpha=0.000 )
         model_reg.fit(all_x.numpy(), all_pred.detach().numpy(), sample_weight=all_weights.numpy())
