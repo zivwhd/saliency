@@ -4,6 +4,7 @@ import numpy as np
 from skimage.segmentation import slic
 from captum.attr import KernelShap
 
+
 def slic_kernel_shap(model, inp, catidx, n_segments=50, compactness=30, sigma=3, start_label=0, n_samples=1000):
     """
     Corrected version handling CUDA, batch dimensions, and 4D tensor constraints.
@@ -68,5 +69,5 @@ class CaptumKernelShapSaliencyCreator:
                                n_segments=self.n_segments, compactness=self.compactness, 
                                sigma=self.sigma, n_samples=self.n_samples)
         return {
-            f'CapKernelShap{self.n_segments}_{self.n_samples}' : sal
+            f'CaptKernelShap{self.n_segments}_{self.n_samples}' : sal
         }

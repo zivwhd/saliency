@@ -21,7 +21,7 @@ from extpert import ExtPertSaliencyCreator
 from ltx import LTXSaliencyCreator
 from dix_cnn import DixCnnSaliencyCreator
 from adaptors_lrp import EPreAwareLRPSaliencyCreator
-
+from ggshap import SimpleKernelSHAPCreator
 from sanity import SanityCreator
 import torch
 import socket
@@ -229,6 +229,7 @@ def get_ckshap_sal_creator():
         #CaptumKernelShapSaliencyCreator(n_segments=20),
         #CaptumKernelShapSaliencyCreator(n_segments=30),
         #CaptumKernelShapSaliencyCreator(n_segments=40),
+        SimpleKernelSHAPCreator(n_segments=50),
         CaptumKernelShapSaliencyCreator(n_segments=50)])
 
     #return KernelShapSaliencyCreator(n_segments=40)
