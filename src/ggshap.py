@@ -98,7 +98,7 @@ def solve_constrained_regression(zs, y, weights, delta):
 
 
 
-class SimpleKernelSHAP:
+class SimpleKernelSHAPCreator:
     def __init__(self,
                  n_samples=1000,
                  n_segments=50,
