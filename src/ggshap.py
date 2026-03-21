@@ -284,7 +284,7 @@ class GTKShapCreator:
                     all_x.append(px)
             all_x = torch.concat([x,torch.stack(all_x)])
 
-            batch_size = 32
+            batch_size = 128
             all_pred = []        
             for idx in range(0,all_x.shape[0],batch_size):                                
                 bx = all_x[idx:idx+batch_size]
