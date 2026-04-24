@@ -218,13 +218,15 @@ class GTKShapCreator:
                  n_samples=1000,
                  n_segments=50,
                   compactness=30, sigma=3,
-                  actual=False):
+                  actual=False,
+                  fit_grads=False):
         self.n_segments = n_segments
         self.compactness = compactness
         self.sigma = sigma
         self.n_samples = n_samples
         self.segments = None
         self.actual = actual
+        self.fit_grads = fit_grads
 
     def __call__(self, me, inp, catidx):
         sal =  self.explain(me, inp, catidx)
@@ -269,7 +271,7 @@ class GTKShapCreator:
             if k==M:
                 x.append(torch.ones((1,M)))
             else:
-                x.append(self.get_choice_pert(k, M, 2))
+                x.append(self.get_choice_pert(k, M, self.n_samples))
         x = torch.concat(x)
         print("####", x.shape, M, x.dtype)
 
@@ -294,12 +296,14 @@ class GTKShapCreator:
                     scores = output[:,catidx].detach().clone().cpu()
                     all_pred.append(scores)
             all_pred = torch.concat(all_pred) - bp
+            all_weights = torch.tensor([self.get_ks_weight(sx.sum(), sx.shape[0]) for sx in all_x])
             self.trace = dict(all_pred=all_pred,all_x=all_x)
+
         else:
-            xt, preds, est_x, est_preds = self.eval_batch(me, inp, catidx, x, mean_baseline, torch.tensor(segments))
+            xt, preds, weights, est_x, est_preds, est_weights = self.eval_batch(me, inp, catidx, x, mean_baseline, torch.tensor(segments))
             all_x = torch.concat([x, est_x])        
             all_pred = torch.concat([preds, est_preds]) - bp
-
+            all_weights = torch.concat([weights, est_weights])
             self.trace = dict(
                 x =x, preds = preds,
                 est_x=est_x, est_preds=est_preds
@@ -315,19 +319,23 @@ class GTKShapCreator:
         
         #all_weights = torch.ones(all_pred.shape)
         #all_weights[0] = 1e6
-        all_weights = []
-        for sampidx in range(all_x.shape[0]):
-            k = all_x[sampidx,:].sum()
-            if k == 0 or k == M:
-                w_k = 1e6
-            else:
-                w_k = 1 / (k * (M - k))            
-            all_weights.append(w_k)
+        if False:
+            all_weights = []
+            for sampidx in range(all_x.shape[0]):
+                k = all_x[sampidx,:].sum()
+                if k == 0 or k == M:
+                    w_k = 1e6
+                else:
+                    w_k = 1 / (k * (M - k))            
+                w_k = self.get_ks_weight(k,M)
+                all_weights.append(w_k)
 
-        all_weights = torch.tensor(all_weights)
+        #all_weights = torch.tensor(all_weights)
+        print("##### Fitting")
         model_reg = LinearRegression(fit_intercept=False)
             #model_reg = Lasso(fit_intercept=False, alpha=0.000 )
-        model_reg.fit(all_x.numpy(), all_pred.detach().numpy(), sample_weight=all_weights.numpy())
+        model_reg.fit(all_x.numpy(), all_pred.detach().numpy(), 
+                      sample_weight=all_weights.numpy())
         #print("###", model_reg.coef_)         
         coef = model_reg.coef_
             
@@ -348,6 +356,13 @@ class GTKShapCreator:
         res = {f"{base_name}.{self.n_segments}.{self.n_samples}":sal.cpu().unsqueeze(0)}
         return res
 
+
+    def get_ks_weight(self, k, M):
+        if k == 0 or k == M:
+            w_k = 1e6
+        else:
+            w_k = 1 / (k * (M - k))     
+        return w_k       
 
     def get_choice_pert(self, k, M, count):
         rv = []
@@ -386,6 +401,7 @@ class GTKShapCreator:
 
     def eval_batch(self, me, inp, catidx, x, baseline, segs):
         #x = torch.ones(sids.shape[0], requires_grad=True, device=inp.device)
+        bx = x
         x = x.clone().to(inp.device).requires_grad_()
         sids = segs.unique()
         
@@ -394,16 +410,18 @@ class GTKShapCreator:
 
         output = self.apply_model(me, inp, catidx,x, baseline,segs)
         scores = output[:,catidx]
-        print(output.shape, scores, x.shape, len(sids))
+        #print(output.shape, scores, x.shape, len(sids))
         agg_score = scores.sum()
         agg_score.backward()
 
         preds = scores.detach().clone().cpu()
         grads = x.grad.clone().detach().cpu()
+        weights = torch.tensor([self.get_ks_weight(sx.sum(), sx.shape[0]) for sx in bx])
+        ## 
 
         est_x = []
         est_pred = []
-
+        est_weights = []
         for sampidx in range(x.shape[0]):
             if bool(x[sampidx].sum() <= 1):
                 continue
@@ -411,15 +429,28 @@ class GTKShapCreator:
             for idx, sid in enumerate(sids):
                 if (x[sampidx, idx] < 0.5):
                     continue
-                px = x[sampidx].detach().clone().cpu()
-                px[idx] = 0                
-                ppred = preds[sampidx] - grads[sampidx,idx]
+                bx = x[sampidx].detach().clone().cpu()
+
+                kw = self.get_ks_weight(bx.sum(), bx.shape[0])                
+                if self.fit_grads:                    
+                    px = torch.zeros(bx.shape)                                         
+                    px[idx] = 1.0 
+                    ppred = grads[sampidx,idx] 
+                    ww = 1 ## bx.sum()
+                    est_weights.append(kw * bx.sum())
+                else:
+                    px = bx
+                    px[idx] = 0                
+                    ppred = preds[sampidx] - grads[sampidx,idx]
+                    est_weights.append(kw)
+                
                 est_x.append(px)
                 est_pred.append(ppred)
+        est_weights = torch.tensor(est_weights)
                 
         est_x = torch.stack(est_x)
         est_preds = torch.tensor(est_pred)
-        return x, preds, est_x, est_preds
+        return x, preds, weights, est_x, est_preds, est_weights
 
                 
 
