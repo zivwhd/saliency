@@ -225,8 +225,11 @@ def get_segrng_sal_creator():
     return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
 
 
-def get_corrs_sal_creator():
-    return CombSaliencyCreator([RngNwSegSlocExpCreator(), CorrelatedRngSegExpCreator()])
+def get_corrs2_sal_creator():
+    return CombSaliencyCreator([CorrelatedRngSegExpCreator(prob=0.2),
+                                CorrelatedRngSegExpCreator(prob=0.3), 
+                                CorrelatedRngSegExpCreator(prob=0.7)])
+
 
 def get_ckshap_sal_creator():    
     return CombSaliencyCreator([

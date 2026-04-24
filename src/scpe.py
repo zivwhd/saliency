@@ -518,18 +518,20 @@ def build_covariance(seg_emb):
     """
     Cosine similarity → PSD covariance
     """
+    
     x = F.normalize(seg_emb, dim=1)
 
     S = x @ x.T
 
+    ##S = torch.clamp(S, min=0)
     # stabilize + PSD projection
-    S = S + 0.05 * torch.eye(S.shape[0], device=S.device)
+    S = S + 0.005 * torch.eye(S.shape[0], device=S.device)
 
+    
     eigvals, eigvecs = torch.linalg.eigh(S)
     eigvals = torch.clamp(eigvals, min=0.0)
 
     Sigma = eigvecs @ torch.diag(eigvals) @ eigvecs.T
-
     return Sigma
 
 
@@ -539,9 +541,10 @@ def build_covariance(seg_emb):
 
 VERB = 3
 @torch.no_grad()
-def sample_segment_latents(Sigma, n, temperature=1.0):
+def sample_segment_latents(Sigma, n, prob=0.5):
+    
     K = Sigma.shape[0]
-
+    
     dist = torch.distributions.MultivariateNormal(
         torch.zeros(K, device=Sigma.device),
         covariance_matrix=Sigma
@@ -550,13 +553,14 @@ def sample_segment_latents(Sigma, n, temperature=1.0):
     z = dist.sample((n,))  # (n, K)
     #return torch.sigmoid(z / temperature)
     p = torch.distributions.Normal(0,1).cdf(z)
-    mask = (p > 0.5) * 1.0
+    #print("###", prob)
+    mask = (p < prob) * 1.0
     #return mask
     #p = torch.clamp(0.5 * (p / p.mean()), min=0.2, max=0.8)
-    global VERB
-    if VERB > 0:
-        print(n, mask.shape)
-        VERB -= 1
+    #global VERB
+    #if VERB > 0:
+    ##    print(n, mask.shape)
+    # #   VERB -= 1
     #mask = torch.bernoulli(p)    
     return mask
 
@@ -590,10 +594,10 @@ def segments_to_masks(seg, probs):
 
 class ViTCorrelatedSegMaskGen:
 
-    def __init__(self, model, inp, patch_size=16, temperature=1.0):
+    def __init__(self, model, inp, patch_size=16, prob=0.5):
         self.model = model
         self.patch_size = patch_size
-        self.temperature = temperature
+        self.prob = prob
         self.patch_emb = extract_vit_patches(self.model, inp)
 
     @torch.no_grad()
@@ -611,7 +615,7 @@ class ViTCorrelatedSegMaskGen:
         Sigma = build_covariance(seg_emb)
 
         # (4) sample latent segment activations
-        z = sample_segment_latents(Sigma, nmasks, self.temperature)
+        z = sample_segment_latents(Sigma, nmasks, prob=self.prob)
 
         # (5) convert to masks
         masks = segments_to_masks(seg, z)
@@ -639,10 +643,11 @@ class CorrelatedSegSlocExpCreator(BaseSampExpCreator):
 
     SIGMA = None
 
-    def __init__(self, desc, seg_fn, nmasks, **kwargs):
+    def __init__(self, desc, seg_fn, nmasks, prob=0.5, **kwargs):
         super().__init__(desc=desc, **kwargs)
         self.seg_fn = seg_fn        
         self.nmasks = nmasks
+        self.prob=prob
 
     def generate_data(self, me, inp, catidx):
 
@@ -653,7 +658,7 @@ class CorrelatedSegSlocExpCreator(BaseSampExpCreator):
         #masks = gen.generate(inp, seg_list, nmasks=self.nmasks)
 
         print("generating vgen")
-        vgen = ViTCorrelatedSegMaskGen(model=me.model, inp=inp)
+        vgen = ViTCorrelatedSegMaskGen(model=me.model, inp=inp, prob=self.prob)
         
         ##### REMOVE  
         CorrelatedSegSlocExpCreator.SIGMA = build_covariance(vgen.patch_emb)
@@ -680,15 +685,15 @@ class CorrelatedSegSlocExpCreator(BaseSampExpCreator):
         return data
 
 
-def CorrelatedRngSegExpCreator():
+def CorrelatedRngSegExpCreator(prob=0.5):
     mshape = (224,224)
     seg_fn_list = [make_seg_fn(x, mshape) for x in range(20,60)]
     #def joint_seg_fn(inp):
     #    return [sf(inp) for sf in seg_fn_list]
     
     return CorrelatedSegSlocExpCreator(
-        "CorrelatedRngSeg",
-        seg_fn_list, 25)        
+        f"CorrelatedRngSeg{prob}",
+        seg_fn_list, 25, prob=prob)        
     
 
 import torch
