@@ -406,7 +406,7 @@ class SegSlocExpCreator(BaseSampExpCreator):
             assert False, f"Unexpected arch {me.arch}"
             
         
-class RngSegSlocExpCreator(SegSlocExpCreator):
+class RngNwSegSlocExpCreator(SegSlocExpCreator):
     def __init__(self, **kwargs):
         seg_list = seg_list = [(x, 25, -1) for x in range(20,60)] ## 60
         super().__init__(desc="RngSeg", seg_list=seg_list, **kwargs)

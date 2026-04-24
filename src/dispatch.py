@@ -25,7 +25,7 @@ from ggshap import SimpleKernelSHAPCreator, GTKShapCreator
 from sanity import SanityCreator
 import torch
 import socket
-
+from scpe import RngNwSegSlocExpCreator, CorrelatedSegSlocExpCreator
 
 def get_attnlrp_sal_creator():
     return EPreAwareLRPSaliencyCreator(method="custom_lrp_gamma_rule_full")
@@ -223,6 +223,10 @@ def get_segsloc_sal_creator():
 
 def get_segrng_sal_creator():
     return RngSegSlocExpCreator(desc="RngSegSloc", epochs=None,   c_tv=100, c_magnitude=50, c_mask_completeness=1.0)
+
+
+def get_corrs_sal_creator():
+    return CombSaliencyCreator([RngNwSegSlocExpCreator(), CorrelatedSegSlocExpCreator()])
 
 def get_ckshap_sal_creator():    
     return CombSaliencyCreator([
